@@ -34,14 +34,16 @@
 
 ```
 com.example.newsfeedproject
-├── auth # 인증/인가
-├── user # 유저 도메인
-├── post # 게시글
-├── comment # 댓글
-├── like # 좋아요
-├── follow # 팔로우
-├── config # 전역 설정
-└── global # 공통 응답/예외 처리
+├── config                # 전역 설정 (CORS, JWT 등)
+├── global                # 예외 처리, 공통 응답, 유틸
+├── auth                 # 인증/인가
+├── user                 # 유저 도메인
+├── newsfeed             # 게시글 도메인
+├── comment              # 댓글 도메인
+├── like                 # 좋아요 도메인
+├── follow               # 팔로우 도메인
+└── NewsfeedApplication.java
+
 ```
 
 
