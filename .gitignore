@@ -17,12 +17,15 @@ bin/
 !**/src/main/**/bin/
 !**/src/test/**/bin/
 
-### IntelliJ IDEA ###
+# Java & IntelliJ
+*.class
+*.log
+*.iml
+.gradle/
+out/
 .idea
 *.iws
-*.iml
 *.ipr
-out/
 !**/src/main/**/out/
 !**/src/test/**/out/
 
@@ -35,3 +38,9 @@ out/
 
 ### VS Code ###
 .vscode/
+
+# OS
+.DS_Store
+
+# Application Secrets
+src/main/resources/application.yml
