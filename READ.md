@@ -1,0 +1,133 @@
+# 📷 Newsfeed Project
+
+> 인스타그램을 클론한 뉴스피드 중심의 음식 레시피 소셜 네트워크 백엔드 서비스입니다.
+
+---
+
+## 👥 팀원 소개
+
+| 이름  | 역할 | GitHub                                    |
+|-----|--|-------------------------------------------|
+| 곽지훈 |  | [github.com/Gwakjihun](https://github.com/Gwakjihun) |
+| 전재민 |  | [github.com/Beforejamni](https://github.com/Beforejamni) |
+| 최재혁 |  | [github.com/Gemini-kei](https://github.com/Gemini-kei) |
+| 최한솔 |  | [github.com/hansolChoi29](https://github.com/hansolChoi29) |
+
+### 역할 - 유저, 인증, 게시글, 이미지 업로드, 댓글, 좋아요, 팔로우, 마이페이지
+---
+
+## 🚀 프로젝트 개요
+
+- **사용 기술**: Java 17, Spring Boot 3, MySQL, JPA, Gradle, Postman, Tomcat
+- **협업 도구**: GitHub, Notion, Figma
+- **기능**
+    - 회원가입 / 로그인 / 로그아웃
+    - 게시글 작성, 수정, 삭제
+    - 이미지 업로드
+    - 댓글 작성 및 좋아요
+    - 팔로우 / 언팔로우
+    - 마이페이지 및 내 활동 조회
+
+---
+
+## 🧱 프로젝트 구조
+
+```
+com.example.newsfeedproject
+├── auth # 인증/인가
+├── user # 유저 도메인
+├── post # 게시글
+├── comment # 댓글
+├── like # 좋아요
+├── follow # 팔로우
+├── config # 전역 설정
+└── global # 공통 응답/예외 처리
+```
+
+
+---
+
+## 🛠️ 환경 설정 방법 (로컬 개발용)
+
+### 1️⃣ 필수 설치
+
+- Postman- **Java** 17
+- **Spring Boot** 3.5.4
+- **MySQL : 8.0.42**
+- **의존성 (dependency):**
+- ```
+  | 분류         | 의존성 이름                           | 설명                           |
+  | ---------   | ---------------------------------- | --------------------------    |
+  | 🌐 웹        | `Spring Web`                       | REST API 개발용                |
+  | 🛢 데이터     | `Spring Data JPA`                  | JPA ORM 사용                   |
+  | 🐬 데이터베이스 | `MySQL Driver`                     | MySQL 연동용 JDBC 드라이버        |
+  | 🔒 인증/보안   | `Spring Security`                  | JWT 인증 구현 시 필수             |
+  | 💾 파일업로드   | `Spring Boot DevTools` (선택)       | 개발 시 핫 리로딩 등              |
+  | 🔍 검증       | `Validation`                       | @Valid, @NotNull 등 유효성 검사  |
+  |    ++++      |  lombok, thymeleaf                |  
+
+### 2️⃣ MySQL Database 생성
+
+```sql
+CREATE DATABASE newsfeed_db;
+```
+### 3️⃣ application.yml 생성
+📁 경로: src/main/resources/application.yml
+
+⚠️ .gitignore에 등록되어 있어 직접 생성해야 합니다.
+src/main/resources/application-example.yml 확인
+
+🔐 Git 보안 설정
+application.yml은 절대 Git에 업로드하지 않습니다.
+
+.gitignore에 민감 정보 추가:
+
+application.yml
+
+.env 등
+
+---
+
+### 📮 API 명세
+
+
+-> [API 명세 보기](https://www.notion.so/teamsparta/API-Auth-User-Newsfeed-Comment-Like-Follow-2402dc3ef51481efb322e0e4143bb9d3?source=copy_link)
+
+
+### 📝 브랜치 전략
+- main: 배포 브랜치
+
+- dev: 통합 개발 브랜치
+
+- feat/{기능명}: 기능 단위 브랜치
+
+예시: feat/user-signup, feat/post-crud
+
+### 📄 커밋 컨벤션
+```
+✨ feat	     해당 파일에 새로운 기능이 생김
+🎉 add	     없던 파일을 생성함, 초기 세팅
+🐛 fix	     버그 수정
+♻️ refactor	 코드 리팩토링
+🚚 move	     파일 옮김/정리
+🔥 delete	   기능/파일 삭제
+✅ test	     테스트 코드 작성 (🧪)
+🙈 gitfix	   gitignore 수정
+🔨 script	   build.gradle 변경, docker compose 변경
+📝 chore	   주석 추가 및 수정, 변수명 및 클래스명 수정
+⚡️ improve	 개선
+```
+
+### 🗂️ ERD 및 와이어프레임
+-> [ERD](https://www.erdcloud.com/d/cKLwxRxB33v9W6JYE)
+
+-> [와이어프레임](https://www.figma.com/design/9s9IO9PjGv81v5QjRcTJK3/Untitled?node-id=108-1652&p=f&t=VUZgk8B7Ab3JiaL6-0)
+
+이미지 파일 업로드 관련 경로는 추후 Nginx 또는 AWS S3로 확장 예정
+
+### 🙌 협업 규칙
+기능 단위로 PR 작성
+
+코드 리뷰어는 3명 모두 승인 시 merge
+
+일일 커밋 후 PR 리뷰 요청
