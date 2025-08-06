@@ -121,9 +121,9 @@ application.yml
 ```
 
 ### 🗂️ ERD 및 와이어프레임
--> [ERD](https://www.erdcloud.com/d/cKLwxRxB33v9W6JYE)
+-> [ERD 보기](https://www.erdcloud.com/d/cKLwxRxB33v9W6JYE)
 
--> [와이어프레임](https://www.figma.com/design/9s9IO9PjGv81v5QjRcTJK3/Untitled?node-id=108-1652&p=f&t=VUZgk8B7Ab3JiaL6-0)
+-> [와이어프레임 보기](https://www.figma.com/design/9s9IO9PjGv81v5QjRcTJK3/Untitled?node-id=108-1652&p=f&t=VUZgk8B7Ab3JiaL6-0)
 
 이미지 파일 업로드 관련 경로는 추후 Nginx 또는 AWS S3로 확장 예정
 
