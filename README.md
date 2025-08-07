@@ -69,7 +69,7 @@ com.example.newsfeedproject
 ### 2️⃣ MySQL Database 생성
 
 ```sql
-CREATE DATABASE newsfeed_db;
+CREATE DATABASE hansolbab;
 ```
 ### 3️⃣ application.properties 생성
 📁 경로: src/main/resources/application.properties
