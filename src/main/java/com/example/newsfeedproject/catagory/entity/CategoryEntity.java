@@ -18,6 +18,5 @@ public class CategoryEntity {
     private Category category;
 
     @Column(nullable = false)
-    private Long postId;
-
+    private Long feedId;
 }
