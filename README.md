@@ -71,18 +71,18 @@ com.example.newsfeedproject
 ```sql
 CREATE DATABASE newsfeed_db;
 ```
-### 3️⃣ application.yml 생성
-📁 경로: src/main/resources/application.yml
+### 3️⃣ application.properties 생성
+📁 경로: src/main/resources/application.properties
 
 ⚠️ .gitignore에 등록되어 있어 직접 생성해야 합니다.
-src/main/resources/application-example.yml 확인
+src/main/resources/application.properties 확인
 
 🔐 Git 보안 설정
-application.yml은 절대 Git에 업로드하지 않습니다.
+application.properties은 절대 Git에 업로드하지 않습니다.
 
 .gitignore에 민감 정보 추가:
 
-application.yml
+application.properties
 
 .env 등
 
