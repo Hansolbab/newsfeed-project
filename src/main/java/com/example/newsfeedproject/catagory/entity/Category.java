@@ -1,5 +1,6 @@
 package com.example.newsfeedproject.catagory.entity;
 
+//이넘 클래스
 public enum Category {
     KOREAN,
     JAPANESE,
@@ -7,6 +8,8 @@ public enum Category {
     WESTERN,
     OTHERS;
 
+
+    //enum 한글문자열로 변경 -> feed 관련 response body에 사용하면 됩니다.
     public String toString() {
 
        return switch (this){
