@@ -22,19 +22,19 @@ public class Users {
     private Long userId;
 
     @NotBlank
-    @Column
+    @Column(nullable = false)
     private String userName;
 
     @NotBlank
-    @Column
+    @Column(nullable = false)
     private String phoneNumber;
 
     @NotBlank
-    @Column(unique = true)
+    @Column(unique = true, nullable = false)
     private String email;
 
     @NotBlank
-    @Column
+    @Column(nullable = false)
     private String password;
 
     @Column
@@ -48,9 +48,9 @@ public class Users {
     @LastModifiedDate
     private LocalDateTime updated_at;
 
-//    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-//    @JoinColumn(name = "profileImgId")
-//    private ProfileImg profileImg;
+    @Column(nullable = false)
+    // 외부 이미지 가져오기, 랜덤으로 이미지 제공해주는 사이틍입니다.
+    private String profileImg = "https://via.placeholder.com/150";
 
 //      followings
 //      followers
