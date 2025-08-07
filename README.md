@@ -6,12 +6,12 @@
 
 ## 👥 팀원 소개
 
-| 이름  | 역할 | GitHub                                    |
-|-----|--|-------------------------------------------|
-| 곽지훈 |  | [github.com/Gwakjihun](https://github.com/Gwakjihun) |
-| 전재민 |  | [github.com/Beforejamni](https://github.com/Beforejamni) |
-| 최재혁 |  | [github.com/Gemini-kei](https://github.com/Gemini-kei) |
-| 최한솔 |  | [github.com/hansolChoi29](https://github.com/hansolChoi29) |
+| 이름  | 역할  | GitHub                                    |
+|-----|-----|-------------------------------------------|
+| 곽지훈 |     | [github.com/Gwakjihun](https://github.com/Gwakjihun) |
+| 전재민 |     | [github.com/Beforejamni](https://github.com/Beforejamni) |
+| 최재혁 |     | [github.com/Gemini-kei](https://github.com/Gemini-kei) |
+| 최한솔 | 인증, 인가 | [github.com/hansolChoi29](https://github.com/hansolChoi29) |
 
 ### 역할 - 유저, 인증, 게시글, 이미지 업로드, 댓글, 좋아요, 팔로우, 마이페이지
 ---
@@ -19,7 +19,7 @@
 ## 🚀 프로젝트 개요
 
 - **사용 기술**: Java 17, Spring Boot 3, MySQL, JPA, Gradle, Postman, Tomcat
-- **협업 도구**: GitHub, Notion, Figma
+- **협업 도구**: GitHub, Notion, Figma, ERDcloud
 - **기능**
     - 회원가입 / 로그인 / 로그아웃
     - 게시글 작성, 수정, 삭제
@@ -34,14 +34,15 @@
 
 ```
 com.example.newsfeedproject
-├── config                # 전역 설정 (CORS, JWT 등)
-├── global                # 예외 처리, 공통 응답, 유틸
+├── config               # 전역 설정 (CORS, JWT 등)
+├── global               # 예외 처리, 공통 응답, 유틸
 ├── auth                 # 인증/인가
 ├── user                 # 유저 도메인
-├── newsfeed             # 게시글 도메인
+├── feed                 # 게시글 도메인
 ├── comment              # 댓글 도메인
 ├── like                 # 좋아요 도메인
 ├── follow               # 팔로우 도메인
+├── category             # 카테고리 도메인
 └── NewsfeedApplication.java
 
 ```
@@ -103,25 +104,25 @@ application.yml
 
 - feat/{기능명}: 기능 단위 브랜치
 
-예시: feat/user-signup, feat/post-crud
+예시: feat/user-signup, feat/feed-crud
 
 ### 📄 커밋 컨벤션
 ```
-✨ feat	     해당 파일에 새로운 기능이 생김
-🎉 add	     없던 파일을 생성함, 초기 세팅
-🐛 fix	     버그 수정
+✨ feat          해당 파일에 새로운 기능이 생김
+🎉 add           없던 파일을 생성함, 초기 세팅
+🐛 fix	         버그 수정
 ♻️ refactor	 코드 리팩토링
-🚚 move	     파일 옮김/정리
-🔥 delete	   기능/파일 삭제
-✅ test	     테스트 코드 작성 (🧪)
-🙈 gitfix	   gitignore 수정
-🔨 script	   build.gradle 변경, docker compose 변경
-📝 chore	   주석 추가 및 수정, 변수명 및 클래스명 수정
+🚚 move	         파일 옮김/정리
+🔥 delete	 기능/파일 삭제
+✅ test	         테스트 코드 작성 (🧪)
+🙈 gitfix	 gitignore 수정
+🔨 script        build.gradle 변경, docker compose 변경
+📝 chore	 주석 추가 및 수정, 변수명 및 클래스명 수정
 ⚡️ improve	 개선
 ```
 
 ### 🗂️ ERD 및 와이어프레임
--> [ERD 보기](https://www.erdcloud.com/d/cKLwxRxB33v9W6JYE)
+-> [ERD 보기](https://github.com/Gwakjihun/newsfeed-project/issues/1#issue-3296282885)
 
 -> [와이어프레임 보기](https://www.figma.com/design/9s9IO9PjGv81v5QjRcTJK3/Untitled?node-id=108-1652&p=f&t=VUZgk8B7Ab3JiaL6-0)
 
