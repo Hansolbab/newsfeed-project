@@ -48,6 +48,10 @@ public class Users {
     @LastModifiedDate
     private LocalDateTime updated_at;
 
+//    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+//    @JoinColumn(name = "profileImgId")
+//    private ProfileImg profileImg;
+
 //      followings
 //      followers
 
