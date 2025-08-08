@@ -12,12 +12,14 @@ public class SignupRequestDto {
     private String userName;
 
     @NotBlank
+    // 이메일은 정규식 사용
     @Email(message = "유효한 이메일 형식을 입력해주세요.")
     private String email;
 
     @NotBlank
     @Pattern(
-            regexp = "^\\d{2,3}-?\\d{3,4}-?\\d{4}$",
+            // 전화번호 - 제외
+            regexp = "^\\d{10,11}$",
             message = "전화번호 형식이 올바르지 않습니다."
     )
     private String phoneNumber;
