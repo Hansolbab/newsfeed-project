@@ -31,7 +31,7 @@ public class FollowsService {
 
 
         Follows relation = followsRepository
-                .findByFollowerIdAndFolloweeId(meId, userId) //할 사람이 당할 사람을 팔로우 했던 이력이 있는가.
+                .findByFollowerAndFollowee(me, followee) //할 사람이 당할 사람을 팔로우 했던 이력이 있는가.
                 .orElseGet(() -> { // 없다면? => 처음 팔로우 하는 경우
                     Follows f = new Follows(); // 객체를 생성
                     f.setFollower(me); // 할 사람을 넣어주고

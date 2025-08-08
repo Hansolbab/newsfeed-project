@@ -9,7 +9,7 @@ import lombok.Setter;
 
 @Entity
 @Table(name = "follows" ,uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"followerId" ,"followeedId"}) // @사용자가 같은 유저를 팔로우 하지 못하게 하기 위함
+        @UniqueConstraint(columnNames = {"followerId" ,"followeeId"}) // @사용자가 같은 유저를 팔로우 하지 못하게 하기 위함
 })
 @Setter
 @Getter
