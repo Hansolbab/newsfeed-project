@@ -1,6 +1,8 @@
 package com.example.newsfeedproject.auth.controller;
 
 
+import com.example.newsfeedproject.auth.dto.signin.SigninRequestDto;
+import com.example.newsfeedproject.auth.dto.signin.SigninResponseDto;
 import com.example.newsfeedproject.auth.dto.signup.SignupRequestDto;
 import com.example.newsfeedproject.auth.service.signup.SignupService;
 import jakarta.validation.Valid;
@@ -23,4 +25,11 @@ public class AuthController {
         Long userId=signupService.signup(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body("회원가입 성공!"+userId);
     }
+
+    //로그인
+//    @PostMapping("/signin")
+//    public  ResponseEntity<SigninResponseDto> signin(@Valid @RequestBody SigninRequestDto dto){
+////        SigninRequestDto response=signinService.singin(dto);
+////        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+//    }
 }
