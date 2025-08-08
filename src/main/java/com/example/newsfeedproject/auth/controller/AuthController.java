@@ -4,6 +4,7 @@ package com.example.newsfeedproject.auth.controller;
 import com.example.newsfeedproject.auth.dto.signin.SigninRequestDto;
 import com.example.newsfeedproject.auth.dto.signin.SigninResponseDto;
 import com.example.newsfeedproject.auth.dto.signup.SignupRequestDto;
+import com.example.newsfeedproject.auth.service.signin.SigninService;
 import com.example.newsfeedproject.auth.service.signup.SignupService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class AuthController {
     private final SignupService signupService;
-
+    private final SigninService signinService;
     @PostMapping("/signup")
     public ResponseEntity<String> signup(@Valid @RequestBody SignupRequestDto dto){
         Long userId=signupService.signup(dto);
@@ -27,9 +28,9 @@ public class AuthController {
     }
 
     //로그인
-//    @PostMapping("/signin")
-//    public  ResponseEntity<SigninResponseDto> signin(@Valid @RequestBody SigninRequestDto dto){
-////        SigninRequestDto response=signinService.singin(dto);
-////        return ResponseEntity.status(HttpStatus.CREATED).body(response);
-//    }
+    @PostMapping("/signin")
+    public ResponseEntity<SigninResponseDto> signin(@Valid @RequestBody SigninRequestDto dto) {
+        SigninResponseDto   response = signinService.signin(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
 }
