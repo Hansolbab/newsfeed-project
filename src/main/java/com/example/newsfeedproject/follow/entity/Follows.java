@@ -3,11 +3,16 @@ package com.example.newsfeedproject.follow.entity;
 
 import com.example.newsfeedproject.users.entity.Users;
 import jakarta.persistence.*;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Setter;
 
 @Entity
 @Table(name = "follows" ,uniqueConstraints = {
         @UniqueConstraint(columnNames = {"followerId" ,"followeedId"}) // @사용자가 같은 유저를 팔로우 하지 못하게 하기 위함
 })
+@Setter
+@Getter
 public class Follows {
 
 
@@ -31,9 +36,15 @@ public class Follows {
     private Users followee;
 
     //팔로우 이력 기록
-    @Column(name = "isFollowed", nullable = true)
+    @Column(name = "isFollowed", nullable = false)
+    @Getter(AccessLevel.NONE) //isFollowed Getter 생성 금지
     private boolean isFollowed;
 
 
+
+    //isIsFollowed를 Getter처럼 사용
+    public boolean isIsFollowed() {
+        return isFollowed;
+    }
 
 }
