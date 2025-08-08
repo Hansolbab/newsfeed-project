@@ -1,81 +1,80 @@
 package com.example.newsfeedproject.common.util;
 
-
-
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.auth0.jwt.interfaces.DecodedJWT;
+import com.auth0.jwt.interfaces.JWTVerifier;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.stereotype.Component;
 
-import java.security.Key;
 import java.util.Date;
 import java.util.List;
-
-
+//static 메서드만 제공되며, 빈 등록 없이 사용
 public class JwtUtil {
-//유틸이란 정적, 외부에서 관리하지 않아도 되는 구조
-    // 주입 필요없음, 정적메서드 위주, 빈등록 x
+    //서명(암호화) 알고리즘 객체 (HMAC256)
+    private static Algorithm algorithm;
+    // 토큰 검증기: 이 알고리즘으로 서명된 토큰인지 검사
+    private static JWTVerifier verifier;
 
-    private static String SECRET_KEY;
-    private static Key key;
+    private static final long ACCESS_EXP  = 1000L * 60 * 30; //30분
+    private static final long REFRESH_EXP = 1000L * 60 * 60 * 24 * 7; //7일
 
-    private static final long ACCESS_EXP=1000*60*30; //30분
-    private static final long REFRESH_EXP=1000*60*60*24*7; //7일
+    // secret 암호화할 때 쓰는 비밀번호 같은 문자열
     public static void init(String secret) {
-        SECRET_KEY = secret;
-        key = Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
+        //HMAC256: 위조할 수 없도록 서명(Signature)할 때 쓰는 알고리즘
+        algorithm = Algorithm.HMAC256(secret);
+        //해당 알고리즘으로 생성된 토큰만 허용하도록 검증기 생성
+        verifier  = JWT.require(algorithm).build();
     }
 
-    /** Access Token 생성 */
+
+    //Access  Token 생성
     public static String createAccessToken(Long userId, String userName) {
-        return Jwts.builder()
-                .setSubject(userName)
-                .claim("userId", userId)
-                .setExpiration(new Date(System.currentTimeMillis() + ACCESS_EXP))
-                .signWith(key, SignatureAlgorithm.HS256)
-                .compact();
+        return JWT.create()
+                .withSubject(userName)
+                .withClaim("userId", userId)
+                .withExpiresAt(new Date(System.currentTimeMillis() + ACCESS_EXP))
+                .sign(algorithm);
     }
 
-    /** Refresh Token 생성 */
+    // Refresh Token 생성
     public static String createRefreshToken(Long userId) {
-        return Jwts.builder()
-                .setSubject("refresh")
-                .claim("userId", userId)
-                .setExpiration(new Date(System.currentTimeMillis() + REFRESH_EXP))
-                .signWith(key, SignatureAlgorithm.HS256)
-                .compact();
+        return JWT.create()
+                .withSubject("refresh")
+                .withClaim("userId", userId)
+                .withExpiresAt(new Date(System.currentTimeMillis() + REFRESH_EXP))
+                .sign(algorithm);
     }
 
-    /** 토큰 유효성 검사 */
+    // 토큰 유효성 검사
     public static boolean validateToken(String token) {
         try {
-            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
+            verifier.verify(token);
             return true;
-        } catch (JwtException e) {
+        } catch (JWTVerificationException e) {
             return false;
         }
     }
 
-    /** 토큰에서 userName 추출 */
+    //토큰 디코드
+    private static DecodedJWT decode(String token) {
+        return verifier.verify(token);
+    }
+
+    // 토큰에서 userName(subject) 추출
     public static String getUserNameFromToken(String token) {
-        Claims claims = Jwts.parserBuilder().setSigningKey(key).build()
-                .parseClaimsJws(token)
-                .getBody();
-        return claims.getSubject();
+        return decode(token).getSubject();
     }
 
-    /** 토큰에서 userId 추출 */
+    //토큰에서 userId 클레임(Long) 추출
     public static Long getUserIdFromToken(String token) {
-        Claims claims = Jwts.parserBuilder().setSigningKey(key).build()
-                .parseClaimsJws(token)
-                .getBody();
-        return claims.get("userId", Long.class);
+        return decode(token).getClaim("userId").asLong();
     }
 
+    // Spring Security Authentication 객체 생성(권한은 빈 리스트) */
     public static Authentication getAuthentication(String token) {
-        Claims claims = Jwts.parserBuilder().setSigningKey(key).build()
-                .parseClaimsJws(token)
-                .getBody();
-        String username = claims.getSubject();
-        return new UsernamePasswordAuthenticationToken(username, null, List.of());
+        String userName = getUserNameFromToken(token);
+        return new UsernamePasswordAuthenticationToken(userName, null, List.of());
     }
 }

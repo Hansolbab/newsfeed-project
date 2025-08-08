@@ -18,7 +18,6 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class JwtAuthorizationFilter extends OncePerRequestFilter {
     //JWT 관련 기능을 담당하는 유틸 클래스 (토큰 꺼내기, 검증 등)
-    private final JwtUtil jwtUtil;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -30,8 +29,8 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
         if (header != null && header.startsWith("Bearer ")) {
             String token = header.substring(7);
             // 토큰 유효성 검사 (만료됐는지, 위조됐는지 등)
-            if (jwtUtil.validateToken(token)) {
-                Authentication auth = jwtUtil.getAuthentication(token);
+            if (JwtUtil.validateToken(token)) {
+                Authentication auth = JwtUtil.getAuthentication(token);
                 SecurityContextHolder.getContext().setAuthentication(auth);
             }
         }
