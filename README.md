@@ -35,11 +35,11 @@
 
 ```
 com.example.newsfeedproject
-├── auth                 # 인증/인가
-├── myinfo                 # 마이페이지 도메인
-├── users                 # 유저 도메인
-├── feeds                 # 게시글 도메인
-├── category             # 카테고리 도메인
+├── auth                      # 인증/인가
+├── myinfo                    # 마이페이지 도메인
+├── users                     # 유저 도메인
+├── feeds                     # 게시글 도메인
+├── category                  # 카테고리 도메인
 └── NewsfeedApplication.java
 
 ```
@@ -99,24 +99,24 @@ application.properties
 
 - dev: 통합 개발 브랜치
 
-- feat/{기능명}: 기능 단위 브랜치
+- feature/{기능명}: 기능 단위 브랜치
 
-예시: feat/user-signup, feat/feed-crud
+예시: feature/user-signup, feature/feed-crud
 
 ### 📄 커밋 컨벤션
-```
-✨ feat          해당 파일에 새로운 기능이 생김
-🎉 add           없던 파일을 생성함, 초기 세팅
-🐛 fix	         버그 수정
-♻️ refactor	 코드 리팩토링
-🚚 move	         파일 옮김/정리
-🔥 delete	 기능/파일 삭제
-✅ test	         테스트 코드 작성 (🧪)
-🙈 gitfix	 gitignore 수정
-🔨 script        build.gradle 변경, docker compose 변경
-📝 chore	 주석 추가 및 수정, 변수명 및 클래스명 수정
-⚡️ improve	 개선
-```
+
+✨ feat &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;해당 파일에 새로운 기능이 생김</br>
+🎉 add  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;없던 파일을 생성함, 초기 세팅</br>
+🐛 fix	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 버그 수정</br>
+♻️ refactor &nbsp;&nbsp; 코드 리팩토링</br>
+🚚 move	 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 파일 옮김/정리</br>
+🔥 delete &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 기능/파일 삭제</br>
+✅ test	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 테스트 코드 작성 (🧪)</br>
+🙈 gitfix &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; gitignore 수정</br>
+🔨 script &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; build.gradle 변경, docker compose 변경</br>
+📝 chore &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 주석 추가 및 수정, 변수명 및 클래스명 수정</br>
+⚡️ improve &nbsp; 개선</br>
+
 
 ### 🗂️ ERD 및 와이어프레임
 -> [ERD 보기](https://github.com/Gwakjihun/newsfeed-project/issues/1#issue-3296282885)
@@ -128,6 +128,6 @@ application.properties
 ### 🙌 협업 규칙
 기능 단위로 PR 작성
 
-코드 리뷰어는 3명 모두 승인 시 merge
+코드 리뷰어는 2명 모두 승인 시 merge
 
 일일 커밋 후 PR 리뷰 요청
