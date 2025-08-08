@@ -12,5 +12,34 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class SignupService {
-//    private final UsersRepository usersRepository;
+
+    private final UsersRepository usersRepository;
+    private final BCryptPasswordEncoder passwordEncoder;
+
+    @Transactional
+    public Long signup(SignupRequestDto  dto){
+        if(usersRepository.existsByUserName(dto.getUserName())){
+            throw new IllegalArgumentException("이미 사용 중인 아이디입니다.");
+        }
+        if(usersRepository.findByEmail(dto.getEmail()).isPresent()){
+            throw new IllegalArgumentException("이미 가입된 이메일입니다.");
+        }
+
+        //비밀번호 암호화
+        String encode= passwordEncoder.encode(dto.getPassword());
+        //엔티티 생성
+        Users user=new Users( null, // userId (auto-generated)
+                dto.getUserName(),
+                dto.getPhoneNumber(),
+                dto.getEmail(),
+                encode, // password
+                false,  // isDeleted
+                null, // created_at (Auditing이 채워줌)
+                null,  // updated_at (Auditing이 채워줌)
+                "https://via.placeholder.com/150" ); //기본프로필
+        //유저저장
+        Users saved=usersRepository.save(user);
+        return saved.getUserId();
+
+    }
 }
