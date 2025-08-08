@@ -17,14 +17,14 @@ import java.time.LocalDateTime;
 
 @Entity
 @Getter
-@Table(name = "users")
+@Table(name = "user")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
 public class Signup {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long userid;
+    private Long userId;
 
     @Column(unique = true, nullable = false, length = 10)
     private String userName;
