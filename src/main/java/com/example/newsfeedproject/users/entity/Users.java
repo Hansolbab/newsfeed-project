@@ -1,5 +1,6 @@
 package com.example.newsfeedproject.users.entity;
 
+import com.example.newsfeedproject.follow.entity.Follows;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
@@ -10,6 +11,8 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -72,7 +75,19 @@ public class Users {
     // 외부 이미지 가져오기, 랜덤으로 이미지 제공해주는 사이트입니다.
     private String profileImg = "https://via.placeholder.com/150";
 
-//      followings
-//      followers
+//  followings
+    @OneToMany(mappedBy = "follower", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Follows> followings = new ArrayList<>();
+//   followers
+
+    @OneToMany(mappedBy = "followee", cascade = CascadeType.ALL,orphanRemoval = true)
+    private List<Follows> followers = new ArrayList<>();
+
+    public Users ( String userName, String phoneNumber, String email,String encode){
+        this.userName = userName;
+        this.phoneNumber = phoneNumber;
+        this.email = email;
+        this.password = encode;
+    }
 
 }

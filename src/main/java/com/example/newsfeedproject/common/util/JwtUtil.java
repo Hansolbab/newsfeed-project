@@ -1,4 +1,4 @@
-package com.example.newsfeedproject.auth.util;
+package com.example.newsfeedproject.common.util;
 
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
