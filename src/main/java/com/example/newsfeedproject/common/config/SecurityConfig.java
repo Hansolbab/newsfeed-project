@@ -1,4 +1,4 @@
-package com.example.newsfeedproject.auth.config;
+package com.example.newsfeedproject.common.config;
 
 import com.example.newsfeedproject.auth.filter.JwtAuthorizationFilter;
 import lombok.RequiredArgsConstructor;
