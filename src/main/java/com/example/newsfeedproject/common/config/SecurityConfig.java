@@ -22,11 +22,11 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 // /auth/** 는 인증 없이 허용, 나머지는 모두 차단
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers("/**" ).permitAll()
                         // 이외에는 모두 허용이지만(개발 편의)
                         .anyRequest().denyAll()
                         // 아래 코드 나중에 활성화하여 로그인 필요 추가할 예정
-//                        .anyRequest().authenticated()
+                 //      .anyRequest().authenticated()
                 )
                  .addFilterBefore(
                 jwtAuthorizationFilter,
