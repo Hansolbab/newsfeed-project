@@ -18,8 +18,8 @@ public class SignupRequestDto {
 
     @NotBlank
     @Pattern(
-            // 전화번호 - 있어도 되고 없어도 되게.
-            regexp = "^\\d{2,3}-?\\d{3,4}-?\\d{4}$",
+            // 전화번호 - 제외
+            regexp = "^\\d{10,11}$",
             message = "전화번호 형식이 올바르지 않습니다."
     )
     private String phoneNumber;
