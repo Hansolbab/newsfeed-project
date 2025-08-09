@@ -1,18 +1,22 @@
 package com.example.newsfeedproject.feeds.dto;
 
-import jakarta.validation.constraints.Pattern;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.example.newsfeedproject.category.entity.Category; // Category Enum 임포트
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-public class FeedUpdateRequestDto {
+@Getter
+@Setter
+public class FeedUpdateRequestDto { // 게시글 수정 요청 데이터 전송 객체
+
+    // 게시글 내용 (필수, 길이 제한)
+    @NotBlank(message = "게시글 내용은 필수 입력 항목입니다.")
+    @Size(max = 2000, message = "게시글 내용은 최대 2000자까지 허용됩니다.")
     private String contents;
-    private String feedImgs;
 
-    @Pattern(regexp = "KOREAN|JAPANESE|CHINESE|WESTERN|OTHERS",
-            message = "Invalid category. Valid categories are KOREAN, JAPANESE, CHINESE, WESTERN, OTHERS.")
-    private String category;
+    // 게시글 카테고리 (필수)
+    @NotNull(message = "게시글 카테고리는 필수 선택 항목입니다.")
+    private Category category; // Category Enum 타입으로 요청 받음
 }
