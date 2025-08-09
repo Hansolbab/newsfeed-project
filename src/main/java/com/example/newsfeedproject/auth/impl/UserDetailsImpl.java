@@ -12,7 +12,7 @@ import java.util.List;
 @RequiredArgsConstructor
 // 인증객체로 사용될 유저 구현체
 public class  UserDetailsImpl implements  UserDetails {
-    //TODO: userId같이 담아줘도 됨
+
     private final Users user;
 
     public Users getUser(){
@@ -34,6 +34,9 @@ public class  UserDetailsImpl implements  UserDetails {
     public String getUsername() {
         // 이메일을 로그인 식별자로 쓴다면
         return user.getUserName();
+    }
+    public Long getUserId() {
+        return  user.getUserId();
     }
 
     public String getEmail() {

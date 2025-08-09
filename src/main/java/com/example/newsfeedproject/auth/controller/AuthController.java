@@ -48,8 +48,8 @@ public class AuthController {
         return ResponseEntity.ok()
                 // 여기서 쿠키로 내려보냄
                 .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
-                //바디에는 access만 내려도 됨(refresh는 쿠키로 보냈으니까 null)
-//                .body(new SigninResponseDto(tokens.getAccessToken(), null));
+                //바디에는 access만 내려도 됨(refresh는 쿠키로 보냈으니까 null -> 세션으로 보내주세요)
+ //               .body(new SigninResponseDto(tokens.getAccessToken(), null));
         
                 // (개발용) 바디에도 같이 넣기
                 .body(new SigninResponseDto(tokens.getAccessToken(), tokens.getRefreshToken()));

@@ -3,9 +3,10 @@ package com.example.newsfeedproject.follow.entity;
 
 import com.example.newsfeedproject.users.entity.Users;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "follows" ,uniqueConstraints = {
@@ -40,7 +41,13 @@ public class Follows {
     //isFollowed Getter 생성 금지
     private boolean followed;
 
+    @Column( name = "createdAt", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
 
+    @PrePersist
+    public void prePersist() { // 다시 팔로우 시 새로 세팅
+        this.createdAt = LocalDateTime.now();
+    }
 
 
 }
