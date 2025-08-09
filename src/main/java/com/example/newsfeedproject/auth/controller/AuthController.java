@@ -68,7 +68,7 @@ public class AuthController {
                 .path("/api/auth/refresh")
                 .maxAge(0)
                 .build();
-        return ResponseEntity.noContent()
+        return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, deleteCookie.toString())
                 .build();
     }
