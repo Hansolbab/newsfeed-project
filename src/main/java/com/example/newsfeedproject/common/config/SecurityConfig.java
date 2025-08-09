@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-//import org.springframework.security.config.http.SessionCreationPolicy; //한솔용
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -24,18 +24,18 @@ public class SecurityConfig {
                 //CSRF 끄기
                 // TODO : 활성화하기
                 .csrf(csrf -> csrf.disable())
-//                .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // 무상태 // 한솔용
-//                .formLogin(f->f.disable()) // 한솔용
-//                .httpBasic(h->h.disable())// 한솔용
+                .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // 무상태 // 한솔용
+                .formLogin(f->f.disable())// 한솔용
+                .httpBasic(h->h.disable())// 한솔용
                 // /auth/** 는 인증 없이 허용, 나머지는 모두 차단
                 .authorizeHttpRequests(
                         auth -> auth
-                        .requestMatchers("/**" ).permitAll()
+//                        .requestMatchers("/**" ).permitAll()
                                 //auth만 허용
-//                                .requestMatchers("/api/auth/**").permitAll()// 한솔용
-//                                .anyRequest().authenticated()// 한솔용
+                                .requestMatchers("/api/auth/**").permitAll()// 한솔용
+                                .anyRequest().authenticated()// 한솔용
                         // 이외에는 모두 허용이지만(개발 편의)
-                        .anyRequest().denyAll()
+//                        .anyRequest().denyAll()
                 )
                  .addFilterBefore(
                 jwtAuthorizationFilter,
