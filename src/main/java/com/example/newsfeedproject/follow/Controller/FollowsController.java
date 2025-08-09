@@ -1,11 +1,14 @@
 package com.example.newsfeedproject.follow.Controller;
 
 
+import com.example.newsfeedproject.common.dto.ReadFollowUsersDto;
 import com.example.newsfeedproject.follow.service.FollowsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 
 @RestController
@@ -36,5 +39,33 @@ public class FollowsController {
 
         return new ResponseEntity<>(HttpStatus.OK);
 
+    }
+    //내 목록 조회
+    @GetMapping("/followers")
+    public  ResponseEntity<List<ReadFollowUsersDto>> readFollowerMeList (@RequestHeader(value = "X-User-Id", required = false) Long meId){
+
+        List<ReadFollowUsersDto> followerMeList = followsService.readFollowerList(meId, meId);
+
+        if(followerMeList.isEmpty()) {
+            return  ResponseEntity.noContent().build();
+        }
+        return new ResponseEntity<>(followerMeList , HttpStatus.OK);
+
+    }
+
+
+
+    //상대 팔로워 목록 조회
+    @GetMapping("/{userId}/followers")
+    public ResponseEntity<List<ReadFollowUsersDto>> readFollowerList (@PathVariable Long userId,
+                                                                      @RequestHeader(value = "X-User-Id", required = false) Long meId) {
+
+        List<ReadFollowUsersDto> followerList = followsService.readFollowerList(meId, userId);
+
+        if(followerList.isEmpty()){
+            return ResponseEntity.noContent().build();
+        }
+
+        return new ResponseEntity<>( followerList , HttpStatus.OK);
     }
 }

@@ -1,6 +1,7 @@
 package com.example.newsfeedproject.follow.service;
 
 
+import com.example.newsfeedproject.common.dto.ReadFollowUsersDto;
 import com.example.newsfeedproject.follow.entity.Follows;
 import com.example.newsfeedproject.follow.repository.FollowsRepository;
 import com.example.newsfeedproject.users.entity.Users;
@@ -8,6 +9,10 @@ import com.example.newsfeedproject.users.repository.UsersRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -41,7 +46,7 @@ public class FollowsService {
                     return f; // 값을 넣어주고 반환
                 });
 
-        if(!relation.isIsFollowed()) { //만약 했었는데 언팔로우 상태라면?
+        if(!relation.isFollowed()) { //만약 했었는데 언팔로우 상태라면?
             relation.setFollowed(true); // 지금은 다시 팔로우라고 반환
         }
 
@@ -63,10 +68,12 @@ public class FollowsService {
                     .findByFollowerAndFollowee(me, followee) // 팔로우 이력 확인 -> Users로 보냈지만, id값으로 판별해서 프록시라도 괜찮
                     .orElseThrow( () -> new IllegalArgumentException("팔로우를 한 적이 없습니다.")); // 없으면 이미 언팔로우
 
-        if(!relation.isIsFollowed()) return; // 이력이 있는데 언팔로우 상태이면 그대로 둠
+        if(!relation.isFollowed()) return; // 이력이 있는데 언팔로우 상태이면 그대로 둠
 
         relation.setFollowed(false); // 이력이 있는데 팔로우 상태면 언팔로우 변경
     }
+
+    //팔로우 목록 조회
 
 
     //공통 검증
@@ -88,4 +95,46 @@ public class FollowsService {
         }
     }
 
+    public List<ReadFollowUsersDto> readFollowerList(Long meId, Long userId) {
+
+        validListId(meId, userId);
+        //이 사람의 팔로워 목록은 이 사람 기준 팔로우 당하는 것입니다.
+        Users followee = usersRepository.getReferenceById(userId);
+
+        List<Users> followerList = followsRepository.findByFollowee(followee)//당하는 사람으로 하는 사람들을 찾아온다.
+                .stream()
+                .map(Follows::getFollower)//찾은 객체는 Follows 엔티티들이기 때문에 Follower로 변경
+                .toList(); // List로 정리
+
+        //meId 내가 팔로우 하는 사람들 목록
+        Users followerMe = usersRepository.getReferenceById(meId);
+
+        //빠른 검색을 위해 Set
+        Set<Long> meFolloweeIdSet = followsRepository.findByFollower(followerMe)
+                .stream()
+                .map(follows -> follows.getFollowee().getUserId())
+                .collect(Collectors.toSet());
+
+
+        return followerList.stream()
+                .map(users -> new ReadFollowUsersDto(users, meFolloweeIdSet.contains(users.getUserId())))
+                .toList();
+    }
+
+
+
+
+    private void validListId(Long meId, Long userId) {
+        if (meId == null || userId == null) {
+            throw new IllegalArgumentException("해당 유저들이 null 입니다.");
+        }
+
+        if (!usersRepository.existsById(meId)) {
+            throw new IllegalArgumentException("현재 유저가 없습니다.");
+        }
+
+        if (!usersRepository.existsById(userId)) {
+            throw new IllegalArgumentException("대상 유저가 없습니다.");
+        }
+    }
 }
