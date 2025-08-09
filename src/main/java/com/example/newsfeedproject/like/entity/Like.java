@@ -21,18 +21,14 @@ public class Like { // 좋아요 엔티티
     private Long likeId;
 
     // 좋아요를 누른 사용자 ID
-    @Column(name="userId", nullable = false)
+    @Column(name = "userId", nullable = false)
     private Long userId;
 
     // 좋아요를 받은 게시글 ID
-    @Column(name="feedId", nullable = false)
+    @Column(name = "feedId", nullable = false)
     private Long feedId;
 
     // 좋아요 상태 (true: 좋아요, false: 좋아요 아님 - 팀 협의 내용)
-    @Column(name="liked", nullable = false)
-    private boolean liked; // 필드명 'liked' 소문자로 변경
-
-    // 추후 created_at, updated_at 필요 시 추가
-    // @CreatedDate @Column(updatable = false) private LocalDateTime createdAt;
-    // @LastModifiedDate @Column private LocalDateTime updatedAt;
+    @Column(name = "liked", nullable = false)
+    private boolean liked;
 }
