@@ -3,6 +3,8 @@ package com.example.newsfeedproject.feeds.dto;
 import lombok.Builder;
 import lombok.Data;
 
+import java.time.LocalDateTime;
+
 @Data
 @Builder
 public class FeedsDto {
@@ -12,6 +14,6 @@ public class FeedsDto {
     private String email;
     private String title;
     private String contents;
-    private Data created;
-    private Data updated;
+    private LocalDateTime created_at;
+    private LocalDateTime updated_at;
 }
