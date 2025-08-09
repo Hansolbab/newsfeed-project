@@ -1,6 +1,7 @@
 package com.example.newsfeedproject.follow.service;
 
 
+import com.example.newsfeedproject.common.dto.ReadFollowUsersDto;
 import com.example.newsfeedproject.follow.entity.Follows;
 import com.example.newsfeedproject.follow.repository.FollowsRepository;
 import com.example.newsfeedproject.users.entity.Users;
@@ -8,6 +9,10 @@ import com.example.newsfeedproject.users.repository.UsersRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -68,6 +73,8 @@ public class FollowsService {
         relation.setFollowed(false); // 이력이 있는데 팔로우 상태면 언팔로우 변경
     }
 
+    //팔로우 목록 조회
+
 
     //공통 검증
     private void validId(Long meId, Long userId) {
@@ -88,4 +95,30 @@ public class FollowsService {
         }
     }
 
+    public List<ReadFollowUsersDto> readFollowerList(Long meId, Long userId) {
+
+        validId(meId, userId);
+        //이 사람의 팔로워 목록은 이 사람 기준 팔로우 당하는 것입니다.
+        Users followee = usersRepository.getReferenceById(userId);
+
+        List<Users> followerList = followsRepository.findByFollowee(followee)//당하는 사람으로 하는 사람들을 찾아온다.
+                .stream()
+                .map(Follows::getFollower)//찾은 객체는 Follows 엔티티들이기 때문에 Follower로 변경
+                .toList(); // List로 정리
+
+        //meId 내가 팔로우 하는 사람들 목록
+        Users followerMe = usersRepository.getReferenceById(meId);
+
+        //빠른 검색을 위해 Set
+        Set<Long> meFolloweeIdSet = followsRepository.findByFollower(followerMe)
+                .stream()
+                .map(follows -> follows.getFollowee().getUserId())
+                .collect(Collectors.toSet());
+
+
+
+        return followerList.stream()
+                .map(users -> new ReadFollowUsersDto(users, meFolloweeIdSet.contains(users.getUserId())))
+                .toList();
+    }
 }
