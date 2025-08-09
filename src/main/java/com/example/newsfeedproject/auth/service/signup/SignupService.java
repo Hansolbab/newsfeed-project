@@ -19,7 +19,7 @@ public class SignupService {
 
     @Transactional
     public Long signup(SignupRequestDto  dto){
-        if(usersRepository.existsByUserName(dto.getUserName())){
+        if(usersRepository.existsByUserName(dto.getEmail())){
             throw new IllegalArgumentException("이미 사용 중인 아이디입니다.");
         }
         if(usersRepository.findByEmail(dto.getEmail()).isPresent()){
