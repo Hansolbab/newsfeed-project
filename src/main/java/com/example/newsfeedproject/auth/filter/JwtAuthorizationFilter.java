@@ -35,8 +35,8 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
 
             // 토큰 유효성 검사 (만료됐는지, 위조됐는지 등)
             //!"refresh".equals(subject)로 리프레시 토큰은 인증에 못쓰게 차단
-            if (JwtUtil.validateToken(token) && !"refresh".equals(JwtUtil.getUserNameFromToken(token))) {
-                String email = JwtUtil.getUserNameFromToken(token);
+            if (JwtUtil.validateToken(token) && !"refresh".equals(JwtUtil.getUserEmailFromToken(token))) {
+                String email = JwtUtil.getUserEmailFromToken(token);
                 //DB에서 유저 조회
                 UserDetails userDetails = userDetailsService.loadUserByUsername(email);
                 //현재 요청 스레드의 보안 컨텍스트에 저장

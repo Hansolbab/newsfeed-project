@@ -12,13 +12,14 @@ import java.util.List;
 @RequiredArgsConstructor
 // 인증객체로 사용될 유저 구현체
 public class  UserDetailsImpl implements  UserDetails {
+    //TODO: userId같이 담아줘도 됨
     private final Users user;
 
     public Users getUser(){
         return user;
     }
 
-    // TODO: 권한 안 하기로 하더라도 만들긴 해야 됨
+    //  권한 안 하기로 하더라도 만들긴 해야 됨
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(); //빈 리스트로

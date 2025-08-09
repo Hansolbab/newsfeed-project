@@ -62,8 +62,8 @@ public class JwtUtil {
         return verifier.verify(token);
     }
 
-    // 토큰에서 userName(subject) 추출
-    public static String getUserNameFromToken(String token) {
+    // 토큰에서 email(subject) 추출
+    public static String getUserEmailFromToken(String token) {
         return decode(token).getSubject();
     }
 
@@ -72,9 +72,9 @@ public class JwtUtil {
         return decode(token).getClaim("userId").asLong();
     }
 
-    // Spring Security Authentication 객체 생성(권한은 빈 리스트) */
+    //Spring Security Authentication 객체 생성(권한은 빈 리스트)
     public static Authentication getAuthentication(String token) {
-        String userName = getUserNameFromToken(token);
-        return new UsernamePasswordAuthenticationToken(userName, null, List.of());
+        String email = getUserEmailFromToken(token);
+        return new UsernamePasswordAuthenticationToken(email, null, List.of());
     }
 }
