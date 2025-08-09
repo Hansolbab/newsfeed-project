@@ -1,4 +1,4 @@
-package com.example.newsfeedproject.catagory.entity;
+package com.example.newsfeedproject.category.entity;
 
 //이넘 클래스
 public enum Category {
