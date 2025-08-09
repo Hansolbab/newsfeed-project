@@ -18,11 +18,10 @@ public class  UserDetailsImpl implements  UserDetails {
         return user;
     }
 
-    // TODO: 권한 안 하기로 했는데, 없으면 빨간밑줄나서 일단 생존.
+    // TODO: 권한 안 하기로 하더라도 만들긴 해야 됨
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        //권한 필요시 채우기
-        return List.of();
+        return List.of(); //빈 리스트로
     }
 
     @Override
