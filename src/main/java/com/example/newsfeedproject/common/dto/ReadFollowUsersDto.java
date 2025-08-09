@@ -18,7 +18,12 @@ public class ReadFollowUsersDto {
         this.userId = users.getUserId();
         this.userName= users.getUserName();
         this.profileImg = users.getProfileImg();
-        this.followByMe= followByMe;
+        this.followByMe= followByMe;// 나랑 팔로우 되어 있는가?
     }
 
+    public static ReadFollowUsersDto todto(Users follower, boolean contains) {
+
+      return new ReadFollowUsersDto( follower, contains);
+
+    }
 }

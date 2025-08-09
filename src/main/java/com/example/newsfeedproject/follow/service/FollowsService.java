@@ -8,6 +8,9 @@ import com.example.newsfeedproject.users.entity.Users;
 import com.example.newsfeedproject.users.repository.UsersRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -96,52 +99,47 @@ public class FollowsService {
     }
 
     //이 사람을 팔로우 하는 사람
-    public List<ReadFollowUsersDto> readFollowerList(Long meId, Long userId) {
+    public Page<ReadFollowUsersDto> readFollowerList(Long meId, Long userId , Pageable pageable) {
 
         validListId(meId, userId);
         //이 사람의 팔로워 목록은 이 사람 기준 팔로우 당하는 것입니다.
         Users followee = usersRepository.getReferenceById(userId);
 
-        List<Users> followerList = followsRepository.findByFollowee(followee)//당하는 사람으로 하는 사람들을 찾아온다.
-                .stream()
-                .map(Follows::getFollower)//찾은 객체는 Follows 엔티티들이기 때문에 Follower로 변경
-                .toList(); // List로 정리
+        Page<Follows> followerPage = followsRepository.findByFollowee(followee, pageable);//당하는 사람으로 하는 사람들을 찾아온다.
 
         //meId 내가 팔로우 하는 사람들 목록
-        Users followerMe = usersRepository.getReferenceById(meId);
+        Set<Long> myFollowerSet = followsRepository.findFolloweeIdsOf(meId);
 
-        //빠른 검색을 위해 Set
-        Set<Long> myFolloweeIdSet = followsRepository.findByFollower(followerMe)
-                .stream()
-                .map(follows -> follows.getFollowee().getUserId())
-                .collect(Collectors.toSet());
+        List<ReadFollowUsersDto> followerList = followerPage.getContent().stream()//페이지에 해당하는 내용 즉 Followers
+                .map(follows -> // follows 엔티티를 ReadFollowUsersDto로 매핑
+                        ReadFollowUsersDto.todto(follows.getFollower(),
+                        myFollowerSet.contains(follows.getFollower().getUserId())))
+                .toList(); // 리스트 반환
 
-
-        return followerList.stream()
-                .map(users -> new ReadFollowUsersDto(users, myFolloweeIdSet.contains(users.getUserId())))
-                .toList();
+        return new PageImpl<>(
+                followerList, // 목록
+                pageable,
+                followerPage.getTotalElements());
     }
 
     //이 사람이 팔로우 하는 사람
-    public List<ReadFollowUsersDto> readFolloweeList(Long meId, Long userId) {
+    public Page<ReadFollowUsersDto> readFolloweeList(Long meId, Long userId ,Pageable pageable) {
 
         validListId( meId, userId);
 
         Users follower = usersRepository.getReferenceById(userId);
 
-        List<Users> followeeList = followsRepository.findByFollower(follower)
-                .stream().map(Follows::getFollowee)
+        Page<Follows> followeePage = followsRepository.findByFollower( follower, pageable);
+
+        Set<Long> myFollowerSet = followsRepository.findFolloweeIdsOf(meId);
+
+        List<ReadFollowUsersDto> followeeList = followeePage.getContent().stream()
+                .map(follows-> ReadFollowUsersDto.todto(follows.getFollowee(),
+                        myFollowerSet.contains(follows.getFollowee().getUserId())))
                 .toList();
 
-        Users followerMe = usersRepository.getReferenceById(meId);
+        return new PageImpl<>( followeeList , pageable, followeePage.getTotalElements());
 
-        Set<Long> myFollowerList = followsRepository.findByFollower(followerMe)
-                .stream().map(f -> f.getFollowee().getUserId())
-                .collect(Collectors.toSet());
-
-        return  followeeList.stream()
-                .map(u -> new ReadFollowUsersDto(u, myFollowerList.contains(u.getUserId())))
-                .toList();
     }
 
 
