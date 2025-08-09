@@ -27,10 +27,10 @@ public class AuthController {
         return ResponseEntity.status(HttpStatus.CREATED).body("회원가입 성공!"+userId);
     }
 
-    //로그인
+    //로그인은 200OK
     @PostMapping("/signin")
     public ResponseEntity<SigninResponseDto> signin(@Valid @RequestBody SigninRequestDto dto) {
-        SigninResponseDto   response = signinService.signin(dto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        SigninResponseDto response = signinService.signin(dto);
+        return ResponseEntity.ok(response);
     }
 }

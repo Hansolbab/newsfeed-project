@@ -30,9 +30,9 @@ public class JwtUtil {
 
 
     //Access  Token 생성
-    public static String createAccessToken(Long userId, String userName) {
+    public static String createAccessToken(Long userId, String email) {
         return JWT.create()
-                .withSubject(userName)
+                .withSubject(email)
                 .withClaim("userId", userId)
                 .withExpiresAt(new Date(System.currentTimeMillis() + ACCESS_EXP))
                 .sign(algorithm);

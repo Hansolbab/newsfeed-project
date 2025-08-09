@@ -12,17 +12,8 @@ import lombok.extern.slf4j.Slf4j;
     @EnableJpaAuditing
 @Slf4j
 public class NewsfeedProjectApplication {
-
-    @Value("${JWT_SECRET}")
-    private String jwtSecret;
-
     public static void main(String[] args) {
         SpringApplication.run(NewsfeedProjectApplication.class, args);
     }
-    // 서버 가동 시 한 번만, 비밃키 일겅와서 JWT서명/검증 알고리즘을 준비해두는 작업임.
-    @PostConstruct
-    public void initJwt() {
-        JwtUtil.init(jwtSecret);
-        log.info("JwtUtil이 비밀로 초기화되었습니다.");
-    }
+
 }

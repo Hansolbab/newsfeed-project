@@ -23,12 +23,16 @@ public class SigninService {
     public SigninResponseDto signin(SigninRequestDto dto) {
         Users user = usersRepository.findByEmail(dto.getEmail())
                 .orElseThrow(()->new IllegalArgumentException("가입된 사용자가 아닙니다."));
+
         if(!passwordEncoder.matches(dto.getPassword(), user.getPassword())){
             throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
         }
+
         //util 호출하여 JWT 토큰 생성
-        String accessToken  = JwtUtil.createAccessToken(user.getUserId(), user.getUserName());
+        String accessToken  = JwtUtil.createAccessToken(user.getUserId(), user.getEmail());
+
         String refreshToken = JwtUtil.createRefreshToken(user.getUserId());
+
         return new SigninResponseDto(accessToken, refreshToken);
     }
 }
