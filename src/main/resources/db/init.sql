@@ -1,16 +1,17 @@
 # -- 유저 테이블
-# CREATE TABLE users (
-#     userId BIGINT AUTO_INCREMENT PRIMARY KEY,
-#     userName VARCHAR(10) NOT NULL,
-#     phone_number VARCHAR(11),
-#     email VARCHAR(255) NOT NULL UNIQUE,
-#     password VARCHAR(255) NOT NULL,
-#     followings VARCHAR(255) NULL,
-#     followers VARCHAR(255) NULL,
-#     isDeleted BOOLEAN DEFAULT FALSE,
-#     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-#     modified_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-# );
+USE hansolbab;
+CREATE TABLE users (
+    userId BIGINT AUTO_INCREMENT PRIMARY KEY,
+    userName VARCHAR(10) NOT NULL,
+    phone_number VARCHAR(11),
+    email VARCHAR(255) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    followings VARCHAR(255) NULL,
+    followers VARCHAR(255) NULL,
+    isDeleted BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    modified_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
 #
 # -- 카테고리 테이블
 # CREATE TABLE categories (
@@ -106,3 +107,6 @@
 #         FOREIGN KEY (userId) REFERENCES users(userId)
 #             ON DELETE CASCADE
 # );
+
+
+SELECT * FROM users WHERE email = '가입한_이메일';
