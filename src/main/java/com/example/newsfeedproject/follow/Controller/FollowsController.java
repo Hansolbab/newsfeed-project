@@ -3,6 +3,7 @@ package com.example.newsfeedproject.follow.Controller;
 
 import com.example.newsfeedproject.common.dto.ReadFollowUsersDto;
 import com.example.newsfeedproject.follow.service.FollowsService;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -40,7 +41,12 @@ public class FollowsController {
         return new ResponseEntity<>(HttpStatus.OK);
 
     }
+    //내 목록 조회
+    @GetMapping("/followers")
 
+
+
+    //상대 팔로워 목록 조회
     @GetMapping("/{userId}/followers")
     public ResponseEntity<List<ReadFollowUsersDto>> readFollowerList (@PathVariable Long userId,
                                                                       @RequestHeader(value = "X-User-Id", required = false) Long meId) {
