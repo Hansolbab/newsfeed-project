@@ -95,6 +95,7 @@ public class FollowsService {
         }
     }
 
+    //이 사람을 팔로우 하는 사람
     public List<ReadFollowUsersDto> readFollowerList(Long meId, Long userId) {
 
         validListId(meId, userId);
@@ -110,18 +111,38 @@ public class FollowsService {
         Users followerMe = usersRepository.getReferenceById(meId);
 
         //빠른 검색을 위해 Set
-        Set<Long> meFolloweeIdSet = followsRepository.findByFollower(followerMe)
+        Set<Long> myFolloweeIdSet = followsRepository.findByFollower(followerMe)
                 .stream()
                 .map(follows -> follows.getFollowee().getUserId())
                 .collect(Collectors.toSet());
 
 
         return followerList.stream()
-                .map(users -> new ReadFollowUsersDto(users, meFolloweeIdSet.contains(users.getUserId())))
+                .map(users -> new ReadFollowUsersDto(users, myFolloweeIdSet.contains(users.getUserId())))
                 .toList();
     }
 
+    //이 사람이 팔로우 하는 사람
+    public List<ReadFollowUsersDto> readFolloweeList(Long meId, Long userId) {
 
+        validListId( meId, userId);
+
+        Users follower = usersRepository.getReferenceById(userId);
+
+        List<Users> followeeList = followsRepository.findByFollower(follower)
+                .stream().map(Follows::getFollowee)
+                .toList();
+
+        Users followerMe = usersRepository.getReferenceById(meId);
+
+        Set<Long> myFollowerList = followsRepository.findByFollower(followerMe)
+                .stream().map(f -> f.getFollowee().getUserId())
+                .collect(Collectors.toSet());
+
+        return  followeeList.stream()
+                .map(u -> new ReadFollowUsersDto(u, myFollowerList.contains(u.getUserId())))
+                .toList();
+    }
 
 
     private void validListId(Long meId, Long userId) {
@@ -137,4 +158,6 @@ public class FollowsService {
             throw new IllegalArgumentException("대상 유저가 없습니다.");
         }
     }
+
+
 }

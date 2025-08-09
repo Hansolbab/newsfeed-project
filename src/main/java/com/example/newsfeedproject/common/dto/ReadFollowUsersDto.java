@@ -21,15 +21,4 @@ public class ReadFollowUsersDto {
         this.followByMe= followByMe;
     }
 
-//    public static ReadFollowUsersDto toDto(Users user, boolean followByMe) {
-//
-//        return new ReadFollowUsersDto(
-//                user.getUserId(),
-//                user.getUserName(),
-//                user.getProfileImg(),
-//                followByMe
-//        );
-//    }
-
-
 }

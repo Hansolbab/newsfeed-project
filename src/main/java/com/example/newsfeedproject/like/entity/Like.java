@@ -17,6 +17,7 @@ public class Like {
     private Long feedId;
 
     @Column(name="liked")
-    private boolean Liked;
+    //소문자로 수정
+    private boolean liked;
 
 }
