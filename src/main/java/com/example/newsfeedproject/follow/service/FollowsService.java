@@ -5,11 +5,13 @@ import com.example.newsfeedproject.follow.entity.Follows;
 import com.example.newsfeedproject.follow.repository.FollowsRepository;
 import com.example.newsfeedproject.users.entity.Users;
 import com.example.newsfeedproject.users.repository.UsersRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class FollowsService {
 
     private final FollowsRepository followsRepository;
@@ -44,7 +46,28 @@ public class FollowsService {
             relation.setFollowed(true); // 지금은 다시 팔로우라고 반환
         }
 
+        //값을 반전처리!!!
+
         followsRepository.save(relation);
 
+    }
+
+    public void unfollow(Long meId, Long userId) {
+
+        if(meId.equals(userId)) {
+            throw new IllegalArgumentException("자기 자신을 팔로우할 수 없습니다.");
+        }
+
+        Users me = usersRepository.findById(meId).orElseThrow(() -> new IllegalArgumentException("현재 유저가 없습니다."));
+
+        Users followee = usersRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("대상 유저가 없습니다."));
+
+        Follows relation = followsRepository
+                    .findByFollowerAndFollowee(me, followee)
+                    .orElseThrow( () -> new IllegalArgumentException("팔로우를 한 적이 없습니다."));
+
+        if(!relation.isIsFollowed()) return;
+
+        relation.setFollowed(false);
     }
 }
