@@ -15,5 +15,4 @@ public class FeedsDto {
     private String title;
     private String contents;
     private LocalDateTime created_at;
-    private LocalDateTime updated_at;
 }
