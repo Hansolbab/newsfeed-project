@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class FeedUpdateRequestDto {
-    private String content;
+    private String contents;
     private String feedImgs;
 
     @Pattern(regexp = "KOREAN|JAPANESE|CHINESE|WESTERN|OTHERS",
