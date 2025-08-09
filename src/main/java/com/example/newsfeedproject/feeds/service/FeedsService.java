@@ -29,8 +29,8 @@ public class FeedsService {
     @Transactional
     public FeedResponseDto createFeed(FeedCreateRequestDto requestDto, String currentUserName) {
         // currentUserName (UserDetails.getUsername())이 Users의 userName과 매핑된다고 가정
-        Users currentUser = usersRepository.findByUserName(currentUserName) // usersRepository 사용
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not found for creation"));
+        Users currentUser = usersRepository.findByEmail(currentUserName) // usersRepository 사용
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "User not found for creation"));
 
         Category category;
         try {
@@ -44,6 +44,8 @@ public class FeedsService {
                 .contents(requestDto.getContents())
                 .feedImgs(requestDto.getFeedImgs())
                 .category(category)
+                .commentTotal(0)
+                .likeTotal(0)
                 .build();
 
         Feeds savedFeeds = feedsRepository.save(feeds);
@@ -136,9 +138,6 @@ public class FeedsService {
 
     // 특정 유저가 특정 피드에 좋아요를 눌렀는지 확인하는 (가상) 로직
     private boolean checkIfUserLikedFeed(String userName, Long feedId) {
-        if ("testUser".equals(userName) && feedId == 1L) {
-            return true;
-        }
-        return false;
+        return "testUser".equals(userName) && feedId == 1L;
     }
 }
