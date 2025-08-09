@@ -10,6 +10,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Entity
@@ -22,14 +23,14 @@ import java.util.Date;
 public class Feeds {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private String userName;
     private String title;
     private String contents;
     @CreatedDate
-    private Date created;
+    private LocalDateTime created_at;
     @LastModifiedDate
-    private Date updated;
+    private LocalDateTime updated_at;
     @ManyToOne
-    @JoinColumn(name = "userId")
+    @JoinColumn(name = "userName")
     private Users user;
 }
