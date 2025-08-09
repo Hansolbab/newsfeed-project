@@ -59,16 +59,16 @@ public class Users {
     private Boolean isDeleted;
 
     @Column
-//    @Column(name="created_at")
+//    @Column(name="createdAt")
     @CreatedDate
     // 생성일
-    private LocalDateTime created_at;
+    private LocalDateTime createdAt;
 
     @Column
-//    @Column(name="updateed_at")
+//    @Column(name="updatedAt")
     @LastModifiedDate
     // 수정일
-    private LocalDateTime updated_at;
+    private LocalDateTime updatedAt;
 
     @Column
 //    @Column(nullable = false, name="profileImg")
