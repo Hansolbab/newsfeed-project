@@ -5,6 +5,8 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.JWTVerifier;
+import com.example.newsfeedproject.auth.impl.UserDetailsImpl;
+import com.example.newsfeedproject.auth.impl.UserDetailsServiceImpl;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 
@@ -73,8 +75,13 @@ public class JwtUtil {
     }
 
     //Spring Security Authentication 객체 생성(권한은 빈 리스트)
-    public static Authentication getAuthentication(String token) {
+//    public static Authentication getAuthentication(String token) {
+//        String email = getUserEmailFromToken(token);
+//        return new UsernamePasswordAuthenticationToken(email, null, List.of());
+//    }
+    public static Authentication getAuthentication(String token, UserDetailsServiceImpl userDetailsServiceImpl) {
         String email = getUserEmailFromToken(token);
-        return new UsernamePasswordAuthenticationToken(email, null, List.of());
+        UserDetailsImpl userDetails = userDetailsServiceImpl.loadUserByUsername(email);
+        return new UsernamePasswordAuthenticationToken(userDetails, null, List.of());
     }
 }

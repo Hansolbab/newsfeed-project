@@ -19,7 +19,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     //Spring Security 로그인 처리 시 호출됨
     //@param username: 여기선 email을 받도록 설정
     @Override
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+    public UserDetailsImpl loadUserByUsername(String email) throws UsernameNotFoundException {
         Users user = usersRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("가입된 회원이 아닙니다: " + email));
         return new UserDetailsImpl(user);
