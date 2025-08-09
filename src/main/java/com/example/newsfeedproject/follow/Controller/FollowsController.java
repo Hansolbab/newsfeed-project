@@ -3,7 +3,6 @@ package com.example.newsfeedproject.follow.Controller;
 
 import com.example.newsfeedproject.common.dto.ReadFollowUsersDto;
 import com.example.newsfeedproject.follow.service.FollowsService;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
