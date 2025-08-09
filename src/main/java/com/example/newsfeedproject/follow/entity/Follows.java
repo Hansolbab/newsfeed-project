@@ -37,14 +37,10 @@ public class Follows {
 
     //팔로우 이력 기록
     @Column(name = "isFollowed", nullable = false)
-    @Getter(AccessLevel.NONE) //isFollowed Getter 생성 금지
-    private boolean isFollowed;
+    //isFollowed Getter 생성 금지
+    private boolean followed;
 
 
 
-    //isIsFollowed를 Getter처럼 사용
-    public boolean isIsFollowed() {
-        return isFollowed;
-    }
 
 }

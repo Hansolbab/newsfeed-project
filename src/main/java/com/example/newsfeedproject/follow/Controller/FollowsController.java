@@ -43,6 +43,16 @@ public class FollowsController {
     }
     //내 목록 조회
     @GetMapping("/followers")
+    public  ResponseEntity<List<ReadFollowUsersDto>> readFollowerMeList (@RequestHeader(value = "X-User-Id", required = false) Long meId){
+
+        List<ReadFollowUsersDto> followerMeList = followsService.readFollowerList(meId, meId);
+
+        if(followerMeList.isEmpty()) {
+            return  ResponseEntity.noContent().build();
+        }
+        return new ResponseEntity<>(followerMeList , HttpStatus.OK);
+
+    }
 
 
 

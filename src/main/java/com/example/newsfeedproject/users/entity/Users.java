@@ -56,7 +56,7 @@ public class Users {
     @Column
 //    @Column(name="isDeleted")
     // 소프트 삭제 여부 확인
-    private Boolean isDeleted;
+    private Boolean deleted;
 
     @Column
 //    @Column(name="createdAt")
