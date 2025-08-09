@@ -16,7 +16,7 @@ public class FollowsController {
     private final FollowsService followsService;
 
 
-    @PostMapping("/{userId}")
+    @PostMapping("/{userId}/follow") // 팔로우 url 추가
     public ResponseEntity<Void> follow(@PathVariable Long userId,
                                         @RequestHeader(value = "X-User-Id", required = false) Long meId
     ) {
@@ -25,5 +25,16 @@ public class FollowsController {
 
 
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @PostMapping("/{userId}/unfollow")
+    public ResponseEntity<Void> unfollow(@PathVariable Long userId,
+                                         @RequestHeader(value = "X-User-Id", required = false) Long meId ) {
+
+
+        followsService.unfollow(meId, userId);
+
+        return new ResponseEntity<>(HttpStatus.OK);
+
     }
 }
