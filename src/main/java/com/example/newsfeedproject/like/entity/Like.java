@@ -16,7 +16,7 @@ public class Like {
     @Column(name="feedId")
     private Long feedId;
 
-    @Column(name="isLiked")
-    private boolean isLiked;
+    @Column(name="liked")
+    private boolean Liked;
 
 }
