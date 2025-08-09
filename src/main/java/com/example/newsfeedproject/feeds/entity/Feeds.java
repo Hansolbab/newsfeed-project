@@ -1,5 +1,7 @@
 package com.example.newsfeedproject.feeds.entity;
 
+import com.example.newsfeedproject.category.entity.CategoryEntity;
+import com.example.newsfeedproject.feedImg.FeedImg;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -26,18 +28,13 @@ public class Feeds {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String contents;
 
-    private String feedImgs;
+    @OneToOne(mappedBy = "feed", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private FeedImg feedImage;
 
-    @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
-    private Category category;
-
-    @Column(nullable = false)
-    private Integer likeTotal = 0;
-
-    @Column(nullable = false)
-    private Integer commentTotal = 0;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "categoryId", nullable = true)
+    private CategoryEntity categoryEntity;
 
     @Transient
-    private Boolean isLiked;
+    private Boolean deleted;
 }
