@@ -55,5 +55,22 @@ public class AuthController {
                 .body(new SigninResponseDto(tokens.getAccessToken(), tokens.getRefreshToken()));
     }
     //TODO: 로그아웃
+    @PostMapping("/signout")
+    public ResponseEntity<Void> signout() {
+        // refreshToken= : 값 비움
+        //Max-Age=0 + Expires=Thu, 01 Jan 1970…: 즉시 만료
+        //Path=/api/auth/refresh: 쿠키만 삭제
+        // HttpOnly; SameSite=Strict: 아래 옵션 맞춰서 제거
+        ResponseCookie deleteCookie =ResponseCookie.from("refreshToken", "")
+                .httpOnly(true)
+                .secure(false)
+                .sameSite("Strict")
+                .path("/api/auth/refresh")
+                .maxAge(0)
+                .build();
+        return ResponseEntity.noContent()
+                .header(HttpHeaders.SET_COOKIE, deleteCookie.toString())
+                .build();
+    }
 
 }
