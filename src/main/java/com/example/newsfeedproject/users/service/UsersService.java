@@ -11,7 +11,6 @@ import com.example.newsfeedproject.users.dto.ReadUsersFeedsResponseDto;
 import com.example.newsfeedproject.users.entity.Users;
 import com.example.newsfeedproject.users.repository.UsersRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
@@ -26,15 +25,10 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class UsersService {
 
-    @Autowired
     private final UsersRepository usersRepository;
-    @Autowired
     private final FeedsRepository feedsRepository;
-    @Autowired
     private final LikesRepository likeRepository;
-    @Autowired
     private final CommentsRepository commentsRepository;
-    @Autowired
     private final FeedImgRepository feedImgRepository;
 
     public ReadUserSimpleResponseDto readUserSimple(Long userId, PrincipalRequestDto principalRequestDto) {
@@ -60,7 +54,7 @@ public class UsersService {
         }
 
         Page<Feeds> feeds = feedsRepository.findByUser_UserId(userId, pageable);  // userId에 맞는 Feed들 Page로 받음
-        List<Long> feedIds = feeds.stream().map(Feeds::getFeedId).toList(); // Feed에서 Id값만 리스트로 정리
+        List<Long> feedIds = feeds.stream().map(Feeds::getFeedId).toList(); // Feed내에서 Id값만 리스트로 정리
 
         //null 값 때문에 Object로 받고 Map으로 key: feedId, value: count한 like값
         Map<Long, Integer> likeTotal =likeRepository.countLikedByFeedIds(feedIds).stream()
