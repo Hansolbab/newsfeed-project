@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("api/myinfo/modify")
+@RequestMapping("/api/myinfo/modify")
 @RequiredArgsConstructor
 public class ResetPasswordController {
     private final ResetPasswordService passwordResetService;

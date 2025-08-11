@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -35,6 +36,7 @@ public class Users {
     // User 이름
     private String userName;
 
+    @Setter
     @NotBlank
     @Column(nullable = false)
 //    @Column(nullable = false, name="phoneNumber")
@@ -47,6 +49,7 @@ public class Users {
     // Email 주소
     private String email;
 
+    @Setter
     @NotBlank
     @Column(nullable = false)
 //    @Column(nullable = false, name="password")
@@ -88,9 +91,5 @@ public class Users {
         this.phoneNumber = phoneNumber;
         this.email = email;
         this.password = encode;
-    }
-
-    public void setPassword(String encodedPassword) {
-        this.password = encodedPassword;
     }
 }
