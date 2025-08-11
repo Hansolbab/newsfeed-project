@@ -16,7 +16,7 @@ public class UpdatePhoneNumberService {
     @Transactional
     public void update(Long me, String phoneNumber) {
 
-        if(usersRepository.countByPhoneNumber(phoneNumber)>0) {
+        if(usersRepository.existsByPhoneNumber(phoneNumber)) {
             //409 Conflict
             throw new ResponseStatusException(HttpStatus.CONFLICT, "이미 존재하는 휴대폰 번호입니다.");
         }
