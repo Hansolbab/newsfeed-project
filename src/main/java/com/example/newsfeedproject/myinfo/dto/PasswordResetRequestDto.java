@@ -19,5 +19,4 @@ public class PasswordResetRequestDto {
     public boolean isNewPasswordMatch(){
         return newPassword.equals(newConfirmPassword);
     }
-
 }

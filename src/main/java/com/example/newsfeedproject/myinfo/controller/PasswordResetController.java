@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/myinfo")
+@RequestMapping("api/myinfo/modify")
 @RequiredArgsConstructor
 public class PasswordResetController {
     private final PasswordResetService passwordResetService;
@@ -22,7 +22,7 @@ public class PasswordResetController {
     public ResponseEntity<String> resetPassword(
             @AuthenticationPrincipal UserDetailsImpl me,
             @Valid @RequestBody PasswordResetRequestDto dto) {
-
+        System.out.println("[CTRL] me=" + (me==null ? "null" : me.getEmail()));
         if (!dto.isNewPasswordMatch()) {
             return ResponseEntity.badRequest().body("새 비밀번호와 비밀번호 확인이 일치하지 않습니다.");
         }
