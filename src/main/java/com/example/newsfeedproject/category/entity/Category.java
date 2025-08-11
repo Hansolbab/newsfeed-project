@@ -1,7 +1,12 @@
 package com.example.newsfeedproject.category.entity;
 
 import com.fasterxml.jackson.annotation.JsonCreator; // JsonCreator 임포트
+import lombok.Getter;
 
+import java.util.Arrays;
+
+
+@Getter
 public enum Category {
     KOREAN("한식"),
     JAPANESE("일식"),
@@ -9,7 +14,7 @@ public enum Category {
     WESTERN("양식"),
     OTHERS("기타");
 
-    private final String koreanName;
+    public final String koreanName;
 
     // 생성자 추가 (Enum 이름과 한글 이름 매핑)
     Category(String koreanName) {
@@ -34,5 +39,14 @@ public enum Category {
         }
         // 일치하는 카테고리가 없을 경우 예외 발생 (Bad Request)
         throw new IllegalArgumentException("존재하지 않는 카테고리입니다: " + text);
+    }
+
+    //문자열-> 이넘 타입으로 변경
+    public  static Category sortedType(String name){
+        return Arrays.stream(Category.values())
+                .filter(category -> category.getKoreanName().contains(name) || category.name().equalsIgnoreCase(name))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 카테고리입니다: " + name));
+
     }
 }
