@@ -3,7 +3,7 @@ package com.example.newsfeedproject.feedimg.entity;
 import jakarta.persistence.*;
 
 @Entity
-public class FeedImg {
+public class FeedImgs {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
