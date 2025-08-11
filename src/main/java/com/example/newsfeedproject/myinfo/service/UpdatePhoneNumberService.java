@@ -15,6 +15,12 @@ public class UpdatePhoneNumberService {
 
     @Transactional
     public void update(Long me, String phoneNumber) {
+
+        if(usersRepository.countByPhoneNumber(phoneNumber)>0) {
+            //409 Conflict
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "이미 존재하는 휴대폰 번호입니다.");
+        }
+
         Users user = usersRepository.findById(me)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다."));
         user.setPhoneNumber(phoneNumber);
