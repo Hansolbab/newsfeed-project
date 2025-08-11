@@ -25,11 +25,11 @@ public class FeedImg {
 
     // 이미지가 속한 게시글 참조 (N:1 관계)
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "feed_id", nullable = false) // 외래키 컬럼명: feed_id
+    @JoinColumn(name = "feedId", nullable = false) // 외래키 컬럼명: feedId
     private Feeds feed;
 
     // 이미지 URL 또는 경로
-    @Column(name="feed_image_url", nullable = false, columnDefinition = "TEXT") // 컬럼명 image_url로 변경, not null, TEXT 타입
+    @Column(name="feedImageUrl", nullable = false, columnDefinition = "TEXT") // 컬럼명 feedImageUrl로 변경, not null, TEXT 타입
     private String feedImageUrl; // 필드명 FeedImageUrl로 변경
 
     // 삭제 여부

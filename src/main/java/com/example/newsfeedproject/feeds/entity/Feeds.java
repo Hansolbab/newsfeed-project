@@ -32,7 +32,7 @@ public class Feeds {
 
     // 게시글 작성자 참조 (Users 엔티티와의 N:1 관계)
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false) // user_id는 Users 엔티티의 userId와 매핑
+    @JoinColumn(name = "userId", nullable = false) // userId는 Users 엔티티의 userId와 매핑
     private Users user;
 
     // 게시글 내용 (TEXT 타입)

@@ -73,7 +73,7 @@ public class Users {
     private LocalDateTime updatedAt;
 
     @Column
-//    @Column(nullable = false, name="profile_image_url")
+//    @Column(nullable = false, name="profileImageUrl")
     // 외부 이미지 가져오기, 랜덤으로 이미지 제공해주는 사이트입니다.
     private String profileImageUrl = "https://via.placeholder.com/150";
 

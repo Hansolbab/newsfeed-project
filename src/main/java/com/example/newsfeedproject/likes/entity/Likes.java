@@ -21,11 +21,11 @@ public class Likes {
     private Long likeId;
 
     // 좋아요를 누른 사용자 ID
-    @Column(name="user_id", nullable = false)
+    @Column(name="userId", nullable = false)
     private Long userId;
 
     // 좋아요를 받은 게시글 ID
-    @Column(name="feed_id", nullable = false)
+    @Column(name="feedId", nullable = false)
     private Long feedId;
 
     // 좋아요 상태 (true: 좋아요, false: 좋아요 아님)
