@@ -23,7 +23,6 @@ public class  UserDetailsImpl implements  UserDetails {
     //  권한 안 하기로 하더라도 만들긴 해야 됨
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        // SimpleGrantedAuthority: 권한설정
         return List.of(new SimpleGrantedAuthority("ROLE_USER")); // ROLE USER로 지정
     }
 
