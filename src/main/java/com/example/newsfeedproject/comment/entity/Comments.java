@@ -10,7 +10,7 @@ public class Comments {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long commentId;
 
-    @Column
+    @Column(name="contents")
     private String contents;
 
     // User 랑 mapping
@@ -23,6 +23,6 @@ public class Comments {
 //    private Feed feedComments;
 
 
-    @Column
+    @Column(name="deleted")
     private boolean deleted;
 }
