@@ -30,8 +30,10 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain filterChain)
             throws ServletException, IOException {
+
         //HTTP 요청 헤더에서 Authorization 값을 꺼냄 (토큰 담겨 있음)
         String header = request.getHeader("Authorization");
+        System.out.println("[JWT] Authorization header = " + header);
         if (header != null && header.startsWith("Bearer ")) {
             String token = header.substring(7);
 

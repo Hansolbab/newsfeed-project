@@ -11,13 +11,13 @@ public class ReadFollowUsersDto {
 
     private Long userId;
     private String userName;
-    private String profileImg;
+    private String profileImageUrl;
     private boolean followByMe;
 
     public ReadFollowUsersDto(Users users, boolean followByMe) {
         this.userId = users.getUserId();
         this.userName= users.getUserName();
-        this.profileImg = users.getProfileImg();
+        this.profileImageUrl = users.getProfileImageUrl();
         this.followByMe= followByMe;// 나랑 팔로우 되어 있는가?
     }
 
