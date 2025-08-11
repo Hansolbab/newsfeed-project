@@ -5,6 +5,7 @@ import com.example.newsfeedproject.feeds.dto.CreateFeedRequestDto;
 import com.example.newsfeedproject.feeds.dto.FeedResponseDto;
 import com.example.newsfeedproject.feeds.dto.UpdateFeedRequestDto;
 import com.example.newsfeedproject.feeds.repository.FeedsRepository;
+import com.example.newsfeedproject.like.repository.LikeRepository;
 import com.example.newsfeedproject.users.entity.Users;
 import com.example.newsfeedproject.users.repository.UsersRepository;
 import lombok.RequiredArgsConstructor;
@@ -15,12 +16,14 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+// 게시글 관련 비즈니스 로직 처리 서비스
 @Service
 @RequiredArgsConstructor
 public class FeedsService {
 
     private final FeedsRepository feedsRepository;
     private final UsersRepository usersRepository;
+    private final LikeRepository likeRepository;
 
     // 게시글 생성 기능
     @Transactional
@@ -47,7 +50,7 @@ public class FeedsService {
 
     // 게시글 전체 조회 (페이징, 최신순)
     @Transactional(readOnly = true) // 읽기 전용 트랜잭션
-    public Page<FeedResponseDto> getAllFeeds(int page, int size, String currentUserEmail) { // currentUserEmail은 더 이상 isLiked 판단에 사용되지 않음
+    public Page<FeedResponseDto> getAllFeeds(int page, int size, String currentUserEmail) {
         // 정렬 기준: createdAt 필드를 기준으로 내림차순 (최신순)
         Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
         Pageable pageable = PageRequest.of(page, size, sort);
@@ -55,17 +58,35 @@ public class FeedsService {
         // 모든 게시글을 페이징하여 조회
         Page<Feeds> feedsPage = feedsRepository.findAll(pageable);
 
-        return feedsPage.map(feeds -> new FeedResponseDto(feeds)); // 또는 FeedResponseDto::new
+        // 현재 사용자 ID 조회 (liked 판단용)
+        Long currentUserId = usersRepository.findByEmail(currentUserEmail)
+                .map(Users::getUserId)
+                .orElse(null); // 사용자를 찾을 수 없다면 null (비로그인 사용자 혹은 오류 상황)
+
+        // 조회된 Feeds 엔티티들을 FeedResponseDto로 변환
+        return feedsPage.map(feeds -> {
+            boolean liked = (currentUserId != null) && likeRepository.findByUserIdAndFeedIdAndLikedTrue(currentUserId, feeds.getFeedId()).isPresent();
+            return new FeedResponseDto(feeds, liked);
+        });
     }
 
     // 게시글 단건 조회
     @Transactional(readOnly = true)
-    public FeedResponseDto getFeedById(Long feedId, String currentUserEmail) { // currentUserEmail은 더 이상 isLiked 판단에 사용되지 않음
+    public FeedResponseDto getFeedById(Long feedId, String currentUserEmail) {
         // 게시글 ID로 Feeds 엔티티 조회
         Feeds feeds = feedsRepository.findById(feedId)
                 .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다.")); // Custom Exception으로 변경 권장
 
-        return new FeedResponseDto(feeds);
+        // 현재 사용자 ID 조회 (liked 판단용)
+        Long currentUserId = usersRepository.findByEmail(currentUserEmail)
+                .map(Users::getUserId)
+                .orElse(null);
+
+        // 현재 사용자가 해당 게시글에 좋아요를 눌렀는지 확인
+        boolean liked = (currentUserId != null) && likeRepository.findByUserIdAndFeedIdAndLikedTrue(currentUserId, feeds.getFeedId()).isPresent();
+
+        // 조회된 Feeds 엔티티를 FeedResponseDto로 변환하여 반환
+        return new FeedResponseDto(feeds, liked);
     }
 
     // 게시글 수정
@@ -89,8 +110,12 @@ public class FeedsService {
 
         // (이미지 관련 로직은 FeedImg 클래스가 구현된 후 추가될 예정)
 
-        // 5. 업데이트된 Feeds 엔티티를 기반으로 응답 DTO 반환
-        return new FeedResponseDto(feeds);
+        // 5. 변경된 Feeds 엔티티 저장 (트랜잭션 종료 시 더티 체킹에 의해 자동 반영됨)
+        // feedsRepository.save(feeds); // save()를 명시적으로 호출해도 됨.
+
+        // 6. 업데이트된 Feeds 엔티티를 기반으로 응답 DTO 반환
+        boolean liked = likeRepository.findByUserIdAndFeedIdAndLikedTrue(currentUser.getUserId(), feeds.getFeedId()).isPresent();
+        return new FeedResponseDto(feeds, liked);
     }
 
     // 게시글 삭제
@@ -109,7 +134,7 @@ public class FeedsService {
             throw new IllegalArgumentException("게시글 삭제 권한이 없습니다."); // Custom Exception으로 변경 권장
         }
 
-        // 4. 게시글 삭제
+        // 4. 게시글 삭제 (DB에서 실제로 삭제)
         feedsRepository.delete(feeds);
     }
 }

@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+// import java.util.List; // 이미지는 현재 제외되어 불필요
 
 @Getter
 @Setter
@@ -29,20 +30,16 @@ public class FeedResponseDto { // 게시글 조회/응답 데이터 전송 객�
     // 게시글 최종 수정 시간
     private LocalDateTime updatedAt;
 
-    // Feeds 엔티티로부터 DTO 생성 (isLiked, likeTotal, commentTotal 관련 파라미터 및 필드 제거)
-    public FeedResponseDto(Feeds feeds) { // 생성자에서 liked 파라미터 제거
+    // Feeds 엔티티와 현재 사용자의 좋아요 여부로부터 DTO 생성
+    public FeedResponseDto(Feeds feeds, boolean liked) {
         this.feedId = feeds.getFeedId();
-        // User 엔티티에 profileImg 게터 필요
         this.user = new UserInfo(feeds.getUser().getUserName(), feeds.getUser().getProfileImg());
         this.contents = feeds.getContents();
         this.category = feeds.getCategory();
-        // likeTotal, commentTotal 필드 제거
-        // isLiked 필드 제거
         this.createdAt = feeds.getCreatedAt();
         this.updatedAt = feeds.getUpdatedAt();
     }
 
-    // 작성자 정보 서브 DTO
     @Getter
     @Setter
     public static class UserInfo {
