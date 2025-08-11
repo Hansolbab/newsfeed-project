@@ -1,6 +1,7 @@
 package com.example.newsfeedproject.feeds.entity;
 
 import com.example.newsfeedproject.category.entity.Category;
+import com.example.newsfeedproject.comment.entity.Comments;
 import com.example.newsfeedproject.users.entity.Users;
 import com.example.newsfeedproject.feedimg.entity.FeedImg;
 import jakarta.persistence.*;
@@ -46,7 +47,10 @@ public class Feeds {
 
     // 게시글 이미지 목록 (FeedImg 엔티티와의 1:N 관계, cascade = ALL로 연관 작업 자동화)
     @OneToMany(mappedBy = "feed", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<FeedImg> feedImgs = new ArrayList<>(); 
+    private List<FeedImg> feedImgs = new ArrayList<>();
+
+    @OneToMany(mappedBy = "feedComments", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Comments> comments = new ArrayList<>();
 
     // 게시글 생성일 (자동 기록)
     @CreatedDate
