@@ -25,15 +25,17 @@ public class CategoryService {
     private final LikesRepository likesRepository;
 
 
+
     @Transactional(readOnly = true)
     public Page<FeedResponseDto> readFeedByCategory(UserDetailsImpl userDetails,
-                                                    Category category ,
+                                                    String text ,
                                                     Pageable pageable) {
 
         Long meId = userDetails.getUserId();
 
+
         // 해당 카테고리 모든 피드 조회
-        Page<Feeds> feedsPage = feedsRepository.findByCategory(category, pageable);
+        Page<Feeds> feedsPage = feedsRepository.findByCategory(Category.sortedType(text), pageable);
 
 
         // 패이지에서 피드Id만 저장
@@ -41,10 +43,10 @@ public class CategoryService {
                 .map(Feeds::getFeedId) // 아이디만 추출해서
                 .collect(Collectors.toSet()); //Set으로 저장
 
-
+        //Page 에 있는 게시물 중 내가 좋아요한 게시물 ID 값
         Set<Long> likedIdSet = pageFeedIdSet.isEmpty() // feedIdSet 이 0일 경우
                 ? Collections.emptySet() // 빈 셋을 반환 : DB 에러 방지
-                : likesRepository.findLikedFeedIds(meId, pageFeedIdSet);
+                : likesRepository.findLikedFeedIds(meId, pageFeedIdSet); // page에서 내가 좋아하는 게시글 식별자
 
 
         return feedsPage.map(feeds -> FeedResponseDto.toDto( feeds, likedIdSet.contains(feeds.getFeedId())));

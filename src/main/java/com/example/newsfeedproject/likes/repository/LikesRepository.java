@@ -17,6 +17,10 @@ public interface LikesRepository extends JpaRepository<Likes, Long> {
     Optional<Likes> findByUserIdAndFeedIdAndLikedTrue(Long userId, Long feedId);
 
     //너무 복잡하고 쿼리를 사용하지 않으면 메서드가 너무 길고 모든 엔티티를 돌지만 이러면, 걸러서 줍니다.
-    @Query("select distinct  l.feedId from Likes l where l.userId = :uesrId and l.liked = true and l.feedId = :feedIds")
+    @Query("select distinct  l.feedId " + // 중복되지 않는 feedId
+            "from Likes l" + // Like 테이블에서
+            " where l.userId = :userId " + // 유저를 포함하고
+            "and l.liked = true " + //좋아요도 눌려 있고
+            "and l.feedId in :feedIds") // feedIds 목록이 포함
     Set<Long> findLikedFeedIds(@Param("userId") Long userId , @Param("feedIds") Collection<Long> feedIds);
 }

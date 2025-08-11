@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/category")
+@RequestMapping("/api/category")
 @RequiredArgsConstructor
 @Validated
 public class CategoryController {
@@ -32,8 +32,9 @@ public class CategoryController {
     @GetMapping()
     public ResponseEntity<Page<FeedResponseDto>> readFeedByCategory(
             @AuthenticationPrincipal UserDetailsImpl userDetails,
-            @RequestParam @NotNull(message = "카테고리는 필수입니다.") Category category,
+            @RequestParam @NotNull(message = "카테고리는 필수입니다.") String category,
             @PageableDefault(size =  10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+
     ){
         return new ResponseEntity<>( categoryService.readFeedByCategory( userDetails, category ,pageable), HttpStatus.OK);
     }
