@@ -2,6 +2,7 @@ package com.example.newsfeedproject.follow.service;
 
 
 import com.example.newsfeedproject.common.dto.ReadFollowUsersDto;
+import com.example.newsfeedproject.common.exception.FollowErrorException;
 import com.example.newsfeedproject.follow.entity.Follows;
 import com.example.newsfeedproject.follow.repository.FollowsRepository;
 import com.example.newsfeedproject.users.entity.Users;
@@ -15,7 +16,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
+import static com.example.newsfeedproject.common.exception.FollowErrorCode.SELF_FOLLOW_NOT;
+import static com.example.newsfeedproject.common.exception.FollowErrorCode.USER_NOT_FOUND;
 
 @Service
 @RequiredArgsConstructor
@@ -82,19 +84,19 @@ public class FollowsService {
     //공통 검증
     private void validId(Long meId, Long userId) {
         if (meId == null || userId == null) {
-            throw new IllegalArgumentException("해당 유저들이 null 입니다.");
+            throw new FollowErrorException( USER_NOT_FOUND);
         }
 
         if (meId.equals(userId)) {
-            throw new IllegalArgumentException("자기 자신을 팔로우할 수 없습니다.");
+            throw new FollowErrorException(SELF_FOLLOW_NOT);
         }
 
         if (!usersRepository.existsById(meId)) {
-            throw new IllegalArgumentException("현재 유저가 없습니다.");
+            throw new FollowErrorException(USER_NOT_FOUND);
         }
 
         if (!usersRepository.existsById(userId)) {
-            throw new IllegalArgumentException("대상 유저가 없습니다.");
+            throw new FollowErrorException(USER_NOT_FOUND);
         }
     }
 
