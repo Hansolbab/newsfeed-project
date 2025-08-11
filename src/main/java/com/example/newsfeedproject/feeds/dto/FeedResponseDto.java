@@ -31,7 +31,7 @@ public class FeedResponseDto { // 게시글 조회/응답 데이터 전송 객�
     private LocalDateTime updatedAt;
 
     // Feeds 엔티티와 현재 사용자의 좋아요 여부로부터 DTO 생성
-    public FeedResponseDto(Feeds feeds, boolean liked) {
+    public FeedResponseDto(Feeds feeds) {
         this.feedId = feeds.getFeedId();
         this.user = new UserInfo(feeds.getUser().getUserName(), feeds.getUser().getProfileImg());
         this.contents = feeds.getContents();
