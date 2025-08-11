@@ -90,4 +90,7 @@ public class Users {
         this.password = encode;
     }
 
+    public void setPassword(String encodedPassword) {
+        this.password = encodedPassword;
+    }
 }
