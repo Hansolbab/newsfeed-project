@@ -12,6 +12,6 @@ public class FeedImg {
     @Column(name="feedImg")
     private String feedImg;
 
-    @Column(name="Deleted")
+    @Column(name="deleted")
     private boolean deleted;
 }
