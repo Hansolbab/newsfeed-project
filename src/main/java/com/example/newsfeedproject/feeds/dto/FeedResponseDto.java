@@ -59,6 +59,10 @@ public class FeedResponseDto {
         this.updatedAt = feeds.getUpdatedAt();
     }
 
+    public static FeedResponseDto toDto( Feeds feeds, boolean liked) {
+        return  new FeedResponseDto( feeds , liked);
+    }
+
     // 작성자 정보 서브 DTO (변동 없음)
     @Getter
     @Setter
