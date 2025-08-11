@@ -53,14 +53,11 @@ public class UsersService {
     }
 
 
-    public Page<ReadUsersFeedsResponseDto> readUserFeed(Long userId, PrincipalRequestDto principalRequestDto) {
+    public Page<ReadUsersFeedsResponseDto> readUserFeed(Long userId, PrincipalRequestDto principalRequestDto, Pageable pageable) {
         Optional<Users> user = usersRepository.findById(userId);
         if (user.isEmpty()) {
             throw new IllegalArgumentException("없는 유저입니다.");
         }
-
-        Pageable pageable = PageRequest.of(0, 10,  Sort.by(Sort.Direction.DESC, "createdAt") );
-
 
         Page<Feeds> feeds = feedsRepository.findByUser_UserId(userId, pageable);  // userId에 맞는 Feed들 Page로 받음
         List<Long> feedIds = feeds.stream().map(Feeds::getFeedId).toList(); // Feed에서 Id값만 리스트로 정리
