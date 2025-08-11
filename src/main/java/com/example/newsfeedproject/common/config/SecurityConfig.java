@@ -34,8 +34,8 @@ public class SecurityConfig {
 //                        .requestMatchers("/**" ).permitAll()
                                 //auth signup, signin만 허용
                                 .requestMatchers("/api/auth/signup", "/api/auth/signin").permitAll()// 한솔용
-                                .requestMatchers("/api/auth/signout").hasRole("ROLE_USER") // USER 권한(로그인한 사람)만 로그아웃 가능
-                                .requestMatchers("/api/**").hasRole("ROLE_USER")  // 현재는 로그인한 사람들만 다 볼 수 있게 설정
+                                .requestMatchers("/api/auth/signout").hasRole("USER") // USER 권한(로그인한 사람)만 로그아웃 가능
+                                .requestMatchers("/api/**").hasRole("USER")  // 현재는 로그인한 사람들만 다 볼 수 있게 설정
                                 .anyRequest().authenticated()// 한솔용
                         // 이외에는 모두 허용이지만(개발 편의)
 //                        .anyRequest().denyAll()
