@@ -38,7 +38,6 @@ public class Users {
     // User 이름
     private String userName;
 
-    @Setter
     @NotBlank
     @Column(nullable = false)
 //    @Column(nullable = false, name="phoneNumber")
@@ -51,7 +50,6 @@ public class Users {
     // Email 주소
     private String email;
 
-    @Setter
     @NotBlank
     @Column(nullable = false)
 //    @Column(nullable = false, name="password")
@@ -92,6 +90,14 @@ public class Users {
         this.userName = userName;
         this.phoneNumber = phoneNumber;
         this.email = email;
+        this.password = encode;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
+
+    public void setPassword(String encode) {
         this.password = encode;
     }
 }

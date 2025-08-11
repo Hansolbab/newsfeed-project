@@ -1,6 +1,7 @@
 package com.example.newsfeedproject.myinfo.controller;
 
 
+import com.example.newsfeedproject.auth.impl.UserDetailsImpl;
 import com.example.newsfeedproject.myinfo.dto.UpdatePhoneNumberDto;
 import com.example.newsfeedproject.myinfo.service.UpdatePhoneNumberService;
 import jakarta.validation.Valid;
@@ -20,7 +21,7 @@ public class UpdatePhoneNumberController {
 
     @PostMapping("/phonenumber")
     public ResponseEntity<String> updatePhoneNumber(
-            @AuthenticationPrincipal com.example.newsfeedproject.auth.impl.UserDetailsImpl me,
+            @AuthenticationPrincipal UserDetailsImpl me,
             @Valid @RequestBody UpdatePhoneNumberDto dto) {
 
         updatePhoneNumberService.update(me.getUserId(), dto.getPhoneNumber());
