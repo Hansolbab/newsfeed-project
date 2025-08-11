@@ -44,7 +44,7 @@ public enum Category {
     //문자열-> 이넘 타입으로 변경
     public  static Category sortedType(String name){
         return Arrays.stream(Category.values())
-                .filter(category -> category.getKoreanName().contains(name))
+                .filter(category -> category.getKoreanName().contains(name) || category.name().equalsIgnoreCase(name))
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 카테고리입니다: " + name));
 
