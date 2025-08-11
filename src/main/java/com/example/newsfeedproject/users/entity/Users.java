@@ -4,6 +4,7 @@ import com.example.newsfeedproject.follow.entity.Follows;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -15,6 +16,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+@Builder
 @Entity
 @Getter
 @AllArgsConstructor
@@ -74,9 +76,9 @@ public class Users {
     private LocalDateTime updatedAt;
 
     @Column
-//    @Column(nullable = false, name="profileImg")
+//    @Column(nullable = false, name="profileImageUrl")
     // 외부 이미지 가져오기, 랜덤으로 이미지 제공해주는 사이트입니다.
-    private String profileImg = "https://via.placeholder.com/150";
+    private String profileImageUrl = "https://via.placeholder.com/150";
 
 //  followings
     @OneToMany(mappedBy = "follower", cascade = CascadeType.ALL, orphanRemoval = true)
