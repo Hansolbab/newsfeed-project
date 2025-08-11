@@ -1,6 +1,6 @@
 package com.example.newsfeedproject.common.config;
 
-import com.example.newsfeedproject.auth.filter.JwtAuthorizationFilter;
+import com.example.newsfeedproject.common.filter.JwtAuthorizationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
