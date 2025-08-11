@@ -66,7 +66,7 @@ public class FeedsService {
         // 조회된 Feeds 엔티티들을 FeedResponseDto로 변환
         return feedsPage.map(feeds -> {
             boolean liked = (currentUserId != null) && likeRepository.findByUserIdAndFeedIdAndLikedTrue(currentUserId, feeds.getFeedId()).isPresent();
-            return new FeedResponseDto(feeds);
+            return new FeedResponseDto(feeds, liked);
         });
     }
 
@@ -75,9 +75,18 @@ public class FeedsService {
     public FeedResponseDto getFeedById(Long feedId, String currentUserEmail) {
         // 게시글 ID로 Feeds 엔티티 조회
         Feeds feeds = feedsRepository.findById(feedId)
-                .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다."));
+                .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다.")); // Custom Exception으로 변경 권장
 
-        return new FeedResponseDto(feeds);
+        // 현재 사용자 ID 조회 (liked 판단용)
+        Long currentUserId = usersRepository.findByEmail(currentUserEmail)
+                .map(Users::getUserId)
+                .orElse(null);
+
+        // 현재 사용자가 해당 게시글에 좋아요를 눌렀는지 확인
+        boolean liked = (currentUserId != null) && likeRepository.findByUserIdAndFeedIdAndLikedTrue(currentUserId, feeds.getFeedId()).isPresent();
+
+        // 조회된 Feeds 엔티티를 FeedResponseDto로 변환하여 반환
+        return new FeedResponseDto(feeds, liked);
     }
 
     // 게시글 수정
@@ -106,7 +115,7 @@ public class FeedsService {
 
         // 6. 업데이트된 Feeds 엔티티를 기반으로 응답 DTO 반환
         boolean liked = likeRepository.findByUserIdAndFeedIdAndLikedTrue(currentUser.getUserId(), feeds.getFeedId()).isPresent();
-        return new FeedResponseDto(feeds);
+        return new FeedResponseDto(feeds, liked);
     }
 
     // 게시글 삭제
