@@ -20,11 +20,14 @@ public class WithdrawAccountService {
 
     @Transactional
     public void withdraw(Long meId, String oldPassword) {
+        //400
         Users user=usersRepository.findById(meId).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND,
                 "사용자를 찾을 수 없습니다."));
+        //409
         if(Boolean.TRUE.equals(user.getDeleted())){
             throw new ResponseStatusException(HttpStatus.CONFLICT,"이미 탈퇴한 사용자입니다.");
         }
+        //401
         if(!passwordEncoder.matches(oldPassword,user.getPassword())){
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,"비밀번호가 일치하지 않습니다.");
         }

@@ -21,6 +21,8 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     @Override
     public UserDetailsImpl loadUserByUsername(String email) throws UsernameNotFoundException {
         Users user = usersRepository.findByEmail(email)
+                // 탈퇴한 계정 차단, deleted=true면 제외
+                .filter(u->!Boolean.TRUE.equals(u.getDeleted()))
                 .orElseThrow(() -> new UsernameNotFoundException("가입된 회원이 아닙니다: " + email));
         return new UserDetailsImpl(user);
     }

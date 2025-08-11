@@ -4,6 +4,7 @@ package com.example.newsfeedproject.common.filter;
 import com.example.newsfeedproject.auth.impl.UserDetailsImpl;
 import com.example.newsfeedproject.auth.impl.UserDetailsServiceImpl;
 import com.example.newsfeedproject.common.util.JwtUtil;
+import com.example.newsfeedproject.users.repository.UsersRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -13,6 +14,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -25,6 +27,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
     //이 필터가 JWT → 유저 복원 → 인증 컨텍스트 세팅을 해주는 다리
     private final UserDetailsServiceImpl userDetailsServiceImpl;
 
+    private final UsersRepository usersRepository;
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
@@ -34,19 +37,51 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
         //HTTP 요청 헤더에서 Authorization 값을 꺼냄 (토큰 담겨 있음)
         String header = request.getHeader("Authorization");
         System.out.println("[JWT] Authorization header = " + header);
+        // 로그인/로그아웃은 스킵
+        if ("POST".equalsIgnoreCase(request.getMethod())
+                && ("/api/auth/signin".equals(request.getRequestURI())
+                || "/api/auth/signout".equals(request.getRequestURI()))) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         if (header != null && header.startsWith("Bearer ")) {
             String token = header.substring(7);
 
-            // 토큰 유효성 검사 (만료됐는지, 위조됐는지 등)
-            //!"refresh".equals(subject)로 리프레시 토큰은 인증에 못쓰게 차단
-            if (JwtUtil.validateToken(token) && !"refresh".equals(JwtUtil.getUserEmailFromToken(token))) {
-//                String email = JwtUtil.getUserEmailFromToken(token);
-                //DB에서 유저 조회
-//                UserDetails userDetails = userDetailsServiceImpl.loadUserByUsername(email);
-//                UserDetailsImpl userDetailsImpl = (UserDetailsImpl) userDetails;
+            // 1) 토큰 유효성 먼저 확인
+            if (JwtUtil.validateToken(token)) {
+                // 2) 그 다음에만 이메일 추출 (만료/위조로 인한 500 방지)
+                String email = JwtUtil.getUserEmailFromToken(token);
+                if ("refresh".equals(email)) { // 리프레시 토큰은 인증에 사용 안 함
+                    filterChain.doFilter(request, response);
+                    return;
+                }
+                // 3) 탈퇴 엔드포인트 재요청이면 즉시 409
+                boolean isWithdrawEndpoint =
+                        "DELETE".equalsIgnoreCase(request.getMethod())
+                                && "/api/myinfo/modify/delete".equals(request.getRequestURI());
+                if (isWithdrawEndpoint) {
+                    usersRepository.findByEmail(email).ifPresent(u -> {
+                        if (Boolean.TRUE.equals(u.getDeleted())) {
+                            try {
+                                response.sendError(HttpServletResponse.SC_CONFLICT, "이미 탈퇴한 사용자입니다.");
+                            } catch (IOException ignored) {}
+                        }
+                    });
+                    if (response.isCommitted()) return; // 이미 409 보냈으면 종료
+                }
+                // 4) 일반 인증 흐름 (UserDetailsServiceImpl에서 deleted=false 필터링하도록)
+                try {
+                    userDetailsServiceImpl.loadUserByUsername(email); // 탈퇴/미존재면 예외 발생
+                } catch (UsernameNotFoundException e) {
+                    SecurityContextHolder.clearContext();// 인증 미세팅
+                    filterChain.doFilter(request, response);
+                    return;
+                }
+                Authentication auth = JwtUtil.getAuthentication(token, userDetailsServiceImpl);
                 //현재 요청 스레드의 보안 컨텍스트에 저장
                 //여기서 var는 컴파일러가 추론하기 때문에, 명시 생략
-                Authentication auth = JwtUtil.getAuthentication(token,(UserDetailsServiceImpl) userDetailsServiceImpl);
+
 //                var auth = new UsernamePasswordAuthenticationToken(
 //                        //여기서 null은 자격 증명(보통 비밀번호)
 //                        //여기서 userDetails.getAuthorities()는 사용자의 권한 목록(빈 리스트여도 무방함)
