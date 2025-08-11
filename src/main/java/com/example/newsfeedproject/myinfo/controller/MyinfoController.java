@@ -4,9 +4,14 @@ package com.example.newsfeedproject.myinfo.controller;
 import com.example.newsfeedproject.auth.impl.UserDetailsImpl;
 import com.example.newsfeedproject.common.dto.PrincipalRequestDto;
 import com.example.newsfeedproject.common.dto.ReadUserSimpleResponseDto;
+import com.example.newsfeedproject.users.dto.ReadUsersFeedsResponseDto;
 import com.example.newsfeedproject.users.service.UsersService;
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -41,6 +46,29 @@ public class MyinfoController {
 
         ReadUserSimpleResponseDto readMySimpleProfile = usersService.readUserSimple(userId, principalUser);
         return ResponseEntity.ok(readMySimpleProfile);
+    }
+
+    @GetMapping("/{userId}/feeds")
+    @Transactional(readOnly = true)
+    public ResponseEntity<Page<ReadUsersFeedsResponseDto>> readMyFeeds(
+            @PathVariable Long userId,
+            @AuthenticationPrincipal UserDetailsImpl userDetails,
+            @PageableDefault(sort="createdAt", direction = Sort.Direction.DESC) Pageable pageable){
+        // 로그인 안한 경우
+        if (userDetails==null){
+            throw new IllegalArgumentException("로그인이 필요합니다.");
+        }
+
+        PrincipalRequestDto principalUser = new PrincipalRequestDto(
+                userDetails.getUserId(),
+                userDetails.getAuthorities().stream()
+                        .map(GrantedAuthority::getAuthority)
+                        .collect(Collectors.toSet()));
+
+        Page<ReadUsersFeedsResponseDto> readMyFeed = usersService.readUserFeed(userId, principalUser, pageable);
+
+        return ResponseEntity.ok(readMyFeed);
+
     }
 
 }
