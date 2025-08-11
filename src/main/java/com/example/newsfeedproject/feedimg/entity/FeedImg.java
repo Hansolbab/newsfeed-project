@@ -1,15 +1,18 @@
 package com.example.newsfeedproject.feedimg.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 
 @Entity
 public class FeedImg {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long feedId;
+    private Long feedImgId;
+
+    @Column(name="feedImg")
+    private String feedImg;
+
+    @Column(name="deleted")
+    private boolean deleted;
 
 }
