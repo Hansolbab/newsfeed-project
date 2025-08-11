@@ -2,6 +2,7 @@ package com.example.newsfeedproject.feeds.entity;
 
 import com.example.newsfeedproject.category.entity.Category;
 import com.example.newsfeedproject.users.entity.Users;
+import com.example.newsfeedproject.feedimg.entity.FeedImg;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -13,6 +14,8 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -41,6 +44,10 @@ public class Feeds {
     @Column(nullable = false)
     private Category category;
 
+    // 게시글 이미지 목록 (FeedImg 엔티티와의 1:N 관계, cascade = ALL로 연관 작업 자동화)
+    @OneToMany(mappedBy = "feed", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<FeedImg> feedImgs = new ArrayList<>(); 
+
     // 게시글 생성일 (자동 기록)
     @CreatedDate
     @Column(updatable = false) // 생성 후 수정 불가
@@ -57,6 +64,7 @@ public class Feeds {
         this.user = user;
         this.contents = contents;
         this.category = category;
+        // likeTotal, commentTotal은 엔티티에 없으므로 초기화 로직 없음
     }
 
     // 게시글 내용 및 카테고리 수정 메소드
@@ -65,4 +73,11 @@ public class Feeds {
         this.category = category;
     }
 
+    // FeedImg 추가 시 양방향 연관관계 설정 편의 메소드
+    public void addFeedImg(FeedImg feedImg) {
+        this.feedImgs.add(feedImg);
+        feedImg.setFeed(this); // FeedImg 엔티티에도 현재 Feeds 엔티티 연결
+    }
+
+    // (참고: likeTotal, commentTotal 관련 메소드는 엔티티에 필드가 없으므로 포함하지 않음)
 }

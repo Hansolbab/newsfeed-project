@@ -16,9 +16,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
 import org.springframework.web.bind.annotation.*;
 
-// 게시글 관련 API 요청을 처리하는 REST 컨트롤러
 @RestController
-@RequestMapping("/api/feeds") // 기본 URL 경로 설정
+@RequestMapping("/api/feeds")
 @RequiredArgsConstructor
 public class FeedsController {
 
@@ -27,8 +26,8 @@ public class FeedsController {
     // 게시글 작성 API (POST /api/feeds)
     @PostMapping
     public ResponseEntity<CreateFeedResponseDto> createFeed(
-            @Valid @RequestBody CreateFeedRequestDto requestDto, // 요청 본문 DTO, 유효성 검사
-            @AuthenticationPrincipal UserDetailsImpl userDetailsImpl // 현재 인증된 사용자 정보 주입
+            @Valid @RequestBody CreateFeedRequestDto requestDto,
+            @AuthenticationPrincipal UserDetailsImpl userDetailsImpl
     ) {
         // userDetailsImpl에서 사용자 이메일(식별자) 추출
         String userEmail = userDetailsImpl.getUsername(); // UserDetailsImpl에서 이메일 반환 가정
