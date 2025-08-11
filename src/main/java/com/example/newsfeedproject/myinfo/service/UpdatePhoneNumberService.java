@@ -18,7 +18,7 @@ public class UpdatePhoneNumberService {
 
         if(usersRepository.existsByPhoneNumber(phoneNumber)) {
             //409 Conflict
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "이미 존재하는 휴대폰 번호입니다.");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "이미 존재하는 전화번호입니다.");
         }
 
         Users user = usersRepository.findById(me)
