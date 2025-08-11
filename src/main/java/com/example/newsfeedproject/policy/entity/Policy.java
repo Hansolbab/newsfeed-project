@@ -1,9 +1,9 @@
-package com.example.newsfeedproject.feedimg.entity;
+package com.example.newsfeedproject.policy.entity;
 
 import jakarta.persistence.*;
 
 @Entity
-public class FeedImg {
+public class Policy {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
