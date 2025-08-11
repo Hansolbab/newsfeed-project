@@ -34,7 +34,9 @@ public class Comments {
 
     // Feed 랑 mapping
     @ManyToOne(fetch = FetchType.LAZY)
+
     @JoinColumn(name = "feedId", nullable = false)
+
     private Feeds feedComments;
 
     // 댓글 생성일
