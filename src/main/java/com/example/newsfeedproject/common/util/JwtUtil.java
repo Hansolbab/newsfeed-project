@@ -82,6 +82,7 @@ public class JwtUtil {
     public static Authentication getAuthentication(String token, UserDetailsServiceImpl userDetailsServiceImpl) {
         String email = getUserEmailFromToken(token);
         UserDetailsImpl userDetails = userDetailsServiceImpl.loadUserByUsername(email);
-        return new UsernamePasswordAuthenticationToken(userDetails, null, List.of());
+        return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+        // userDetails에 넣어둔 Autorities 사용
     }
 }
