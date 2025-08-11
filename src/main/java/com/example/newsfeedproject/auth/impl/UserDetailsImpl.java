@@ -34,7 +34,7 @@ public class  UserDetailsImpl implements  UserDetails {
     @Override
     public String getUsername() {
         // 이메일을 로그인 식별자로 쓴다면
-        return user.getUserName();
+        return user.getEmail();
     }
     public Long getUserId() {
         return  user.getUserId();
