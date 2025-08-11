@@ -7,6 +7,9 @@ import com.example.newsfeedproject.users.dto.ReadUsersFeedsResponseDto;
 import com.example.newsfeedproject.users.service.UsersService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.GrantedAuthority;
@@ -51,7 +54,9 @@ public class UsersController {
     @Transactional(readOnly = true)
     public ResponseEntity<Page<ReadUsersFeedsResponseDto>> readUserFeeds(
             @PathVariable Long userId,
-            @AuthenticationPrincipal UserDetailsImpl userDetails){
+            @AuthenticationPrincipal UserDetailsImpl userDetails,
+            @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC)Pageable pageable
+    ){
         // 로그인 안한 경우
         if (userDetails==null) {throw new IllegalStateException("로그인 필요합니다.");}
 
@@ -60,7 +65,7 @@ public class UsersController {
                         .map(GrantedAuthority::getAuthority)
                         .collect(Collectors.toSet()));
 
-        Page<ReadUsersFeedsResponseDto> userFeedList = usersService.readUserFeed(userId, principalUser);
+        Page<ReadUsersFeedsResponseDto> userFeedList = usersService.readUserFeed(userId, principalUser, pageable);
 
         return new ResponseEntity<>(userFeedList, HttpStatus.OK);
     }
