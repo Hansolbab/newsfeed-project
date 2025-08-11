@@ -1,6 +1,6 @@
 package com.example.newsfeedproject.feeds.dto;
 
-import com.example.newsfeedproject.category.entity.Category; // Category Enum 임포트
+import com.example.newsfeedproject.category.entity.Category;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -9,7 +9,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class FeedUpdateRequestDto { // 게시글 수정 요청 데이터 전송 객체
+public class UpdateFeedRequestDto {
 
     // 게시글 내용 (필수, 길이 제한)
     @NotBlank(message = "게시글 내용은 필수 입력 항목입니다.")

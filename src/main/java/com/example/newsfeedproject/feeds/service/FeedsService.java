@@ -1,14 +1,13 @@
 package com.example.newsfeedproject.feeds.service;
 
-import com.example.newsfeedproject.feeds.entity.Feeds; // Feeds 엔티티 임포트
-import com.example.newsfeedproject.feeds.dto.FeedCreateRequestDto;
-import com.example.newsfeedproject.feeds.dto.FeedCreateResponseDto;
+import com.example.newsfeedproject.feeds.entity.Feeds;
+import com.example.newsfeedproject.feeds.dto.CreateFeedRequestDto;
 import com.example.newsfeedproject.feeds.dto.FeedResponseDto;
-import com.example.newsfeedproject.feeds.dto.FeedUpdateRequestDto;
+import com.example.newsfeedproject.feeds.dto.UpdateFeedRequestDto;
 import com.example.newsfeedproject.feeds.repository.FeedsRepository;
-import com.example.newsfeedproject.like.repository.LikeRepository; // LikeRepository 임포트
-import com.example.newsfeedproject.users.entity.Users; // Users 엔티티 임포트
-import com.example.newsfeedproject.users.repository.UsersRepository; // UsersRepository 임포트
+import com.example.newsfeedproject.like.repository.LikeRepository;
+import com.example.newsfeedproject.users.entity.Users;
+import com.example.newsfeedproject.users.repository.UsersRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -28,7 +27,7 @@ public class FeedsService {
 
     // 게시글 생성 기능
     @Transactional
-    public Feeds createFeed(FeedCreateRequestDto requestDto, String userEmail) { // userEmail 기반
+    public Feeds createFeed(CreateFeedRequestDto requestDto, String userEmail) { // userEmail 기반
         // 1. 게시글 작성 사용자 조회
         Users user = usersRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다.")); // Custom Exception으로 변경 권장
@@ -59,15 +58,15 @@ public class FeedsService {
         // 모든 게시글을 페이징하여 조회
         Page<Feeds> feedsPage = feedsRepository.findAll(pageable);
 
-        // 현재 사용자 ID 조회 (isLiked 판단용)
+        // 현재 사용자 ID 조회 (liked 판단용)
         Long currentUserId = usersRepository.findByEmail(currentUserEmail)
                 .map(Users::getUserId)
                 .orElse(null); // 사용자를 찾을 수 없다면 null (비로그인 사용자 혹은 오류 상황)
 
         // 조회된 Feeds 엔티티들을 FeedResponseDto로 변환
         return feedsPage.map(feeds -> {
-            boolean isLiked = (currentUserId != null) && likeRepository.findByUserIdAndFeedIdAndLikedTrue(currentUserId, feeds.getFeedId()).isPresent();
-            return new FeedResponseDto(feeds, isLiked);
+            boolean liked = (currentUserId != null) && likeRepository.findByUserIdAndFeedIdAndLikedTrue(currentUserId, feeds.getFeedId()).isPresent();
+            return new FeedResponseDto(feeds, liked);
         });
     }
 
@@ -78,21 +77,21 @@ public class FeedsService {
         Feeds feeds = feedsRepository.findById(feedId)
                 .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다.")); // Custom Exception으로 변경 권장
 
-        // 현재 사용자 ID 조회 (isLiked 판단용)
+        // 현재 사용자 ID 조회 (liked 판단용)
         Long currentUserId = usersRepository.findByEmail(currentUserEmail)
                 .map(Users::getUserId)
                 .orElse(null);
 
         // 현재 사용자가 해당 게시글에 좋아요를 눌렀는지 확인
-        boolean isLiked = (currentUserId != null) && likeRepository.findByUserIdAndFeedIdAndLikedTrue(currentUserId, feeds.getFeedId()).isPresent();
+        boolean liked = (currentUserId != null) && likeRepository.findByUserIdAndFeedIdAndLikedTrue(currentUserId, feeds.getFeedId()).isPresent();
 
         // 조회된 Feeds 엔티티를 FeedResponseDto로 변환하여 반환
-        return new FeedResponseDto(feeds, isLiked);
+        return new FeedResponseDto(feeds, liked);
     }
 
     // 게시글 수정
     @Transactional
-    public FeedResponseDto updateFeed(Long feedId, FeedUpdateRequestDto requestDto, String currentUserEmail) {
+    public FeedResponseDto updateFeed(Long feedId, UpdateFeedRequestDto requestDto, String currentUserEmail) {
         // 1. 게시글 조회 (존재 여부 및 작성자 권한 확인)
         Feeds feeds = feedsRepository.findById(feedId)
                 .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다.")); // Custom Exception으로 변경 권장
@@ -115,8 +114,8 @@ public class FeedsService {
         // feedsRepository.save(feeds); // save()를 명시적으로 호출해도 됨.
 
         // 6. 업데이트된 Feeds 엔티티를 기반으로 응답 DTO 반환
-        boolean isLiked = likeRepository.findByUserIdAndFeedIdAndLikedTrue(currentUser.getUserId(), feeds.getFeedId()).isPresent();
-        return new FeedResponseDto(feeds, isLiked);
+        boolean liked = likeRepository.findByUserIdAndFeedIdAndLikedTrue(currentUser.getUserId(), feeds.getFeedId()).isPresent();
+        return new FeedResponseDto(feeds, liked);
     }
 
     // 게시글 삭제
@@ -137,8 +136,5 @@ public class FeedsService {
 
         // 4. 게시글 삭제 (DB에서 실제로 삭제)
         feedsRepository.delete(feeds);
-
-        // (선택 사항: 소프트 삭제로 변경 시)
-        // feeds.softDelete();
     }
 }

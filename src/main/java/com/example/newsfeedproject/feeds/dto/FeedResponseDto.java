@@ -24,15 +24,6 @@ public class FeedResponseDto { // 게시글 조회/응답 데이터 전송 객�
     // 게시글 카테고리
     private Category category;
 
-    // 좋아요 총 개수
-    private int likeTotal;
-
-    // 댓글 총 개수
-    private int commentTotal;
-
-    // 현재 사용자가 좋아요했는지 여부 (이 필드는 Likes 기능 구현 시 유효함)
-    private boolean isLiked; // 로그인한 사용자의 좋아요 여부
-
     // 게시글 생성 시간
     private LocalDateTime createdAt;
 
@@ -40,19 +31,15 @@ public class FeedResponseDto { // 게시글 조회/응답 데이터 전송 객�
     private LocalDateTime updatedAt;
 
     // Feeds 엔티티와 현재 사용자의 좋아요 여부로부터 DTO 생성
-    public FeedResponseDto(Feeds feeds, boolean isLiked) {
+    public FeedResponseDto(Feeds feeds, boolean liked) {
         this.feedId = feeds.getFeedId();
         this.user = new UserInfo(feeds.getUser().getUserName(), feeds.getUser().getProfileImg());
         this.contents = feeds.getContents();
         this.category = feeds.getCategory();
-        this.likeTotal = feeds.getLikeTotal();
-        this.commentTotal = feeds.getCommentTotal();
-        this.isLiked = isLiked; // 현재 사용자의 좋아요 여부 설정
         this.createdAt = feeds.getCreatedAt();
         this.updatedAt = feeds.getUpdatedAt();
     }
 
-    // 작성자 정보 서브 DTO
     @Getter
     @Setter
     public static class UserInfo {
