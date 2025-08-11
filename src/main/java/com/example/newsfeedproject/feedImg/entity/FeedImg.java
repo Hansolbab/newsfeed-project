@@ -14,4 +14,5 @@ public class FeedImg {
 
     @Column(name="deleted")
     private boolean deleted;
+
 }
