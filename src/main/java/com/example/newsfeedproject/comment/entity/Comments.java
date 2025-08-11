@@ -1,5 +1,6 @@
 package com.example.newsfeedproject.comment.entity;
 
+import com.example.newsfeedproject.feeds.entity.Feeds;
 import com.example.newsfeedproject.users.entity.Users;
 import jakarta.persistence.*;
 
@@ -18,9 +19,9 @@ public class Comments {
     @JoinColumn(name="userId")
     private Users userComments;
     // Feed 랑 mapping
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name="feedId")
-//    private Feed feedComments;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="feedId")
+    private Feeds feedComments;
 
 
     @Column(name="deleted")
