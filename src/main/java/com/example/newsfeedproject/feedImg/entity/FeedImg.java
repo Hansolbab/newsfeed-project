@@ -1,4 +1,4 @@
-package com.example.newsfeedproject.feedimg.entity;
+package com.example.newsfeedproject.feedImg.entity;
 
 import jakarta.persistence.*;
 
