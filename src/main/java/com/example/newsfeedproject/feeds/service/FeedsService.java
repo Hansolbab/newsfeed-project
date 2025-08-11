@@ -43,9 +43,9 @@ public class FeedsService {
                 .build();
 
         // 3. 이미지 URL 목록을 FeedImg 엔티티로 변환하여 Feeds에 연결
-        for (String imageUrl : requestDto.getFeedImgs()) {
+        for (String imageUrl : requestDto.getFeedImageUrls()) {
             FeedImg feedImg = FeedImg.builder()
-                    .imageUrl(imageUrl)
+                    .feedImageUrl(imageUrl)
                     .deleted(false)
                     // feed 필드는 addFeedImg에서 설정
                     .build();
@@ -120,9 +120,9 @@ public class FeedsService {
         feeds.getFeedImgs().clear(); // 기존 이미지 목록 삭제
 
         // 요청 DTO의 새 이미지 URL 목록으로 FeedImg 엔티티 재생성 및 연결
-        for (String imageUrl : requestDto.getFeedImgs()) {
+        for (String imageUrl : requestDto.getFeedImageUrls()) {
             FeedImg newFeedImg = FeedImg.builder()
-                    .imageUrl(imageUrl)
+                    .feedImageUrl(imageUrl)
                     .deleted(false)
                     .build();
             feeds.addFeedImg(newFeedImg); // 새 이미지 추가 (Feeds 엔티티의 addFeedImg 메소드 사용)

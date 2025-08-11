@@ -24,7 +24,7 @@ public class FeedResponseDto {
     private String contents;
 
     // 게시글 이미지 URL 목록
-    private List<String> feedImgs;
+    private List<String> feedImageUrls;
 
     // 게시글 카테고리
     private Category category;
@@ -47,10 +47,10 @@ public class FeedResponseDto {
     // Feeds 엔티티와 'liked' 여부로부터 DTO 생성
     public FeedResponseDto(Feeds feeds, boolean liked) {
         this.feedId = feeds.getFeedId();
-        this.user = new UserInfo(feeds.getUser().getUserName(), feeds.getUser().getProfileImg());
+        this.user = new UserInfo(feeds.getUser().getUserName(), feeds.getUser().getProfileImageUrl());
         this.contents = feeds.getContents();
-        this.feedImgs = feeds.getFeedImgs().stream() // Feeds 엔티티의 feedImgs에서 imageUrl 추출
-                .map(FeedImg::getImageUrl)
+        this.feedImageUrls = feeds.getFeedImgs().stream() // Feeds 엔티티의 feedImgs에서 imageUrl 추출
+                .map(FeedImg::getFeedImageUrl)
                 .collect(Collectors.toList());
         this.category = feeds.getCategory(); // Feeds 엔티티에서 가져옴
         // likeTotal, commentTotal은 Feeds 엔티티에 없으므로 DTO에서 0으로 초기화
@@ -64,11 +64,11 @@ public class FeedResponseDto {
     @Setter
     public static class UserInfo {
         private String userName;
-        private String profileImg;
+        private String profileImageUrl;
 
-        public UserInfo(String userName, String profileImg) {
+        public UserInfo(String userName, String profileImageUrl) {
             this.userName = userName;
-            this.profileImg = profileImg;
+            this.profileImageUrl = profileImageUrl;
         }
     }
 }

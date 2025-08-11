@@ -31,6 +31,6 @@ public class UsersService {
 //        }
 
         Users userSimple = user.get();
-        return new ReadUserSimpleResponseDto(userSimple.getUserName(),userSimple.getProfileImg());
+        return new ReadUserSimpleResponseDto(userSimple.getUserName(),userSimple.getProfileImageUrl());
     }
 }

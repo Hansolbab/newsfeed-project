@@ -29,8 +29,8 @@ public class FeedImg {
     private Feeds feed;
 
     // 이미지 URL 또는 경로
-    @Column(name="image_url", nullable = false, columnDefinition = "TEXT") // 컬럼명 image_url로 변경, not null, TEXT 타입
-    private String imageUrl; // 필드명 imageUrl로 변경
+    @Column(name="feed_image_url", nullable = false, columnDefinition = "TEXT") // 컬럼명 image_url로 변경, not null, TEXT 타입
+    private String feedImageUrl; // 필드명 FeedImageUrl로 변경
 
     // 삭제 여부
     @Column(name="deleted", nullable = false) // not null

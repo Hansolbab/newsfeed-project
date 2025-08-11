@@ -21,7 +21,7 @@ public class CreateFeedRequestDto {
     // 게시글 이미지 URL 목록 (클라이언트로부터 String URL 목록을 받음)
     @NotNull(message = "게시글 이미지는 필수입니다.")
     @Size(min = 1, message = "게시글 이미지는 최소 1개 이상이어야 합니다.")
-    private List<String> feedImgs;
+    private List<String> feedImageUrls;
 
     // 게시글 카테고리 (필수)
     @NotNull(message = "게시글 카테고리는 필수 선택 항목입니다.")
