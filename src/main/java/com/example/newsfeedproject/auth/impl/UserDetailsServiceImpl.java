@@ -23,7 +23,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         Users user = usersRepository.findByEmail(email)
                 // 탈퇴한 계정 차단, deleted=true면 제외
                 .filter(u->!Boolean.TRUE.equals(u.getDeleted()))
-                .orElseThrow(() -> new UsernameNotFoundException("가입된 회원이 아닙니다: " + email));
+                .orElseThrow(() -> new UsernameNotFoundException("가입된 사용자가 아닙니다: " + email));
         return new UserDetailsImpl(user);
     }
 }
