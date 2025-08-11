@@ -1,4 +1,4 @@
-package com.example.newsfeedproject.catagory.entity;
+package com.example.newsfeedproject.category.entity;
 
 
 import jakarta.persistence.*;

@@ -1,4 +1,4 @@
-package com.example.newsfeedproject.auth.filter;
+package com.example.newsfeedproject.common.filter;
 
 
 import com.example.newsfeedproject.auth.impl.UserDetailsImpl;

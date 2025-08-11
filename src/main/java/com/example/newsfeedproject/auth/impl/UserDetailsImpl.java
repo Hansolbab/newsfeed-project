@@ -4,6 +4,7 @@ package com.example.newsfeedproject.auth.impl;
 import com.example.newsfeedproject.users.entity.Users;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
@@ -22,7 +23,7 @@ public class  UserDetailsImpl implements  UserDetails {
     //  권한 안 하기로 하더라도 만들긴 해야 됨
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(); //빈 리스트로
+        return List.of(new SimpleGrantedAuthority("ROLE_USER")); // ROLE USER로 지정
     }
 
     @Override
@@ -33,7 +34,7 @@ public class  UserDetailsImpl implements  UserDetails {
     @Override
     public String getUsername() {
         // 이메일을 로그인 식별자로 쓴다면
-        return user.getUserName();
+        return user.getEmail();
     }
     public Long getUserId() {
         return  user.getUserId();
