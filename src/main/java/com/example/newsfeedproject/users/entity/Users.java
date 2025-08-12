@@ -83,12 +83,12 @@ public class Users {
 //  followings
     @Builder.Default//초기값 유지용
     @OneToMany(mappedBy = "follower", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Follows> followings = new ArrayList<>();
+    private List<Follows> followingList = new ArrayList<>();
 //   followers
 
     @Builder.Default//초기값 유지용
     @OneToMany(mappedBy = "followee", cascade = CascadeType.ALL,orphanRemoval = true)
-    private List<Follows> followers = new ArrayList<>();
+    private List<Follows> followerList = new ArrayList<>();
 
     public Users ( String userName, String phoneNumber, String email,String encode){
         this.userName = userName;

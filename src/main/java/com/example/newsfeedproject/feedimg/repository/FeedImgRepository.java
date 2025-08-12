@@ -14,10 +14,9 @@ public interface FeedImgRepository extends JpaRepository<FeedImg, Long> {
 
 
     // Query문으로 진행, Comments Table의 feedId로 Count
-    @Query("SELECT f.feedId, i.feedImageUrl " +
-           "FROM Feeds f " +                // Feeds Table as f
-           "LEFT JOIN f.feedImgs i " +      // 연관관계 있으므로 LEFT JOIN 사용
-           "WHERE f.feedId IN (:feedIds) ")
+    @Query("SELECT fi.feed.feedId, fi.feedImageUrl " +
+            "FROM FeedImg fi " +
+            "WHERE fi.feed.feedId IN :feedIds")
     List<Object[]> findFeedImgByFeedId(@Param("feedIds") List<Long> feedIds);
 
 }
