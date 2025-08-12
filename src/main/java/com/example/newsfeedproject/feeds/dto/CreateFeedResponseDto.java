@@ -17,7 +17,7 @@ public class CreateFeedResponseDto {
     private Long feedId;
     private UserInfo user;
     private String contents;
-    private List<String> feedImageUrls;
+    private List<String> feedImageUrlList;
     private Category category;
     private int likeTotal = 0; // likeTotal 추가 (Feeds 엔티티에 없으므로 기본값 0)
     private int commentTotal = 0; // commentTotal 추가 (Feeds 엔티티에 없으므로 기본값 0)
@@ -29,7 +29,7 @@ public class CreateFeedResponseDto {
         this.feedId = feeds.getFeedId();
         this.user = new UserInfo(feeds.getUser().getUserName(), feeds.getUser().getProfileImageUrl());
         this.contents = feeds.getContents();
-        this.feedImageUrls = feeds.getFeedImgs().stream() // Feeds 엔티티의 feedImgs에서 FeedImageUrl 추출
+        this.feedImageUrlList = feeds.getFeedImgList().stream() // Feeds 엔티티의 feedImgs에서 FeedImageUrl 추출
                 .map(FeedImg::getFeedImageUrl)
                 .collect(Collectors.toList());
         this.category = feeds.getCategory();
