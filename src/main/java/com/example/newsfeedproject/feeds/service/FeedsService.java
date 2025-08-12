@@ -118,7 +118,7 @@ public class FeedsService {
         feeds.update(requestDto.getContents(), requestDto.getCategory());
 
         // 5. 이미지 목록 업데이트 (기존 이미지 삭제 후 새로 추가)
-        feeds.getFeedImgList().clear(); // 기존 이미지 목록 삭제
+        feeds.getFeedImageList().clear(); // 기존 이미지 목록 삭제
 
         // 요청 DTO의 새 이미지 URL 목록으로 FeedImg 엔티티 재생성 및 연결
         for (String imageUrl : requestDto.getFeedImageUrlList()) {
