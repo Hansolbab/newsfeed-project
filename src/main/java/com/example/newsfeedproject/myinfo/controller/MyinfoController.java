@@ -6,9 +6,11 @@ import com.example.newsfeedproject.common.dto.PrincipalRequestDto;
 import com.example.newsfeedproject.common.dto.ReadUserSimpleResponseDto;
 import com.example.newsfeedproject.feeds.dto.FeedResponseDto;
 import com.example.newsfeedproject.myinfo.service.MyinfoService;
+import com.example.newsfeedproject.users.dto.ReadUsersFeedsResponseDto;
 import com.example.newsfeedproject.users.service.UsersService;
 import lombok.RequiredArgsConstructor;
 
+import org.hibernate.boot.model.naming.IllegalIdentifierException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -51,6 +53,27 @@ public class MyinfoController {
         ReadUserSimpleResponseDto readMySimpleProfile = usersService.readUserSimple(userId, principalUser);
         return ResponseEntity.ok(readMySimpleProfile);
     }
+
+    @GetMapping("/{userId}/feeds")
+    @Transactional(readOnly = true)
+    public ResponseEntity<Page<ReadUsersFeedsResponseDto>> readMyFeeds(
+            @PathVariable Long userId,                              // 본인 확인용 당사자 userId값
+            @AuthenticationPrincipal UserDetailsImpl userDetails,   // 본인 확인용 로그인한 userId값
+            @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable){
+        // 로그인 안한 경우
+        if (userDetails==null) {throw new IllegalIdentifierException("로그인 필요");}
+
+        PrincipalRequestDto principalUser = new PrincipalRequestDto(
+                userDetails.getUserId(),
+                userDetails.getAuthorities().stream()
+                        .map(GrantedAuthority::getAuthority)
+                        .collect(Collectors.toSet()));
+
+        Page<ReadUsersFeedsResponseDto> readMyFeedPage = usersService.readUserFeed(userId, principalUser, pageable);
+
+        return new  ResponseEntity<>(readMyFeedPage, HttpStatus.OK);
+    }
+
 
 
     @GetMapping("/commentfeeds")
