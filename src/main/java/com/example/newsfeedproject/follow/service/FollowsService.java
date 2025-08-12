@@ -1,6 +1,7 @@
 package com.example.newsfeedproject.follow.service;
 
 
+import com.example.newsfeedproject.auth.impl.UserDetailsImpl;
 import com.example.newsfeedproject.common.dto.ReadFollowUsersDto;
 import com.example.newsfeedproject.common.exception.FollowErrorException;
 import com.example.newsfeedproject.follow.entity.Follows;
@@ -8,6 +9,7 @@ import com.example.newsfeedproject.follow.repository.FollowsRepository;
 import com.example.newsfeedproject.users.entity.Users;
 import com.example.newsfeedproject.users.repository.UsersRepository;
 import jakarta.transaction.Transactional;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -29,7 +31,9 @@ public class FollowsService {
 
 
     //팔로우 서비스
-    public void follow(Long meId, Long userId) {
+    public void follow(UserDetailsImpl userDetails, Long userId) {
+
+        Long meId = userDetails.getUserId();
 
         validId(meId, userId);
 
@@ -60,7 +64,9 @@ public class FollowsService {
 
     }
     //언팔로우 서비스
-    public void unfollow(Long meId, Long userId) {
+    public void unfollow(UserDetailsImpl userDetails, Long userId) {
+
+        Long meId = userDetails.getUserId();
 
         validId(meId, userId);
 
@@ -68,13 +74,38 @@ public class FollowsService {
 
         Users followee = usersRepository.getReferenceById(userId);
 
-        Follows relation = followsRepository
-                    .findByFollowerAndFollowee(me, followee) // 팔로우 이력 확인 -> Users로 보냈지만, id값으로 판별해서 프록시라도 괜찮
-                    .orElseThrow( () -> new FollowErrorException(RELATION_NOT_FOUND)); // 없으면 이미 언팔로우
+        Follows relation = readRelation(me, followee);
 
         if(!relation.isFollowed()) return; // 이력이 있는데 언팔로우 상태이면 그대로 둠
 
         relation.setFollowed(false); // 이력이 있는데 팔로우 상태면 언팔로우 변경
+    }
+
+    //팔로우 삭제
+    public void deleteFollow(UserDetailsImpl userDetails, Long userId) {
+
+        Long meId = userDetails.getUserId();
+
+        validId(meId, userId);
+
+        Users me = usersRepository.getReferenceById(meId);
+
+        Users followerMe = usersRepository.getReferenceById(userId);
+
+        Follows relation = readRelation(followerMe, me);
+
+        if(!relation.isFollowed()) return;
+
+        relation.setFollowed(false);
+    }
+
+
+    //팔로우 이력 확인 메서드
+    public Follows readRelation(Users follower , Users followee){
+
+        return followsRepository
+                .findByFollowerAndFollowee(follower, followee)
+                .orElseThrow( () -> new FollowErrorException(RELATION_NOT_FOUND));
     }
 
     //팔로우 목록 조회

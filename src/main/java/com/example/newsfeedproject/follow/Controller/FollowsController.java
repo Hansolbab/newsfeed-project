@@ -32,10 +32,7 @@ public class FollowsController {
 
     ) {
 
-      Long meId = userDetails.getUserId();
-
-
-        followsService.follow(meId, userId);
+        followsService.follow(userDetails, userId);
 
 
         return new ResponseEntity<>(HttpStatus.OK);
@@ -45,9 +42,17 @@ public class FollowsController {
     public ResponseEntity<Void> unfollow(@PathVariable @NotNull Long userId,
                                          @AuthenticationPrincipal UserDetailsImpl userDetails) {
 
-        Long meId = userDetails.getUserId();
+        followsService.unfollow(userDetails, userId);
 
-        followsService.unfollow(meId, userId);
+        return new ResponseEntity<>(HttpStatus.OK);
+
+    }
+
+    @PostMapping("/{userId}/delete")
+    public ResponseEntity<Void> deleteFollow(@PathVariable@NotNull Long userId,
+                                             @AuthenticationPrincipal UserDetailsImpl userDetails) {
+
+        followsService.deleteFollow(userDetails, userId);
 
         return new ResponseEntity<>(HttpStatus.OK);
 
