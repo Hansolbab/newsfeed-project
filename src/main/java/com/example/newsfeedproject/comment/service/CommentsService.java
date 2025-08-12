@@ -8,9 +8,12 @@ import com.example.newsfeedproject.feeds.entity.Feeds;
 import com.example.newsfeedproject.feeds.repository.FeedsRepository;
 import com.example.newsfeedproject.users.entity.Users;
 import com.example.newsfeedproject.users.repository.UsersRepository;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -43,5 +46,19 @@ public class CommentsService {
 
         // 5. Response DTO로 변환하여 반환
         return new CommentResponseDto(comment);
+    }
+
+    // 특정 게시글의 모든 댓글 조회
+    @Transactional(readOnly = true)
+    public List<CommentResponseDto> getCommentsByFeed(Long feedId) {
+
+        Feeds feed = feedsRepository.findById(feedId)
+                .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다."));
+
+        List<Comments> commentList = commentsRepository.findByFeedComments(feed);
+
+        return commentList.stream()
+                .map(CommentResponseDto::new)
+                .collect(Collectors.toList());
     }
 }

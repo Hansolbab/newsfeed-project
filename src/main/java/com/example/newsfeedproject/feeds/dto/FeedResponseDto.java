@@ -24,7 +24,7 @@ public class FeedResponseDto {
     private String contents;
 
     // 게시글 이미지 URL 목록
-    private List<String> feedImageUrls;
+    private List<String> feedImageUrlList;
 
     // 게시글 카테고리
     private Category category;
@@ -49,7 +49,7 @@ public class FeedResponseDto {
         this.feedId = feeds.getFeedId();
         this.user = new UserInfo(feeds.getUser().getUserName(), feeds.getUser().getProfileImageUrl());
         this.contents = feeds.getContents();
-        this.feedImageUrls = feeds.getFeedImgs().stream() // Feeds 엔티티의 feedImgs에서 imageUrl 추출
+        this.feedImageUrlList = feeds.getFeedImgList().stream() // Feeds 엔티티의 feedImgs에서 imageUrl 추출
                 .map(FeedImg::getFeedImageUrl)
                 .collect(Collectors.toList());
         this.category = feeds.getCategory(); // Feeds 엔티티에서 가져옴
@@ -62,6 +62,7 @@ public class FeedResponseDto {
     public static FeedResponseDto toDto( Feeds feeds, boolean liked) {
         return  new FeedResponseDto( feeds , liked);
     }
+
 
     // 작성자 정보 서브 DTO (변동 없음)
     @Getter

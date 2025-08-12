@@ -14,15 +14,18 @@ public class UpdatePhoneNumberService {
     private final UsersRepository usersRepository;
 
     @Transactional
-    public void update(Long me, String phoneNumber) {
+    public void update(Long meId, String newPhoneNumber) {
+        Users user = usersRepository.findById(meId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다."));
 
-        if(usersRepository.existsByPhoneNumber(phoneNumber)) {
+        // 본인 번호와 동일하면 막기
+        if (newPhoneNumber.equals(user.getPhoneNumber())) {
             //409 Conflict
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "이미 존재하는 전화번호입니다.");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "현재 전화번호와 동일합니다.");
         }
 
-        Users user = usersRepository.findById(me)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다."));
-        user.setPhoneNumber(phoneNumber);
+        // 변경
+        user.setPhoneNumber(newPhoneNumber);
     }
+
 }
