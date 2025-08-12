@@ -70,15 +70,15 @@ public class UsersService {
 
         //null 값 때문에 Object로 받고 Map으로 key: feedId, value: count한 like값
         Map<Long, Integer> likeTotal =likeRepository.countLikedByFeedIds(feedIds).stream()
-                                        .collect(Collectors.toMap(row ->(Long) row[0], row ->(Integer) row[1]));
+                                        .collect(Collectors.toMap(row ->(Long) row[0], row ->((Long) row[1]).intValue()));
 
         //null 값 때문에 Object로 받고 Map으로 Key: feedId, value: count한 comments값
         Map<Long, Integer> commentsTotal = commentsRepository.countCommentsByFeedIds(feedIds).stream()
-                                            .collect(Collectors.toMap(row ->(Long) row[0], row ->(Integer) row[1]));
+                                            .collect(Collectors.toMap(row ->(Long) row[0], row ->((Long) row[1]).intValue()));
 
 
         // null 값 때문에 Object로 받고 Map으로 Key: feedId, value: liked true값
-        Map<Long, Boolean> liked = likeRepository.isLikedByFeedIdsANDUserId(feedIds, userId).stream()
+        Map<Long, Boolean> liked = likeRepository.isLikedByFeedIdsANDUserId(feedIds, principalRequestDto.getUserId()).stream()
                                         .collect(Collectors.toMap(row->(Long) row[0], row ->(Boolean) row[1]));
 
 
