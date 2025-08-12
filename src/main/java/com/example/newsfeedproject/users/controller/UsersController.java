@@ -4,6 +4,7 @@ import com.example.newsfeedproject.auth.impl.UserDetailsImpl;
 import com.example.newsfeedproject.common.dto.PrincipalRequestDto;
 import com.example.newsfeedproject.common.dto.ReadUserSimpleResponseDto;
 import com.example.newsfeedproject.users.dto.ReadUsersFeedsResponseDto;
+import com.example.newsfeedproject.users.dto.SearchUserResponseDto;
 import com.example.newsfeedproject.users.service.UsersService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -15,10 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.stream.Collectors;
 
@@ -68,5 +66,25 @@ public class UsersController {
         Page<ReadUsersFeedsResponseDto> userFeedPage = usersService.readUserFeed(userId, principalUser, pageable);
 
         return new ResponseEntity<>(userFeedPage, HttpStatus.OK);
+    }
+
+    @GetMapping("/search")
+    @Transactional(readOnly = true)
+    public ResponseEntity<Page<SearchUserResponseDto>> searchUsers(
+            @RequestParam String keyword,
+            @AuthenticationPrincipal UserDetailsImpl userDetails,
+            @PageableDefault() Pageable pageable){
+
+        //로그인 안한 경우
+        if (userDetails==null) {throw new IllegalStateException("로그인 필요");}
+
+        PrincipalRequestDto principalUser = new PrincipalRequestDto(userDetails.getUserId(),
+                userDetails.getAuthorities().stream()
+                        .map(GrantedAuthority::getAuthority)
+                        .collect(Collectors.toSet()));
+
+        Page<SearchUserResponseDto> searchUserPage = usersService.searchUser(keyword, principalUser, pageable);
+
+        return new ResponseEntity<>(searchUserPage, HttpStatus.OK);
     }
 }
