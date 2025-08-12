@@ -32,9 +32,13 @@ public interface LikesRepository extends JpaRepository<Likes, Long> {
             "GROUP BY l.feedId")             // FeedId 별로 그룹화
     List<Object[]> countLikedByFeedIds(@Param("feedIds") List<Long> feedIds);
 
-    @Query("SELECT l.feedId " +
+    @Query("SELECT l.feedId, l.liked " +
             "FROM Likes l " +                // Likes Table as l
-            "WHERE l.feedId IN :feedIds AND l.userId = :userId AND l.liked = true " +  // feedIds 리스트 IN AND Likes Table의 liked = true 값
-            "GROUP BY l.feedId")
-    List<Object []> isLikedByFeedIdsANDUserId(@Param("feedIds") List<Long> feedIds, Long userId);
+            "WHERE l.feedId IN :feedIds AND l.userId = :userId "  // feedIds 리스트 IN AND Likes Table의 liked = true 값
+            )
+    List<Object []> isLikedByFeedIdsANDUserId(@Param("feedIds") List<Long> feedIds, @Param("userId") Long userId);
+
+    Optional<Likes> findByUserIdAndFeedId(Long userId, Long feedId);
+
+    Long countByFeedIdAndLikedTrue(Long feedId);
 }
