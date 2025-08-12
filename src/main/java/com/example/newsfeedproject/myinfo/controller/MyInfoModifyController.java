@@ -15,6 +15,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
+//TODO: 본인 이외 다른 사람 접근 불가하게 막기
 @RequestMapping("/api/myinfo/modify")
 @RequiredArgsConstructor
 public class MyInfoModifyController {
