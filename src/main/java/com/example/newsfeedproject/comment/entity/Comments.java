@@ -50,7 +50,6 @@ public class Comments {
     private LocalDateTime updatedAt;
 
     // 소프트 삭제 여부 (true: 삭제됨, false: 활성) - 필드명 및 컬럼명 변경
-
     @Builder.Default
     @Column(name="deleted", nullable = false)
     private boolean deleted = false; // <-- 기본값은 false (삭제되지 않음)
