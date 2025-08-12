@@ -3,6 +3,7 @@ package com.example.newsfeedproject.comment.controller;
 import com.example.newsfeedproject.auth.impl.UserDetailsImpl;
 import com.example.newsfeedproject.comment.dto.CommentResponseDto;
 import com.example.newsfeedproject.comment.dto.CreateCommentRequestDto;
+import com.example.newsfeedproject.comment.dto.UpdateCommentRequestDto;
 import com.example.newsfeedproject.comment.entity.Comments;
 import com.example.newsfeedproject.comment.service.CommentsService;
 import jakarta.validation.Valid;
@@ -58,6 +59,31 @@ public class CommentsController {
         Page<CommentResponseDto> responseDtoPage = commentsService.getCommentsByFeed(feedId, pageable); // Pageable 전달
 
         return ResponseEntity.ok(responseDtoPage);
+    }
+
+    // 댓글 수정 API
+    @PutMapping("/{commentId}")
+    public ResponseEntity<CommentResponseDto> updateComment(
+            @PathVariable Long feedId,
+            @PathVariable Long commentId,
+            @Valid @RequestBody UpdateCommentRequestDto requestDto,
+            @AuthenticationPrincipal UserDetailsImpl userDetailsImpl
+    ) {
+        String userEmail = userDetailsImpl.getUsername();
+        CommentResponseDto responseDto = commentsService.updateComment(feedId, commentId, requestDto, userEmail);
+        return ResponseEntity.ok(responseDto);
+    }
+
+    // 댓글 삭제 API (DELETE /api/feeds/{feedId}/comments/{commentId})
+    @DeleteMapping("/{commentId}")
+    public ResponseEntity<Void> deleteComment(
+            @PathVariable Long feedId,
+            @PathVariable Long commentId,
+            @AuthenticationPrincipal UserDetailsImpl userDetailsImpl
+    ) {
+        String userEmail = userDetailsImpl.getUsername();
+        commentsService.deleteComment(feedId, commentId, userEmail);
+        return ResponseEntity.noContent().build();
     }
 
 }
