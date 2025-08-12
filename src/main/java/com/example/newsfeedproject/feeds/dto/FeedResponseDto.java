@@ -63,6 +63,7 @@ public class FeedResponseDto {
         return  new FeedResponseDto( feeds , liked);
     }
 
+
     // 작성자 정보 서브 DTO (변동 없음)
     @Getter
     @Setter
