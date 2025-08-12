@@ -30,6 +30,16 @@ public class ProfileImageService {
             //변경
         }
         user.setProfileImageUrl(newprofileImageUrl);
+    }
 
+    //삭제
+    @Transactional
+    public void setPlaceholderUrl(Long meId) {
+        Users user=usersRepository.findById(meId)
+                .orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND,"사용자 정보를 찾을 수 없습니다."));
+        //만약 이미 기본값이면 넘어가고, 아니면 PLACEHOLDER_URL
+        if(!PLACEHOLDER_URL.equals(user.getProfileImageUrl())) {
+            user.setProfileImageUrl(PLACEHOLDER_URL);
+        }
     }
 }

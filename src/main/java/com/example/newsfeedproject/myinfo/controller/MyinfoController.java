@@ -100,8 +100,12 @@ public class MyinfoController {
     ){
       profileImageService.updateProfileImageUrl(me.getUserId(), dto.getProfileImageUrl());
       return ResponseEntity.ok("프로필 이미지 변경이 완료되었습니다.");
-
-        // 내 프로필 이미지 삭제
+    }
+    // 내 프로필 이미지 삭제
+    @DeleteMapping("/profileimg")
+    public ResponseEntity<Void> deleteProfileImage(@AuthenticationPrincipal UserDetailsImpl me){
+        profileImageService.setPlaceholderUrl(me.getUserId());
+        return ResponseEntity.ok().build();
     }
 
 }
