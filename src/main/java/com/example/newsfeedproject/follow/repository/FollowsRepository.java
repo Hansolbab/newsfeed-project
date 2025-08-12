@@ -28,4 +28,7 @@ public interface FollowsRepository extends JpaRepository<Follows , Long> {
             "from  Follows f" + // 팔로우 테이블로부터
             " where f.follower.userId = :meId") // 내가 팔로워하는 사람과 은
     Set<Long> findFolloweeIdsOf(@Param("meId") Long meId);
+
+
+    boolean existsByFollower_UserIdAndFollowee_UserIdAndFollowedTrue(Long meId, Long userId);
 }

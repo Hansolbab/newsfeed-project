@@ -65,8 +65,8 @@ public class UsersController {
                         .map(GrantedAuthority::getAuthority)
                         .collect(Collectors.toSet()));
 
-        Page<ReadUsersFeedsResponseDto> userFeedList = usersService.readUserFeed(userId, principalUser, pageable);
+        Page<ReadUsersFeedsResponseDto> userFeedPage = usersService.readUserFeed(userId, principalUser, pageable);
 
-        return new ResponseEntity<>(userFeedList, HttpStatus.OK);
+        return new ResponseEntity<>(userFeedPage, HttpStatus.OK);
     }
 }
