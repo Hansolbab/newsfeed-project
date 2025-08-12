@@ -9,7 +9,6 @@ import java.time.LocalDateTime;
 
 @Getter
 @Setter
-@JsonPropertyOrder
 public class CommentResponseDto {
 
     private Long commentId;
