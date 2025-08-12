@@ -93,7 +93,7 @@ public class MyinfoController {
     }
 
     // 내 프로필 이미지 URL로 수정
-    @PostMapping("/profileimg")
+    @PutMapping("/profileimg")
     public ResponseEntity<String> uploadProfileImage(
             @AuthenticationPrincipal UserDetailsImpl me,
           @Valid @RequestBody UpdateProfileImageRequestDto dto
