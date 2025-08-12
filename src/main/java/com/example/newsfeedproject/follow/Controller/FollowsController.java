@@ -3,6 +3,7 @@ package com.example.newsfeedproject.follow.Controller;
 
 import com.example.newsfeedproject.auth.impl.UserDetailsImpl;
 import com.example.newsfeedproject.common.dto.ReadFollowUsersDto;
+import com.example.newsfeedproject.follow.dto.FollowResponseDto;
 import com.example.newsfeedproject.follow.service.FollowsService;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
@@ -27,34 +28,84 @@ public class FollowsController {
 
 
     @PostMapping("/{userId}/follow") // 팔로우 url 추가
-    public ResponseEntity<Void> follow(@PathVariable @NotNull Long userId,
-                                      @AuthenticationPrincipal  UserDetailsImpl userDetails
-
+    public ResponseEntity<FollowResponseDto> follow(
+            @PathVariable @NotNull Long userId,
+            @AuthenticationPrincipal  UserDetailsImpl userDetails
     ) {
 
         followsService.follow(userDetails, userId);
 
 
-        return new ResponseEntity<>(HttpStatus.OK);
+        return new ResponseEntity<>(followsService.follow(userDetails, userId), HttpStatus.OK);
     }
 
+
+
+
+    @PostMapping("/private/{userId}/request") // 팔로우 url 추가
+    public  ResponseEntity<FollowResponseDto> requestFollow(
+            @PathVariable @NotNull Long userId,
+            @AuthenticationPrincipal  UserDetailsImpl userDetails
+                                       ) {
+
+
+        return new ResponseEntity<>(followsService.requestFollow(userDetails, userId), HttpStatus.OK);
+    }
+
+    @PostMapping("/private/{userId}/accept")
+    public  ResponseEntity<FollowResponseDto> acceptFollow(
+            @PathVariable @NotNull Long userId,
+            @AuthenticationPrincipal  UserDetailsImpl userDetails
+    ) {
+
+
+        return new ResponseEntity<>(followsService.acceptFollow(userDetails, userId), HttpStatus.OK);
+    }
+
+    @PostMapping("/private/{userId}/reject")
+    public  ResponseEntity<FollowResponseDto> rejectFollow(
+            @PathVariable @NotNull Long userId,
+            @AuthenticationPrincipal  UserDetailsImpl userDetails
+
+    ) {
+
+        return new ResponseEntity<>(followsService.rejectedFollow(userDetails, userId), HttpStatus.OK);
+    }
+
+
+
+
+
+    @PostMapping("/private/{userId}/cancel")
+    public   ResponseEntity<FollowResponseDto> cancelFollow(
+            @PathVariable @NotNull Long userId,
+            @AuthenticationPrincipal  UserDetailsImpl userDetails
+    ) {
+
+        return new ResponseEntity<>(followsService.resetFollow(userDetails, userId), HttpStatus.OK);
+    }
+
+
+
     @PostMapping("/{userId}/unfollow")
-    public ResponseEntity<Void> unfollow(@PathVariable @NotNull Long userId,
-                                         @AuthenticationPrincipal UserDetailsImpl userDetails) {
+    public  ResponseEntity<FollowResponseDto> unfollow(
+            @PathVariable @NotNull Long userId,
+            @AuthenticationPrincipal UserDetailsImpl userDetails
+    ) {
 
-        followsService.unfollow(userDetails, userId);
 
-        return new ResponseEntity<>(HttpStatus.OK);
+        return new ResponseEntity<>(followsService.unfollow(userDetails, userId), HttpStatus.OK);
 
     }
 
     @PostMapping("/{userId}/delete")
-    public ResponseEntity<Void> deleteFollow(@PathVariable@NotNull Long userId,
-                                             @AuthenticationPrincipal UserDetailsImpl userDetails) {
+    public  ResponseEntity<FollowResponseDto> deleteFollow(
+            @PathVariable@NotNull Long userId,
+            @AuthenticationPrincipal UserDetailsImpl userDetails) {
 
         followsService.deleteFollow(userDetails, userId);
 
-        return new ResponseEntity<>(HttpStatus.OK);
+        return new ResponseEntity<>(followsService.deleteFollow(userDetails, userId), HttpStatus.OK);
 
     }
 
@@ -65,7 +116,8 @@ public class FollowsController {
             @PageableDefault(size =  10, // 페이지에 들어올 수
                     sort = "createdAt", // 생성 시간으로 정렬
                     direction = Sort.Direction.DESC //내림차순 정렬 일단 최신순 정렬인데, 오래된 순으로도 가능합니다.
-            )Pageable pageable) {
+            )Pageable pageable
+    ) {
 
        Long meId = userDetails.getUserId();
 
@@ -96,7 +148,8 @@ public class FollowsController {
     @GetMapping("/followees")
     public ResponseEntity<Page<ReadFollowUsersDto>> readFolloweeMeList(
             @AuthenticationPrincipal UserDetailsImpl userDetails,
-            @PageableDefault(size =  10, sort = "createdAt", direction = Sort.Direction.DESC)Pageable pageable) {
+            @PageableDefault(size =  10, sort = "createdAt", direction = Sort.Direction.DESC)Pageable pageable
+    ) {
 
         Long meId = userDetails.getUser().getUserId();
 
@@ -110,7 +163,8 @@ public class FollowsController {
     public ResponseEntity<Page<ReadFollowUsersDto>> readFolloweeList(
             @PathVariable @NotNull Long userId,
             @AuthenticationPrincipal UserDetailsImpl userDetails,
-            @PageableDefault(size =  10, sort = "createdAt", direction = Sort.Direction.DESC)Pageable pageable) {
+            @PageableDefault(size =  10, sort = "createdAt", direction = Sort.Direction.DESC)Pageable pageable
+    ) {
 
         Long meId = userDetails.getUserId();
 
