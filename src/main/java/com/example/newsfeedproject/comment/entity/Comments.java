@@ -24,7 +24,7 @@ public class Comments {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long commentId;
 
-    @Column(nullable = false, columnDefinition = "TEXT")
+    @Column(name = "contents", nullable = false, columnDefinition = "TEXT")
     private String contents;
 
     // User 랑 mapping

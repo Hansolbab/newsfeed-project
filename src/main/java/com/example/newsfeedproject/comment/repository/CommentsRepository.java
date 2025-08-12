@@ -15,14 +15,24 @@ import java.util.Optional;
 public interface CommentsRepository extends JpaRepository<Comments, Long> {
 
     // 특정 Feed에 속한 댓글들을 조회하는 쿼리 메서드 (최신순 정렬)
-    List<Comments> findByFeedCommentsAndDeletedFalseOrderByCreatedAtDesc(Feeds feed);
+    @Query("SELECT c " + "FROM Comments c WHERE c.feedComments = :feed AND c.deleted = false ORDER BY c.createdAt DESC")
+    List<Comments> findByFeedComments(@Param("feed") Feeds feed);
 
     // 특정 Feed에 속한 특정 댓글 조회 (deleted가 아닌 경우)
-    Optional<Comments> findByCommentIdAndFeedCommentsAndDeletedFalse(Long commentId, Feeds feed);
+    @Query("SELECT c FROM Comments c WHERE c.commentId = :commentId AND c.feedComments = :feed AND c.deleted = false")
+    Optional<Comments> findByCommentIdAndFeedComments(@Param("commentId") Long commentId, @Param("feed") Feeds feed);
 
     // 사용자ID와 FeedID로 댓글 조회 (작성자 확인 및 삭제 여부 확인 시 유용)
-    Optional<Comments> findByCommentIdAndUserCommentsUserIdAndFeedCommentsFeedIdAndDeletedFalse(Long commentId, Long userId, Long feedId);
+    @Query("SELECT c FROM Comments c " +
+            "WHERE c.commentId = :commentId " +
+            "AND c.userComments.userId = :userId " + // User 엔티티의 userId 필드 참조
+            "AND c.feedComments.feedId = :feedId " + // Feed 엔티티의 feedId 필드 참조
+            "AND c.deleted = false")
 
+    Optional<Comments> findByCommentIdAndUserCommentsUserIdAndFeedCommentsFeedId(
+            @Param("commentId") Long commentId,
+            @Param("userId") Long userId,
+            @Param("feedId") Long feedId);
 
     // Query문으로 진행, Comments Table의 feedId로 Count
     @Query("SELECT f.feedId, COUNT(c) " +

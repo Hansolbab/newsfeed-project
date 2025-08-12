@@ -1,6 +1,7 @@
 package com.example.newsfeedproject.comment.dto;
 
 import com.example.newsfeedproject.comment.entity.Comments;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -8,6 +9,7 @@ import java.time.LocalDateTime;
 
 @Getter
 @Setter
+@JsonPropertyOrder
 public class CommentResponseDto {
 
     private Long commentId;
@@ -16,7 +18,6 @@ public class CommentResponseDto {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    // Comments 엔티티를 받아서 DTO 생성
     public CommentResponseDto(Comments comment) {
         this.commentId = comment.getCommentId();
         // userComments 필드에 접근하여 UserInfo 생성 (이전 Users 엔티티에 맞춰 getter 사용)
@@ -26,7 +27,6 @@ public class CommentResponseDto {
         this.updatedAt = comment.getUpdatedAt();
     }
 
-    // 작성자 정보 서브 DTO (Feeds의 UserInfo와 동일)
     @Getter
     @Setter
     public static class UserInfo {
