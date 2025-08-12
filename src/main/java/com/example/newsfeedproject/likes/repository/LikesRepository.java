@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -23,4 +24,17 @@ public interface LikesRepository extends JpaRepository<Likes, Long> {
             "and l.liked = true " + //좋아요도 눌려 있고
             "and l.feedId in :feedIds") // feedIds 목록이 포함
     Set<Long> findLikedFeedIds(@Param("userId") Long userId , @Param("feedIds") Collection<Long> feedIds);
+
+    // Query문으로 진행, Likes Table의 feedId로 Count
+    @Query("SELECT l.feedId, COUNT(l) " +
+            "FROM Likes l " +                // Likes Table as l
+            "WHERE l.feedId IN :feedIds AND l.liked = true " +  // feedIds 리스트 IN AND Likes Table의 liked = true 값
+            "GROUP BY l.feedId")             // FeedId 별로 그룹화
+    List<Object[]> countLikedByFeedIds(@Param("feedIds") List<Long> feedIds);
+
+    @Query("SELECT l.feedId " +
+            "FROM Likes l " +                // Likes Table as l
+            "WHERE l.feedId IN :feedIds AND l.userId = :userId AND l.liked = true " +  // feedIds 리스트 IN AND Likes Table의 liked = true 값
+            "GROUP BY l.feedId")
+    List<Object []> isLikedByFeedIdsANDUserId(@Param("feedIds") List<Long> feedIds, Long userId);
 }
