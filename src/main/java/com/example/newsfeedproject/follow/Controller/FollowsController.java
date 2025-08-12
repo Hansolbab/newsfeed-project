@@ -3,6 +3,7 @@ package com.example.newsfeedproject.follow.Controller;
 
 import com.example.newsfeedproject.auth.impl.UserDetailsImpl;
 import com.example.newsfeedproject.common.dto.ReadFollowUsersDto;
+import com.example.newsfeedproject.follow.dto.FollowResponseDto;
 import com.example.newsfeedproject.follow.service.FollowsService;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
@@ -27,7 +28,7 @@ public class FollowsController {
 
 
     @PostMapping("/{userId}/follow") // 팔로우 url 추가
-    public ResponseEntity<Void> follow(
+    public ResponseEntity<FollowResponseDto> follow(
             @PathVariable @NotNull Long userId,
             @AuthenticationPrincipal  UserDetailsImpl userDetails
     ) {
@@ -35,49 +36,40 @@ public class FollowsController {
         followsService.follow(userDetails, userId);
 
 
-        return new ResponseEntity<>(HttpStatus.OK);
+        return new ResponseEntity<>(followsService.follow(userDetails, userId), HttpStatus.OK);
     }
 
 
 
 
     @PostMapping("/private/{userId}/request") // 팔로우 url 추가
-    public ResponseEntity<Void> requestFollow(
+    public  ResponseEntity<FollowResponseDto> requestFollow(
             @PathVariable @NotNull Long userId,
             @AuthenticationPrincipal  UserDetailsImpl userDetails
                                        ) {
 
-        followsService.requestFollow(userDetails, userId);
 
-
-        return new ResponseEntity<>(HttpStatus.OK);
+        return new ResponseEntity<>(followsService.requestFollow(userDetails, userId), HttpStatus.OK);
     }
 
     @PostMapping("/private/{userId}/accept")
-    public ResponseEntity<Void> acceptFollow(
+    public  ResponseEntity<FollowResponseDto> acceptFollow(
             @PathVariable @NotNull Long userId,
             @AuthenticationPrincipal  UserDetailsImpl userDetails
     ) {
 
 
-        followsService.acceptFollow(userDetails, userId);
-
-
-        return new ResponseEntity<>(HttpStatus.OK);
+        return new ResponseEntity<>(followsService.acceptFollow(userDetails, userId), HttpStatus.OK);
     }
 
     @PostMapping("/private/{userId}/reject")
-    public ResponseEntity<Void> rejectFollow(
+    public  ResponseEntity<FollowResponseDto> rejectFollow(
             @PathVariable @NotNull Long userId,
             @AuthenticationPrincipal  UserDetailsImpl userDetails
 
     ) {
 
-
-        followsService.rejectedFollow(userDetails, userId);
-
-
-        return new ResponseEntity<>(HttpStatus.OK);
+        return new ResponseEntity<>(followsService.rejectedFollow(userDetails, userId), HttpStatus.OK);
     }
 
 
@@ -85,38 +77,35 @@ public class FollowsController {
 
 
     @PostMapping("/private/{userId}/cancel")
-    public  ResponseEntity<Void> cancelFollow(
+    public   ResponseEntity<FollowResponseDto> cancelFollow(
             @PathVariable @NotNull Long userId,
             @AuthenticationPrincipal  UserDetailsImpl userDetails
     ) {
 
-        followsService.resetFollow(userDetails, userId);
-
-        return new ResponseEntity<>(HttpStatus.OK);
+        return new ResponseEntity<>(followsService.resetFollow(userDetails, userId), HttpStatus.OK);
     }
 
 
 
     @PostMapping("/{userId}/unfollow")
-    public ResponseEntity<Void> unfollow(
+    public  ResponseEntity<FollowResponseDto> unfollow(
             @PathVariable @NotNull Long userId,
             @AuthenticationPrincipal UserDetailsImpl userDetails
     ) {
 
-        followsService.unfollow(userDetails, userId);
 
-        return new ResponseEntity<>(HttpStatus.OK);
+        return new ResponseEntity<>(followsService.unfollow(userDetails, userId), HttpStatus.OK);
 
     }
 
     @PostMapping("/{userId}/delete")
-    public ResponseEntity<Void> deleteFollow(
+    public  ResponseEntity<FollowResponseDto> deleteFollow(
             @PathVariable@NotNull Long userId,
             @AuthenticationPrincipal UserDetailsImpl userDetails) {
 
         followsService.deleteFollow(userDetails, userId);
 
-        return new ResponseEntity<>(HttpStatus.OK);
+        return new ResponseEntity<>(followsService.deleteFollow(userDetails, userId), HttpStatus.OK);
 
     }
 

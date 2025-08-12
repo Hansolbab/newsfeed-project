@@ -3,7 +3,9 @@ package com.example.newsfeedproject.follow.service;
 
 import com.example.newsfeedproject.auth.impl.UserDetailsImpl;
 import com.example.newsfeedproject.common.dto.ReadFollowUsersDto;
+import com.example.newsfeedproject.common.exception.FollowErrorCode;
 import com.example.newsfeedproject.common.exception.FollowErrorException;
+import com.example.newsfeedproject.follow.dto.FollowResponseDto;
 import com.example.newsfeedproject.follow.entity.FollowStatus;
 import com.example.newsfeedproject.follow.entity.Follows;
 import com.example.newsfeedproject.follow.repository.FollowsRepository;
@@ -16,6 +18,7 @@ import org.apache.catalina.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -31,51 +34,62 @@ public class FollowsService {
     private final FollowsRepository followsRepository;
     private final UsersRepository usersRepository;
 
-    public void follow(UserDetailsImpl userDetails, Long userId) {
+    public FollowResponseDto follow(UserDetailsImpl userDetails, Long userId) {
 
         Follows relation = getRelation(userDetails, userId);
         relation.accept();
 
+        if(relation.isFollowed()){
+            throw new FollowErrorException(ALREADY_FOLLOW);
+        }
+
         followsRepository.save(relation);
 
+
+        return new FollowResponseDto(relation.isFollowed() , relation.getFollowStatus());
     }
 
 
     // A -> B 에게 팔로우 요청
-    public void requestFollow(UserDetailsImpl userDetails, Long userId) {
+    public FollowResponseDto requestFollow(UserDetailsImpl userDetails, Long userId) {
 
         Follows relation = getRelation(userDetails, userId);
 
         if(relation.getFollowStatus().equals(FollowStatus.REQUESTED)) {
-            throw  new FollowErrorException(ALREADY_REQUEST);
+            throw new FollowErrorException(ALREADY_REQUEST);
         }
 
 
         relation.request();
 
         followsRepository.save(relation);
+
+        return new FollowResponseDto(relation.isFollowed() , relation.getFollowStatus());
     }
 
 
     //B가 A의 요청을 승인
-    public void acceptFollow(UserDetailsImpl userDetails, Long userId) {
+    public FollowResponseDto acceptFollow(UserDetailsImpl userDetails, Long userId) {
 
         Follows relation = getRelationOrThrow(userDetails, userId);
         relation.accept();
 
+        return new FollowResponseDto(relation.isFollowed() , relation.getFollowStatus());
     }
 
     //Br가 A의 요청을 거절
-    public void rejectedFollow(UserDetailsImpl userDetails, Long userId) {
+    public FollowResponseDto rejectedFollow(UserDetailsImpl userDetails, Long userId) {
 
         Follows relation = getRelationOrThrow(userDetails, userId);
         relation.reject();
+
+        return new FollowResponseDto(relation.isFollowed() , relation.getFollowStatus());
     }
 
 
 
     //A가 B에게 요청한 것을 취소
-    public void resetFollow(UserDetailsImpl userDetails, Long userId) {
+    public FollowResponseDto resetFollow(UserDetailsImpl userDetails, Long userId) {
         Long meId = userDetails.getUserId();
 
         validId(meId, userId);
@@ -92,11 +106,13 @@ public class FollowsService {
         }
 
         relation.reset();
+
+        return new FollowResponseDto(relation.isFollowed() , relation.getFollowStatus());
     }
 
 
     //언팔로우 서비스 //내 팔로잉 목록에서 삭제
-    public void unfollow(UserDetailsImpl userDetails, Long userId) {
+    public FollowResponseDto unfollow(UserDetailsImpl userDetails, Long userId) {
 
         Long meId = userDetails.getUserId();
 
@@ -109,10 +125,12 @@ public class FollowsService {
         Follows relation = readRelation(me, followee);
 
         relation.reset();
+
+        return new FollowResponseDto(relation.isFollowed() , relation.getFollowStatus());
     }
 
     //팔로우 삭제 // 내 팔로워 목록에서 삭제
-    public void deleteFollow(UserDetailsImpl userDetails, Long userId) {
+    public FollowResponseDto deleteFollow(UserDetailsImpl userDetails, Long userId) {
 
         Long meId = userDetails.getUserId();
 
@@ -125,6 +143,8 @@ public class FollowsService {
         Follows relation = readRelation(followerMe, me);
 
         relation.reset();
+
+        return new FollowResponseDto(relation.isFollowed() , relation.getFollowStatus());
     }
 
 
