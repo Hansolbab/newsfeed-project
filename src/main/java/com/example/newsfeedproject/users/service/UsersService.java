@@ -6,6 +6,7 @@ import com.example.newsfeedproject.common.dto.ReadUserSimpleResponseDto;
 import com.example.newsfeedproject.feedimg.repository.FeedImgRepository;
 import com.example.newsfeedproject.feeds.entity.Feeds;
 import com.example.newsfeedproject.feeds.repository.FeedsRepository;
+import com.example.newsfeedproject.follow.repository.FollowsRepository;
 import com.example.newsfeedproject.likes.repository.LikesRepository;
 import com.example.newsfeedproject.users.dto.ReadUsersFeedsResponseDto;
 import com.example.newsfeedproject.users.entity.Users;
@@ -30,6 +31,7 @@ public class UsersService {
     private final LikesRepository likeRepository;
     private final CommentsRepository commentsRepository;
     private final FeedImgRepository feedImgRepository;
+    private final FollowsRepository followsRepository;
 
     public ReadUserSimpleResponseDto readUserSimple(Long userId, PrincipalRequestDto principalRequestDto) {
         // userId(프로필 보려는 대상 userId) null 확인
@@ -52,6 +54,16 @@ public class UsersService {
         if (user.isEmpty()) {
             throw new IllegalArgumentException("없는 유저입니다.");
         }
+        // 상대방 userId와 로그인한 principalRequestDto.getUserId() 값 비교
+        if (!userId.equals(principalRequestDto.getUserId())){       // 다르면 상대 유저
+            // 내 id = follower id  상대 유저 id = followee id, 내가 상대를 Follow 상태일때만 피드 정보 노출
+            if (!followsRepository.existsByFollower_UserIdAndFollowee_UserIdAndFollowedTrue(principalRequestDto.getUserId(), userId))
+            {
+                throw new IllegalArgumentException("팔로우를 하세요");
+            }
+        }
+        // 본인 페이지 or 내가 상대를 Follow한 상태일때 피드 정보 값
+        // 현재는 두개의 값이 다른점이 없어서 하나로 진행
 
         Page<Feeds> feeds = feedsRepository.findByUser_UserId(userId, pageable);  // userId에 맞는 Feed들 Page로 받음
         List<Long> feedIds = feeds.stream().map(Feeds::getFeedId).toList(); // Feed내에서 Id값만 리스트로 정리
