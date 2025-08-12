@@ -1,12 +1,15 @@
 package com.example.newsfeedproject.follow.service;
 
 
+import com.example.newsfeedproject.auth.impl.UserDetailsImpl;
 import com.example.newsfeedproject.common.dto.ReadFollowUsersDto;
+import com.example.newsfeedproject.common.exception.FollowErrorException;
 import com.example.newsfeedproject.follow.entity.Follows;
 import com.example.newsfeedproject.follow.repository.FollowsRepository;
 import com.example.newsfeedproject.users.entity.Users;
 import com.example.newsfeedproject.users.repository.UsersRepository;
 import jakarta.transaction.Transactional;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -15,7 +18,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
+import static com.example.newsfeedproject.common.exception.FollowErrorCode.*;
 
 @Service
 @RequiredArgsConstructor
@@ -28,7 +31,9 @@ public class FollowsService {
 
 
     //팔로우 서비스
-    public void follow(Long meId, Long userId) {
+    public void follow(UserDetailsImpl userDetails, Long userId) {
+
+        Long meId = userDetails.getUserId();
 
         validId(meId, userId);
 
@@ -59,7 +64,9 @@ public class FollowsService {
 
     }
     //언팔로우 서비스
-    public void unfollow(Long meId, Long userId) {
+    public void unfollow(UserDetailsImpl userDetails, Long userId) {
+
+        Long meId = userDetails.getUserId();
 
         validId(meId, userId);
 
@@ -67,13 +74,38 @@ public class FollowsService {
 
         Users followee = usersRepository.getReferenceById(userId);
 
-        Follows relation = followsRepository
-                    .findByFollowerAndFollowee(me, followee) // 팔로우 이력 확인 -> Users로 보냈지만, id값으로 판별해서 프록시라도 괜찮
-                    .orElseThrow( () -> new IllegalArgumentException("팔로우를 한 적이 없습니다.")); // 없으면 이미 언팔로우
+        Follows relation = readRelation(me, followee);
 
         if(!relation.isFollowed()) return; // 이력이 있는데 언팔로우 상태이면 그대로 둠
 
         relation.setFollowed(false); // 이력이 있는데 팔로우 상태면 언팔로우 변경
+    }
+
+    //팔로우 삭제
+    public void deleteFollow(UserDetailsImpl userDetails, Long userId) {
+
+        Long meId = userDetails.getUserId();
+
+        validId(meId, userId);
+
+        Users me = usersRepository.getReferenceById(meId);
+
+        Users followerMe = usersRepository.getReferenceById(userId);
+
+        Follows relation = readRelation(followerMe, me);
+
+        if(!relation.isFollowed()) return;
+
+        relation.setFollowed(false);
+    }
+
+
+    //팔로우 이력 확인 메서드
+    public Follows readRelation(Users follower , Users followee){
+
+        return followsRepository
+                .findByFollowerAndFollowee(follower, followee)
+                .orElseThrow( () -> new FollowErrorException(RELATION_NOT_FOUND));
     }
 
     //팔로우 목록 조회
@@ -81,20 +113,14 @@ public class FollowsService {
 
     //공통 검증
     private void validId(Long meId, Long userId) {
-        if (meId == null || userId == null) {
-            throw new IllegalArgumentException("해당 유저들이 null 입니다.");
-        }
 
+        //자기 자신 관련 팔로우/언팔로우
         if (meId.equals(userId)) {
-            throw new IllegalArgumentException("자기 자신을 팔로우할 수 없습니다.");
-        }
-
-        if (!usersRepository.existsById(meId)) {
-            throw new IllegalArgumentException("현재 유저가 없습니다.");
+            throw new FollowErrorException(SELF_FOLLOW_NOT);
         }
 
         if (!usersRepository.existsById(userId)) {
-            throw new IllegalArgumentException("대상 유저가 없습니다.");
+            throw new FollowErrorException(USER_NOT_FOUND);
         }
     }
 
@@ -116,7 +142,9 @@ public class FollowsService {
     //이 사람을 팔로우 하는 사람 == 이사람의 팔로워 목록  재혁님이 -> 재민(나를 팔로워 하는) => 팔로워 재혁
     public Page<ReadFollowUsersDto> readFollowerList(Long meId, Long userId , Pageable pageable) {
 
-        validListId(meId, userId);
+        if (!usersRepository.existsById(userId)) {
+            throw new FollowErrorException(USER_NOT_FOUND);
+        }
         //이 사람의 팔로워 목록은 이 사람 기준 팔로우 당하는 것입니다.
         Users followee = usersRepository.getReferenceById(userId);
 
@@ -140,7 +168,9 @@ public class FollowsService {
     //이 사람이 팔로우 하는 사람
     public Page<ReadFollowUsersDto> readFolloweeList(Long meId, Long userId ,Pageable pageable) {
 
-        validListId( meId, userId);
+        if (!usersRepository.existsById(userId)) {
+            throw new FollowErrorException(USER_NOT_FOUND);
+        }
 
         Users follower = usersRepository.getReferenceById(userId);
 
@@ -155,21 +185,6 @@ public class FollowsService {
 
         return new PageImpl<>( followeeList , pageable, followeePage.getTotalElements());
 
-    }
-
-
-    private void validListId(Long meId, Long userId) {
-        if (meId == null || userId == null) {
-            throw new IllegalArgumentException("해당 유저들이 null 입니다.");
-        }
-
-        if (!usersRepository.existsById(meId)) {
-            throw new IllegalArgumentException("현재 유저가 없습니다.");
-        }
-
-        if (!usersRepository.existsById(userId)) {
-            throw new IllegalArgumentException("대상 유저가 없습니다.");
-        }
     }
 
 

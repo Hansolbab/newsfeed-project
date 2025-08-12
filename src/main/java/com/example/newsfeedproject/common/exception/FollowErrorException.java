@@ -1,4 +1,15 @@
 package com.example.newsfeedproject.common.exception;
 
-public class FollowErrorException {
+import lombok.Getter;
+
+@Getter
+public class FollowErrorException extends  RuntimeException{
+
+    private final FollowErrorCode followErrorCode;
+
+
+    public FollowErrorException(FollowErrorCode followErrorCode) {
+        super(followErrorCode.getMessage());
+        this.followErrorCode = followErrorCode;
+    }
 }

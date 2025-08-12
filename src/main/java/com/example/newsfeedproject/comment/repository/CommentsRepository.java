@@ -2,6 +2,8 @@ package com.example.newsfeedproject.comment.repository;
 
 import com.example.newsfeedproject.comment.entity.Comments;
 import com.example.newsfeedproject.feeds.entity.Feeds;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -15,8 +17,8 @@ import java.util.Optional;
 public interface CommentsRepository extends JpaRepository<Comments, Long> {
 
     // 특정 Feed에 속한 댓글들을 조회하는 쿼리 메서드 (최신순 정렬)
-    @Query("SELECT c " + "FROM Comments c WHERE c.feedComments = :feed AND c.deleted = false ORDER BY c.createdAt DESC")
-    List<Comments> findByFeedComments(@Param("feed") Feeds feed);
+    @Query("SELECT c FROM Comments c WHERE c.feedComments = :feed AND c.deleted = false ORDER BY c.createdAt DESC")
+    Page<Comments> findByFeedComments(@Param("feed") Feeds feed, Pageable pageable);
 
     // 특정 Feed에 속한 특정 댓글 조회 (deleted가 아닌 경우)
     @Query("SELECT c FROM Comments c WHERE c.commentId = :commentId AND c.feedComments = :feed AND c.deleted = false")

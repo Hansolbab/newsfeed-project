@@ -5,12 +5,12 @@ import com.example.newsfeedproject.auth.impl.UserDetailsImpl;
 import com.example.newsfeedproject.feeds.dto.FeedResponseDto;
 import com.example.newsfeedproject.feeds.entity.Feeds;
 import com.example.newsfeedproject.feeds.repository.FeedsRepository;
-import com.example.newsfeedproject.likes.entity.Likes;
 import com.example.newsfeedproject.likes.repository.LikesRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
 import java.util.List;
 import java.util.Set;
 

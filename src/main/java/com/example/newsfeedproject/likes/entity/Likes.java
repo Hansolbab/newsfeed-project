@@ -31,4 +31,14 @@ public class Likes {
     // 좋아요 상태 (true: 좋아요, false: 좋아요 아님)
     @Column(name="liked", nullable = false)
     private boolean liked;
+
+    public Likes (Long userId, Long feedId, boolean liked) {
+        this.userId = userId;
+        this.feedId = feedId;
+        this.liked = liked;
+    }
+
+    public void setLiked(boolean liked){
+        this.liked = liked;
+    }
 }
