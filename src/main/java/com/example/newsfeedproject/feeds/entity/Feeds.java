@@ -47,7 +47,7 @@ public class Feeds {
 
     // 게시글 이미지 목록 (FeedImg 엔티티와의 1:N 관계, cascade = ALL로 연관 작업 자동화)
     @OneToMany(mappedBy = "feed", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<FeedImg> feedImgList = new ArrayList<>();
+    private List<FeedImg> feedImageList = new ArrayList<>();
 
     @OneToMany(mappedBy = "feedComments", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comments> comments = new ArrayList<>();
@@ -79,7 +79,7 @@ public class Feeds {
 
     // FeedImg 추가 시 양방향 연관관계 설정 편의 메소드
     public void addFeedImg(FeedImg feedImg) {
-        this.feedImgList.add(feedImg);
+        this.feedImageList.add(feedImg);
         feedImg.setFeed(this); // FeedImg 엔티티에도 현재 Feeds 엔티티 연결
     }
 
