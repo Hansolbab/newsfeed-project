@@ -56,10 +56,11 @@ public class Users {
     // 비밀번호
     private String password;
 
-    @Column
-//    @Column(name="isDeleted")
+//    @Column
+    @Builder.Default//초기값 유지용
+    @Column(name="deleted")
     // 소프트 삭제 여부 확인
-    private Boolean deleted;
+    private Boolean deleted= false;
 
     @Column
 //    @Column(name="createdAt")
@@ -76,13 +77,16 @@ public class Users {
     @Column
 //    @Column(nullable = false, name="profileImageUrl")
     // 외부 이미지 가져오기, 랜덤으로 이미지 제공해주는 사이트입니다.
+    @Builder.Default//초기값 유지용
     private String profileImageUrl = "https://via.placeholder.com/150";
 
 //  followings
+    @Builder.Default//초기값 유지용
     @OneToMany(mappedBy = "follower", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Follows> followings = new ArrayList<>();
 //   followers
 
+    @Builder.Default//초기값 유지용
     @OneToMany(mappedBy = "followee", cascade = CascadeType.ALL,orphanRemoval = true)
     private List<Follows> followers = new ArrayList<>();
 
@@ -99,5 +103,12 @@ public class Users {
 
     public void setPassword(String encode) {
         this.password = encode;
+    }
+
+    //회원탈퇴 처리 메서드
+    public void softDelete(String scrambledPassword, LocalDateTime when){
+        //재로그인 원천 차단
+        this.password = scrambledPassword;
+        this.deleted = true;
     }
 }
