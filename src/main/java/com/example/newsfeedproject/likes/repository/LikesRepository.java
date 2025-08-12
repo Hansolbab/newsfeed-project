@@ -37,4 +37,8 @@ public interface LikesRepository extends JpaRepository<Likes, Long> {
             "WHERE l.feedId IN :feedIds AND l.userId = :userId AND l.liked = true " +  // feedIds 리스트 IN AND Likes Table의 liked = true 값
             "GROUP BY l.feedId")
     List<Object []> isLikedByFeedIdsANDUserId(@Param("feedIds") List<Long> feedIds, Long userId);
+
+
+    @Query("select l.feedId from  Likes l where  l.userId = :meId")
+    Set<Long> findLikesByFeedId(@Param(("meId")) Long meId);
 }

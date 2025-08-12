@@ -10,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Set;
 
 // Feeds 엔티티 데이터 접근
 @Repository
@@ -31,4 +32,9 @@ public interface FeedsRepository extends JpaRepository<Feeds, Long> {
                 "join  f.comments c" + // commnets를 들고 온다
                 " where  c.userComments.userId = : meId") // 유저 아이디가 나
     Page<Feeds> findFeedsByCommentsBy(@Param("meId") Long meId, Pageable pageable);
+
+
+    @Query("select f from Feeds f where f.id in : feedIds")
+    Page<Feeds> findByIdIn(@Param("feedIds")Set<Long> feedIds, Pageable pageable);
+
 }

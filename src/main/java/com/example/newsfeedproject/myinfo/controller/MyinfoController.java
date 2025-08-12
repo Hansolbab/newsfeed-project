@@ -17,6 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.parameters.P;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -65,6 +66,19 @@ public class MyinfoController {
 
        return new ResponseEntity<>(myinfoService.readFeedsByMyCommnet(userDetails, pageable), HttpStatus.OK);
 
+    }
+
+    @GetMapping("/likefeeds")
+    @Transactional(readOnly = true)
+    public ResponseEntity<Page<FeedResponseDto>> readFeedsByMyLikes(
+            @AuthenticationPrincipal UserDetailsImpl userDetails,
+            @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+    ) {
+        if(userDetails == null) {
+            throw new IllegalArgumentException("로그인이 필요합니다.");
+        }
+
+        return new ResponseEntity<>(myinfoService.readFeedsByMyLikes(userDetails, pageable) ,HttpStatus.OK);
     }
 
 }
