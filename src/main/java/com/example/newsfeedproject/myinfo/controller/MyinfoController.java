@@ -105,7 +105,7 @@ public class MyinfoController {
     @DeleteMapping("/profileimg")
     public ResponseEntity<Void> deleteProfileImage(@AuthenticationPrincipal UserDetailsImpl me){
         profileImageService.setPlaceholderUrl(me.getUserId());
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
 }
