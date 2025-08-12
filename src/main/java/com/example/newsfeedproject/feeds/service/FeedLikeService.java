@@ -43,6 +43,7 @@ public class FeedLikeService {
 
 
     public Long feedLikeCount(Long feedId){
+        // 피드 존재 여부 확인
         if (!feedsRepository.existsById(feedId)){throw new IllegalArgumentException("피드 없음");}
 
         return likesRepository.countByFeedIdAndLikedTrue(feedId);

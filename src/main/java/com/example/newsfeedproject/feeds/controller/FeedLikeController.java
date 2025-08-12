@@ -26,6 +26,7 @@ public class FeedLikeController {
         return new ResponseEntity<>(feedIsLiked, HttpStatus.OK);
     }
 
+    // 게시글 좋아요 수 조회
     @GetMapping("/{feedId}/likescount")
     @Transactional(readOnly = true)
     public ResponseEntity<Long> likesCount(@PathVariable Long feedId){
