@@ -33,7 +33,8 @@ public interface FeedsRepository extends JpaRepository<Feeds, Long> {
     Page<Feeds> findFeedsByCommentsBy(@Param("meId") Long meId, Pageable pageable);
 
 
-    @Query("select f from Feeds f where f.id in : feedIds")
+    @Query(value = "select f from Feeds f where f.feedId in :feedIds " ,
+              countQuery = "select count(f) from Feeds f where f.feedId in :feedIds")
     Page<Feeds> findByIdIn(@Param("feedIds")Set<Long> feedIds, Pageable pageable);
 
 }
