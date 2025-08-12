@@ -27,9 +27,9 @@ public class FollowsController {
 
 
     @PostMapping("/{userId}/follow") // 팔로우 url 추가
-    public ResponseEntity<Void> follow(@PathVariable @NotNull Long userId,
-                                      @AuthenticationPrincipal  UserDetailsImpl userDetails
-
+    public ResponseEntity<Void> follow(
+            @PathVariable @NotNull Long userId,
+            @AuthenticationPrincipal  UserDetailsImpl userDetails
     ) {
 
         followsService.follow(userDetails, userId);
@@ -38,9 +38,70 @@ public class FollowsController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+
+
+
+    @PostMapping("/private/{userId}/request") // 팔로우 url 추가
+    public ResponseEntity<Void> requestFollow(
+            @PathVariable @NotNull Long userId,
+            @AuthenticationPrincipal  UserDetailsImpl userDetails
+                                       ) {
+
+        followsService.requestFollow(userDetails, userId);
+
+
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @PostMapping("/private/{userId}/accept")
+    public ResponseEntity<Void> acceptFollow(
+            @PathVariable @NotNull Long userId,
+            @AuthenticationPrincipal  UserDetailsImpl userDetails
+    ) {
+
+
+        followsService.acceptFollow(userDetails, userId);
+
+
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @PostMapping("/private/{userId}/reject")
+    public ResponseEntity<Void> rejectFollow(
+            @PathVariable @NotNull Long userId,
+            @AuthenticationPrincipal  UserDetailsImpl userDetails
+
+    ) {
+
+
+        followsService.rejectedFollow(userDetails, userId);
+
+
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+
+
+
+
+    @PostMapping("/private/{userId}/cancel")
+    public  ResponseEntity<Void> cancelFollow(
+            @PathVariable @NotNull Long userId,
+            @AuthenticationPrincipal  UserDetailsImpl userDetails
+    ) {
+
+        followsService.resetFollow(userDetails, userId);
+
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+
+
     @PostMapping("/{userId}/unfollow")
-    public ResponseEntity<Void> unfollow(@PathVariable @NotNull Long userId,
-                                         @AuthenticationPrincipal UserDetailsImpl userDetails) {
+    public ResponseEntity<Void> unfollow(
+            @PathVariable @NotNull Long userId,
+            @AuthenticationPrincipal UserDetailsImpl userDetails
+    ) {
 
         followsService.unfollow(userDetails, userId);
 
@@ -49,8 +110,9 @@ public class FollowsController {
     }
 
     @PostMapping("/{userId}/delete")
-    public ResponseEntity<Void> deleteFollow(@PathVariable@NotNull Long userId,
-                                             @AuthenticationPrincipal UserDetailsImpl userDetails) {
+    public ResponseEntity<Void> deleteFollow(
+            @PathVariable@NotNull Long userId,
+            @AuthenticationPrincipal UserDetailsImpl userDetails) {
 
         followsService.deleteFollow(userDetails, userId);
 
@@ -65,7 +127,8 @@ public class FollowsController {
             @PageableDefault(size =  10, // 페이지에 들어올 수
                     sort = "createdAt", // 생성 시간으로 정렬
                     direction = Sort.Direction.DESC //내림차순 정렬 일단 최신순 정렬인데, 오래된 순으로도 가능합니다.
-            )Pageable pageable) {
+            )Pageable pageable
+    ) {
 
        Long meId = userDetails.getUserId();
 
@@ -96,7 +159,8 @@ public class FollowsController {
     @GetMapping("/followees")
     public ResponseEntity<Page<ReadFollowUsersDto>> readFolloweeMeList(
             @AuthenticationPrincipal UserDetailsImpl userDetails,
-            @PageableDefault(size =  10, sort = "createdAt", direction = Sort.Direction.DESC)Pageable pageable) {
+            @PageableDefault(size =  10, sort = "createdAt", direction = Sort.Direction.DESC)Pageable pageable
+    ) {
 
         Long meId = userDetails.getUser().getUserId();
 
@@ -110,7 +174,8 @@ public class FollowsController {
     public ResponseEntity<Page<ReadFollowUsersDto>> readFolloweeList(
             @PathVariable @NotNull Long userId,
             @AuthenticationPrincipal UserDetailsImpl userDetails,
-            @PageableDefault(size =  10, sort = "createdAt", direction = Sort.Direction.DESC)Pageable pageable) {
+            @PageableDefault(size =  10, sort = "createdAt", direction = Sort.Direction.DESC)Pageable pageable
+    ) {
 
         Long meId = userDetails.getUserId();
 

@@ -4,6 +4,7 @@ package com.example.newsfeedproject.follow.service;
 import com.example.newsfeedproject.auth.impl.UserDetailsImpl;
 import com.example.newsfeedproject.common.dto.ReadFollowUsersDto;
 import com.example.newsfeedproject.common.exception.FollowErrorException;
+import com.example.newsfeedproject.follow.entity.FollowStatus;
 import com.example.newsfeedproject.follow.entity.Follows;
 import com.example.newsfeedproject.follow.repository.FollowsRepository;
 import com.example.newsfeedproject.users.entity.Users;
@@ -11,9 +12,11 @@ import com.example.newsfeedproject.users.repository.UsersRepository;
 import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
+import org.apache.catalina.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -28,42 +31,71 @@ public class FollowsService {
     private final FollowsRepository followsRepository;
     private final UsersRepository usersRepository;
 
-
-
-    //팔로우 서비스
     public void follow(UserDetailsImpl userDetails, Long userId) {
 
-        Long meId = userDetails.getUserId();
-
-        validId(meId, userId);
-
-        //팔로우 할 사람이 있는지
-        Users me = usersRepository.getReferenceById(meId);
-
-        //팔로우 당할 사람이 있는지
-        Users followee = usersRepository.getReferenceById(userId);
-
-
-        Follows relation = followsRepository
-                .findByFollowerAndFollowee(me, followee) //할 사람이 당할 사람을 팔로우 했던 이력이 있는가.
-                .orElseGet(() -> { // 없다면? => 처음 팔로우 하는 경우
-                    Follows f = new Follows(); // 객체를 생성
-                    f.setFollower(me); // 할 사람을 넣어주고
-                    f.setFollowee(followee); // 당할 사람을 넣어주고
-                    f.setFollowed(true); // 팔로우한다라고 반환
-                    return f; // 값을 넣어주고 반환
-                });
-
-        if(!relation.isFollowed()) { //만약 했었는데 언팔로우 상태라면?
-            relation.setFollowed(true); // 지금은 다시 팔로우라고 반환
-        }
-
-        //값을 반전처리!!!
+        Follows relation = getRelation(userDetails, userId);
+        relation.accept();
 
         followsRepository.save(relation);
 
     }
-    //언팔로우 서비스
+
+
+    // A -> B 에게 팔로우 요청
+    public void requestFollow(UserDetailsImpl userDetails, Long userId) {
+
+        Follows relation = getRelation(userDetails, userId);
+
+        if(relation.getFollowStatus().equals(FollowStatus.REQUESTED)) {
+            throw  new FollowErrorException(ALREADY_REQUEST);
+        }
+
+
+        relation.request();
+
+        followsRepository.save(relation);
+    }
+
+
+    //B가 A의 요청을 승인
+    public void acceptFollow(UserDetailsImpl userDetails, Long userId) {
+
+        Follows relation = getRelationOrThrow(userDetails, userId);
+        relation.accept();
+
+    }
+
+    //Br가 A의 요청을 거절
+    public void rejectedFollow(UserDetailsImpl userDetails, Long userId) {
+
+        Follows relation = getRelationOrThrow(userDetails, userId);
+        relation.reject();
+    }
+
+
+
+    //A가 B에게 요청한 것을 취소
+    public void resetFollow(UserDetailsImpl userDetails, Long userId) {
+        Long meId = userDetails.getUserId();
+
+        validId(meId, userId);
+
+        Users me = usersRepository.getReferenceById(meId);
+
+        Users follower = usersRepository.getReferenceById(userId);
+
+        Follows relation = followsRepository.findByFollowerAndFollowee(me, follower)
+                .orElseThrow(() -> new FollowErrorException(NOT_REQUEST));
+
+        if(relation.isFollowed()){
+            throw new FollowErrorException(ALREADY_FOLLOW);
+        }
+
+        relation.reset();
+    }
+
+
+    //언팔로우 서비스 //내 팔로잉 목록에서 삭제
     public void unfollow(UserDetailsImpl userDetails, Long userId) {
 
         Long meId = userDetails.getUserId();
@@ -76,12 +108,10 @@ public class FollowsService {
 
         Follows relation = readRelation(me, followee);
 
-        if(!relation.isFollowed()) return; // 이력이 있는데 언팔로우 상태이면 그대로 둠
-
-        relation.setFollowed(false); // 이력이 있는데 팔로우 상태면 언팔로우 변경
+        relation.reset();
     }
 
-    //팔로우 삭제
+    //팔로우 삭제 // 내 팔로워 목록에서 삭제
     public void deleteFollow(UserDetailsImpl userDetails, Long userId) {
 
         Long meId = userDetails.getUserId();
@@ -94,9 +124,7 @@ public class FollowsService {
 
         Follows relation = readRelation(followerMe, me);
 
-        if(!relation.isFollowed()) return;
-
-        relation.setFollowed(false);
+        relation.reset();
     }
 
 
@@ -111,18 +139,6 @@ public class FollowsService {
     //팔로우 목록 조회
 
 
-    //공통 검증
-    private void validId(Long meId, Long userId) {
-
-        //자기 자신 관련 팔로우/언팔로우
-        if (meId.equals(userId)) {
-            throw new FollowErrorException(SELF_FOLLOW_NOT);
-        }
-
-        if (!usersRepository.existsById(userId)) {
-            throw new FollowErrorException(USER_NOT_FOUND);
-        }
-    }
 
     //이 사람을 팔로우 하는 사람
     public Page<ReadFollowUsersDto> readFollowerList(Long meId, Long userId , Pageable pageable) {
@@ -171,6 +187,65 @@ public class FollowsService {
         return new PageImpl<>( followeeList , pageable, followeePage.getTotalElements());
 
     }
+
+    //메서드 정리
+
+
+
+    private void validId(Long meId, Long userId) {
+
+        //자기 자신 관련 팔로우/언팔로우
+        if (meId.equals(userId)) {
+            throw new FollowErrorException(SELF_FOLLOW_NOT);
+        }
+
+        if (!usersRepository.existsById(userId)) {
+            throw new FollowErrorException(USER_NOT_FOUND);
+        }
+    }
+
+
+    private Follows getRelation(UserDetailsImpl userDetails, Long userId) {
+
+        Long meId = userDetails.getUserId();
+
+        if (meId.equals(userId)) {
+            throw new FollowErrorException(SELF_FOLLOW_NOT);
+        }
+
+        if (!usersRepository.existsById(userId)) {
+            throw new FollowErrorException(USER_NOT_FOUND);
+        }
+
+        Users me = usersRepository.getReferenceById(meId);
+
+        Users followee = usersRepository.getReferenceById(userId);
+
+        return  followsRepository
+                .findByFollowerAndFollowee(me, followee)
+                .orElseGet(() -> new Follows(me, followee));
+    }
+
+    private Follows getRelationOrThrow(UserDetailsImpl userDetails, Long userId) {
+        Long meId =userDetails.getUserId();
+
+        if (meId.equals(userId)) {
+            throw new FollowErrorException(SELF_FOLLOW_NOT);
+        }
+
+        if (!usersRepository.existsById(userId)) {
+            throw new FollowErrorException(USER_NOT_FOUND);
+        }
+
+        Users me =  usersRepository.getReferenceById(meId);
+
+        Users follower = usersRepository.getReferenceById(userId);
+
+        return followsRepository.findByFollowerAndFollowee(follower, me)
+                .orElseThrow(() -> new FollowErrorException(NOT_REQUEST));
+    }
+
+
 
 
 }
