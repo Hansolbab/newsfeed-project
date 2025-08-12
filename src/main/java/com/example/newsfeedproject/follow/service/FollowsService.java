@@ -113,16 +113,10 @@ public class FollowsService {
 
     //공통 검증
     private void validId(Long meId, Long userId) {
-        if (meId == null || userId == null) {
-            throw new FollowErrorException( USER_NOT_FOUND);
-        }
 
+        //자기 자신 관련 팔로우/언팔로우
         if (meId.equals(userId)) {
             throw new FollowErrorException(SELF_FOLLOW_NOT);
-        }
-
-        if (!usersRepository.existsById(meId)) {
-            throw new FollowErrorException(USER_NOT_FOUND);
         }
 
         if (!usersRepository.existsById(userId)) {
@@ -133,7 +127,9 @@ public class FollowsService {
     //이 사람을 팔로우 하는 사람
     public Page<ReadFollowUsersDto> readFollowerList(Long meId, Long userId , Pageable pageable) {
 
-        validListId(meId, userId);
+        if (!usersRepository.existsById(userId)) {
+            throw new FollowErrorException(USER_NOT_FOUND);
+        }
         //이 사람의 팔로워 목록은 이 사람 기준 팔로우 당하는 것입니다.
         Users followee = usersRepository.getReferenceById(userId);
 
@@ -157,7 +153,9 @@ public class FollowsService {
     //이 사람이 팔로우 하는 사람
     public Page<ReadFollowUsersDto> readFolloweeList(Long meId, Long userId ,Pageable pageable) {
 
-        validListId( meId, userId);
+        if (!usersRepository.existsById(userId)) {
+            throw new FollowErrorException(USER_NOT_FOUND);
+        }
 
         Users follower = usersRepository.getReferenceById(userId);
 
@@ -172,21 +170,6 @@ public class FollowsService {
 
         return new PageImpl<>( followeeList , pageable, followeePage.getTotalElements());
 
-    }
-
-
-    private void validListId(Long meId, Long userId) {
-        if (meId == null || userId == null) {
-            throw new FollowErrorException(USER_NOT_FOUND);
-        }
-
-        if (!usersRepository.existsById(meId)) {
-            throw new FollowErrorException(USER_NOT_FOUND);
-        }
-
-        if (!usersRepository.existsById(userId)) {
-            throw new FollowErrorException(USER_NOT_FOUND);
-        }
     }
 
 
