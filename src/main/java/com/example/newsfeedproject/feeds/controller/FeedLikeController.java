@@ -7,10 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/feeds")
@@ -27,5 +24,13 @@ public class FeedLikeController {
         Boolean feedIsLiked = feedLikeService.feedLike(feedId, userDetails);
 
         return new ResponseEntity<>(feedIsLiked, HttpStatus.OK);
+    }
+
+    // 게시글 좋아요 수 조회
+    @GetMapping("/{feedId}/likescount")
+    @Transactional(readOnly = true)
+    public ResponseEntity<Long> likesCount(@PathVariable Long feedId){
+        Long feedLikesTotal = feedLikeService.feedLikeCount(feedId);
+        return new ResponseEntity<>(feedLikesTotal, HttpStatus.OK);
     }
 }
