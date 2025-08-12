@@ -5,10 +5,12 @@ import com.example.newsfeedproject.auth.impl.UserDetailsImpl;
 import com.example.newsfeedproject.common.dto.PrincipalRequestDto;
 import com.example.newsfeedproject.common.dto.ReadUserSimpleResponseDto;
 import com.example.newsfeedproject.feeds.dto.FeedResponseDto;
+import com.example.newsfeedproject.myinfo.dto.UpdateProfileImageRequestDto;
 import com.example.newsfeedproject.myinfo.service.MyinfoService;
 import com.example.newsfeedproject.myinfo.service.ProfileImageService;
 import com.example.newsfeedproject.users.dto.ReadUsersFeedsResponseDto;
 import com.example.newsfeedproject.users.service.UsersService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 import org.hibernate.boot.model.naming.IllegalIdentifierException;
@@ -33,7 +35,7 @@ import java.util.stream.Collectors;
 public class MyinfoController {
     private final UsersService usersService;
     private final MyinfoService myinfoService;
-    private final ProfileImageService ProfileImageService ;
+    private final ProfileImageService profileImageService ;
 
 
     @GetMapping("/{userId}")
@@ -90,12 +92,16 @@ public class MyinfoController {
 
     }
 
+    // 내 프로필 이미지 URL로 수정
     @PostMapping("/profileimg")
     public ResponseEntity<String> uploadProfileImage(
             @AuthenticationPrincipal UserDetailsImpl me,
-            @RequestParam("image") MultipartFile img
+          @Valid @RequestBody UpdateProfileImageRequestDto dto
     ){
-        return ResponseEntity.ok("프로필사진 변경 완료되었습니다.");
+      profileImageService.updateProfileImageUrl(me.getUserId(), dto.getProfileImageUrl());
+      return ResponseEntity.ok("프로필 이미지 변경이 완료되었습니다.");
+
+        // 내 프로필 이미지 삭제
     }
 
 }
