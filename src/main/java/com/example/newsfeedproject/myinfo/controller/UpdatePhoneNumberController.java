@@ -2,7 +2,7 @@ package com.example.newsfeedproject.myinfo.controller;
 
 
 import com.example.newsfeedproject.auth.impl.UserDetailsImpl;
-import com.example.newsfeedproject.myinfo.dto.UpdatePhoneNumberDto;
+import com.example.newsfeedproject.myinfo.dto.UpdatePhoneNumberRequestDto;
 import com.example.newsfeedproject.myinfo.service.UpdatePhoneNumberService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +22,7 @@ public class UpdatePhoneNumberController {
     @PostMapping("/phonenumber")
     public ResponseEntity<String> updatePhoneNumber(
             @AuthenticationPrincipal UserDetailsImpl me,
-            @Valid @RequestBody UpdatePhoneNumberDto dto) {
+            @Valid @RequestBody UpdatePhoneNumberRequestDto dto) {
 
         updatePhoneNumberService.update(me.getUserId(), dto.getPhoneNumber());
         return ResponseEntity.ok("전화번호 변경이 완료되었습니다.");
