@@ -6,7 +6,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class UpdatePhoneNumberDto {
+public class UpdatePhoneNumberRequestDto {
     @Pattern(regexp = "^\\d{10,11}$", message = "전화번호 변경은 11자리여야 합니다.")
     private String phoneNumber;
 }
