@@ -40,4 +40,11 @@ public class FeedLikeService {
         }
 
     }
+
+
+    public Long feedLikeCount(Long feedId){
+        if (!feedsRepository.existsById(feedId)){throw new IllegalArgumentException("피드 없음");}
+
+        return likesRepository.countByFeedIdAndLikedTrue(feedId);
+    }
 }
