@@ -49,7 +49,7 @@ public class FeedResponseDto {
         this.feedId = feeds.getFeedId();
         this.user = new UserInfo(feeds.getUser().getUserName(), feeds.getUser().getProfileImageUrl());
         this.contents = feeds.getContents();
-        this.feedImageUrlList = feeds.getFeedImgList().stream() // Feeds 엔티티의 feedImgs에서 imageUrl 추출
+        this.feedImageUrlList = feeds.getFeedImageList().stream() // Feeds 엔티티의 feedImgs에서 imageUrl 추출
                 .map(FeedImg::getFeedImageUrl)
                 .collect(Collectors.toList());
         this.category = feeds.getCategory(); // Feeds 엔티티에서 가져옴
