@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 
+
 // 게시글 관련 비즈니스 로직 처리 서비스
 @Service
 @RequiredArgsConstructor
@@ -43,7 +44,7 @@ public class FeedsService {
                 .build();
 
         // 3. 이미지 URL 목록을 FeedImg 엔티티로 변환하여 Feeds에 연결
-        for (String imageUrl : requestDto.getFeedImageUrls()) {
+        for (String imageUrl : requestDto.getFeedImageUrlList()) {
             FeedImg feedImg = FeedImg.builder()
                     .feedImageUrl(imageUrl)
                     .deleted(false)
@@ -117,10 +118,10 @@ public class FeedsService {
         feeds.update(requestDto.getContents(), requestDto.getCategory());
 
         // 5. 이미지 목록 업데이트 (기존 이미지 삭제 후 새로 추가)
-        feeds.getFeedImgs().clear(); // 기존 이미지 목록 삭제
+        feeds.getFeedImgList().clear(); // 기존 이미지 목록 삭제
 
         // 요청 DTO의 새 이미지 URL 목록으로 FeedImg 엔티티 재생성 및 연결
-        for (String imageUrl : requestDto.getFeedImageUrls()) {
+        for (String imageUrl : requestDto.getFeedImageUrlList()) {
             FeedImg newFeedImg = FeedImg.builder()
                     .feedImageUrl(imageUrl)
                     .deleted(false)

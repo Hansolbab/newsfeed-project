@@ -11,6 +11,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/feeds/{feedId}/comments")
 @RequiredArgsConstructor
@@ -18,6 +20,7 @@ public class CommentsController {
 
     private final CommentsService commentsService;
 
+    // 댓글 생성 API
     @PostMapping
     public ResponseEntity<CommentResponseDto> createComment(
             @PathVariable Long feedId,
@@ -32,6 +35,17 @@ public class CommentsController {
 
         // HTTP 201 Created 상태 코드와 함께 생성된 댓글 정보 DTO 반환
         return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
+    }
+    // 댓글 조회 API
+    @GetMapping
+    public ResponseEntity<List<CommentResponseDto>> getCommentsByFeed(
+            @PathVariable Long feedId,
+            @AuthenticationPrincipal UserDetailsImpl userDetailsImpl
+    ) {
+
+        List<CommentResponseDto> responseDtoList = commentsService.getCommentsByFeed(feedId);
+
+        return ResponseEntity.ok(responseDtoList);
     }
 
 }
