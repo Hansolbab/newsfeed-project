@@ -111,4 +111,10 @@ public class Users {
         this.password = scrambledPassword;
         this.deleted = true;
     }
+
+    //유저프로필 처리 메서드(수정/삭제)
+    //profileImageUrl-> 표준식
+    public void setProfileImageUrl(String profileImageUrl) {
+        this.profileImageUrl = profileImageUrl;
+    }
 }

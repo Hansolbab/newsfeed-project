@@ -6,6 +6,7 @@ import com.example.newsfeedproject.common.dto.PrincipalRequestDto;
 import com.example.newsfeedproject.common.dto.ReadUserSimpleResponseDto;
 import com.example.newsfeedproject.feeds.dto.FeedResponseDto;
 import com.example.newsfeedproject.myinfo.service.MyinfoService;
+import com.example.newsfeedproject.myinfo.service.ProfileImageService;
 import com.example.newsfeedproject.users.service.UsersService;
 import lombok.RequiredArgsConstructor;
 
@@ -18,10 +19,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.stream.Collectors;
 
@@ -32,6 +31,7 @@ import java.util.stream.Collectors;
 public class MyinfoController {
     private final UsersService usersService;
     private final MyinfoService myinfoService;
+    private final ProfileImageService ProfileImageService ;
 
 
     @GetMapping("/{userId}")
@@ -65,6 +65,14 @@ public class MyinfoController {
 
        return new ResponseEntity<>(myinfoService.readFeedsByMyCommnet(userDetails, pageable), HttpStatus.OK);
 
+    }
+
+    @PostMapping("/profileimg")
+    public ResponseEntity<String> uploadProfileImage(
+            @AuthenticationPrincipal UserDetailsImpl me,
+            @RequestParam("image") MultipartFile img
+    ){
+        return ResponseEntity.ok("프로필사진 변경 완료되었습니다.");
     }
 
 }
