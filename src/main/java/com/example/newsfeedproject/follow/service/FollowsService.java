@@ -16,8 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Set;
-import static com.example.newsfeedproject.common.exception.FollowErrorCode.SELF_FOLLOW_NOT;
-import static com.example.newsfeedproject.common.exception.FollowErrorCode.USER_NOT_FOUND;
+import static com.example.newsfeedproject.common.exception.FollowErrorCode.*;
 
 @Service
 @RequiredArgsConstructor
@@ -71,7 +70,7 @@ public class FollowsService {
 
         Follows relation = followsRepository
                     .findByFollowerAndFollowee(me, followee) // 팔로우 이력 확인 -> Users로 보냈지만, id값으로 판별해서 프록시라도 괜찮
-                    .orElseThrow( () -> new IllegalArgumentException("팔로우를 한 적이 없습니다.")); // 없으면 이미 언팔로우
+                    .orElseThrow( () -> new FollowErrorException(RELATION_NOT_FOUND)); // 없으면 이미 언팔로우
 
         if(!relation.isFollowed()) return; // 이력이 있는데 언팔로우 상태이면 그대로 둠
 
@@ -147,15 +146,15 @@ public class FollowsService {
 
     private void validListId(Long meId, Long userId) {
         if (meId == null || userId == null) {
-            throw new IllegalArgumentException("해당 유저들이 null 입니다.");
+            throw new FollowErrorException(USER_NOT_FOUND);
         }
 
         if (!usersRepository.existsById(meId)) {
-            throw new IllegalArgumentException("현재 유저가 없습니다.");
+            throw new FollowErrorException(USER_NOT_FOUND);
         }
 
         if (!usersRepository.existsById(userId)) {
-            throw new IllegalArgumentException("대상 유저가 없습니다.");
+            throw new FollowErrorException(USER_NOT_FOUND);
         }
     }
 
