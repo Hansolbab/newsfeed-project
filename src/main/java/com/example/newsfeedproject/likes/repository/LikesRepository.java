@@ -39,4 +39,6 @@ public interface LikesRepository extends JpaRepository<Likes, Long> {
     List<Object []> isLikedByFeedIdsANDUserId(@Param("feedIds") List<Long> feedIds, @Param("userId") Long userId);
 
     Optional<Likes> findByUserIdAndFeedId(Long userId, Long feedId);
+
+    Long countByFeedIdAndLikedTrue(Long feedId);
 }
