@@ -74,8 +74,8 @@ public class Users {
     // 수정일
     private LocalDateTime updatedAt;
 
-    @Column
-//    @Column(nullable = false, name="profileImageUrl")
+//    @Column
+    @Column(nullable = false, name="profileImageUrl", length = 255)
     // 외부 이미지 가져오기, 랜덤으로 이미지 제공해주는 사이트입니다.
     @Builder.Default//초기값 유지용
     private String profileImageUrl = "https://via.placeholder.com/150";
@@ -95,6 +95,7 @@ public class Users {
         this.phoneNumber = phoneNumber;
         this.email = email;
         this.password = encode;
+        this.profileImageUrl = "https://via.placeholder.com/150";
     }
 
     public void setPhoneNumber(String phoneNumber) {
@@ -110,5 +111,11 @@ public class Users {
         //재로그인 원천 차단
         this.password = scrambledPassword;
         this.deleted = true;
+    }
+
+    //유저프로필 처리 메서드(수정/삭제)
+    //profileImageUrl-> 표준식
+    public void setProfileImageUrl(String profileImageUrl) {
+        this.profileImageUrl = profileImageUrl;
     }
 }
