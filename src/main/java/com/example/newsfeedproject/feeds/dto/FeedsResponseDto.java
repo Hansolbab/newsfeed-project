@@ -54,14 +54,31 @@ public class FeedsResponseDto {
                 .collect(Collectors.toList());
         this.category = feeds.getCategory(); // Feeds 엔티티에서 가져옴
         // likeTotal, commentTotal은 Feeds 엔티티에 없으므로 DTO에서 0으로 초기화
+//        this.likeTotal = likeTotal; //
+        this.liked = liked;
+        this.createdAt = feeds.getCreatedAt();
+        this.updatedAt = feeds.getUpdatedAt();
+    }
+    public FeedsResponseDto(Feeds feeds, boolean liked ,int likeTotal) {
+        this.feedId = feeds.getFeedId();
+        this.user = new UserInfo(feeds.getUser().getUserName(), feeds.getUser().getProfileImageUrl());
+        this.contents = feeds.getContents();
+        this.feedImageUrlList = feeds.getFeedImageList().stream() // Feeds 엔티티의 feedImgs에서 imageUrl 추출
+                .map(FeedImage::getFeedImageUrl)
+                .collect(Collectors.toList());
+        this.category = feeds.getCategory(); // Feeds 엔티티에서 가져옴
+        // likeTotal, commentTotal은 Feeds 엔티티에 없으므로 DTO에서 0으로 초기화
+        this.likeTotal = likeTotal; //
         this.liked = liked;
         this.createdAt = feeds.getCreatedAt();
         this.updatedAt = feeds.getUpdatedAt();
     }
 
-    public static FeedsResponseDto toDto(Feeds feeds, boolean liked) {
-        return  new FeedsResponseDto( feeds , liked);
+    public static FeedsResponseDto toDto(Feeds feeds, boolean liked, int likeTotal) {
+        return  new FeedsResponseDto( feeds , liked , likeTotal);
     }
+
+    
 
 
     // 작성자 정보 서브 DTO (변동 없음)

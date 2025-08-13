@@ -43,6 +43,6 @@ public interface LikesRepository extends JpaRepository<Likes, Long> {
     Long countByFeedIdAndLikedTrue(Long feedId);
 
 
-    @Query("SELECT l.feedId FROM  Likes l WHERE  l.userId = :meId")
+    @Query("SELECT l.feedId FROM  Likes l WHERE  l.userId = :meId AND l.liked = true")
     Set<Long> findLikesByFeedId(@Param(("meId")) Long meId);
 }

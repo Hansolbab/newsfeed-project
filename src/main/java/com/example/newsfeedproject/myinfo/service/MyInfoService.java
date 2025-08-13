@@ -10,7 +10,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -29,7 +31,10 @@ public class MyInfoService {
                 ? Set.of() // 빈 셋을 반환 : DB 에러 방지
                 : likesRepository.findLikedFeedIds(meId, feedIdList);
 
-        return  feedsPage.map(feeds -> FeedsResponseDto.toDto(feeds, likedIdSet.contains(feeds.getFeedId())));
+        Map<Long, Integer> likeTotalMap =likesRepository.countLikedByFeedIds(likesRepository.findLikesByFeedId(meId).stream().toList()).stream()
+                .collect(Collectors.toMap(row ->(Long) row[0], row ->((Long) row[1]).intValue()));
+
+        return  feedsPage.map(feeds -> FeedsResponseDto.toDto(feeds, likedIdSet.contains(feeds.getFeedId()),likeTotalMap.getOrDefault(feeds.getFeedId(),0)));
     }
 
     public Page<FeedsResponseDto> readFeedsByMyLikes(UserDetailsImpl userDetails, Pageable pageable) {
@@ -37,8 +42,14 @@ public class MyInfoService {
 
         Set<Long> likesIdSet =  likesRepository.findLikesByFeedId(meId);
 
+
+        Map<Long, Integer> likeTotalMap =likesRepository.countLikedByFeedIds(likesRepository.findLikesByFeedId(meId).stream().toList()).stream()
+                .collect(Collectors.toMap(row ->(Long) row[0], row ->((Long) row[1]).intValue()));
+
         return (likesIdSet.isEmpty()) ? Page.empty(pageable)
                 :feedsRepository.findByIdIn(likesIdSet, pageable)
-                .map(feeds -> FeedsResponseDto.toDto(feeds , true));
+                .map(feeds ->
+
+                        FeedsResponseDto.toDto(feeds, true, likeTotalMap.getOrDefault(feeds.getFeedId(),0)));
     }
 }

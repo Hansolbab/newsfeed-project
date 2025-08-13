@@ -12,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.Collections;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -39,7 +40,10 @@ public class CategoryService {
         Set<Long> likedIdSet = pageFeedIdSet.isEmpty() // feedIdSet 이 0일 경우
                 ? Collections.emptySet() // 빈 셋을 반환 : DB 에러 방지
                 : likesRepository.findLikedFeedIds(meId, pageFeedIdSet); // page에서 내가 좋아하는 게시글 식별자
+        Map<Long, Integer> likeTotalMap =likesRepository.countLikedByFeedIds(likesRepository.findLikesByFeedId(meId).stream().toList()).stream()
+                .collect(Collectors.toMap(row ->(Long) row[0], row ->((Long) row[1]).intValue()));
 
-        return feedsPage.map(feeds -> FeedsResponseDto.toDto(feeds, likedIdSet.contains(feeds.getFeedId())));
+
+        return feedsPage.map(feeds -> FeedsResponseDto.toDto(feeds, true, likeTotalMap.getOrDefault(feeds.getFeedId(),0)));
     }
 }

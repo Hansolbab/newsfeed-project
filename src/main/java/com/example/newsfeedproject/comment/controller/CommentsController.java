@@ -56,7 +56,7 @@ public class CommentsController {
     }
 
     // 댓글 수정 API
-    @PutMapping("(/{feedId}/comments/{commentId}")
+    @PutMapping("/{feedId}/comments/{commentId}")
     public ResponseEntity<CommentResponseDto> updateComment(
             @PathVariable Long feedId,
             @PathVariable Long commentId,
