@@ -5,9 +5,12 @@ import com.example.newsfeedproject.auth.impl.UserDetailsImpl;
 import com.example.newsfeedproject.common.dto.PrincipalRequestDto;
 import com.example.newsfeedproject.common.dto.ReadUserSimpleResponseDto;
 import com.example.newsfeedproject.feeds.dto.FeedResponseDto;
+import com.example.newsfeedproject.myinfo.dto.UpdateProfileImageRequestDto;
 import com.example.newsfeedproject.myinfo.service.MyinfoService;
+import com.example.newsfeedproject.myinfo.service.ProfileImageService;
 import com.example.newsfeedproject.users.dto.ReadUsersFeedsResponseDto;
 import com.example.newsfeedproject.users.service.UsersService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 import org.hibernate.boot.model.naming.IllegalIdentifierException;
@@ -19,12 +22,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.parameters.P;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.stream.Collectors;
 
@@ -35,6 +34,7 @@ import java.util.stream.Collectors;
 public class MyinfoController {
     private final UsersService usersService;
     private final MyinfoService myinfoService;
+    private final ProfileImageService profileImageService ;
 
 
     @GetMapping("/{userId}")
@@ -89,6 +89,22 @@ public class MyinfoController {
 
        return new ResponseEntity<>(myinfoService.readFeedsByMyCommnet(userDetails, pageable), HttpStatus.OK);
 
+    }
+
+    // 내 프로필 이미지 URL로 수정
+    @PutMapping("/profileimg")
+    public ResponseEntity<String> uploadProfileImage(
+            @AuthenticationPrincipal UserDetailsImpl me,
+          @Valid @RequestBody UpdateProfileImageRequestDto dto
+    ){
+      profileImageService.updateProfileImageUrl(me.getUserId(), dto.getProfileImageUrl());
+      return ResponseEntity.ok("프로필 이미지 변경이 완료되었습니다.");
+    }
+    // 내 프로필 이미지 삭제
+    @DeleteMapping("/profileimg")
+    public ResponseEntity<Void> deleteProfileImage(@AuthenticationPrincipal UserDetailsImpl me){
+        profileImageService.setPlaceholderUrl(me.getUserId());
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/likefeeds")
