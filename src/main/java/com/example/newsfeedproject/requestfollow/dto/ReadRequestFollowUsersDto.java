@@ -21,12 +21,13 @@ public class ReadRequestFollowUsersDto {
         this.profileImageUrl = users.getProfileImageUrl();
     }
 
-    public static ReadRequestFollowUsersDto todto(RequestFollows follower) {
+    public static ReadRequestFollowUsersDto toDto(RequestFollows target) {
+        Users requester = target.getRequester();
 
         return new ReadRequestFollowUsersDto(
-                follower.getRequester().getUserId(),
-                follower.getRequester().getUserName(),
-                follower.getRequester().getProfileImageUrl()
+                requester.getUserId(),
+                requester.getUserName(),
+                requester.getProfileImageUrl()
         );
 
     }

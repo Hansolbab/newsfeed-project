@@ -46,10 +46,6 @@ public class Follows {
     @Column(name = "createdAt", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "followStatus", nullable = false)
-    @Setter(AccessLevel.NONE)
-    private FollowStatus followStatus = FollowStatus.NONE;
 
     @PrePersist
     public void prePersist() { // 다시 팔로우 시 새로 세팅

@@ -19,7 +19,7 @@ public class ReadFollowUsersDto {
         this.followByMe= followByMe;// 나랑 팔로우 되어 있는가?
     }
 
-    public static ReadFollowUsersDto todto(Users follower, boolean contains) {
+    public static ReadFollowUsersDto toDto(Users follower, boolean contains) {
       return new ReadFollowUsersDto(follower, contains);
     }
 }

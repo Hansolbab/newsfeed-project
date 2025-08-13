@@ -37,20 +37,14 @@ public class RequestFollowService {
 
         Long meId =userDetails.getUserId();
 
-        if (meId.equals(userId)) {
-            throw new FollowErrorException(SELF_FOLLOW_NOT);
-        }
-
-        if (!usersRepository.existsById(userId)) {
-            throw new FollowErrorException(USER_NOT_FOUND);
-        }
+        valid(meId,userId);
 
         Users me =  usersRepository.getReferenceById(meId);
 
-        Users requester = usersRepository.getReferenceById(userId);
+        Users target = usersRepository.getReferenceById(userId);
 
-        RequestFollows requestRelation = requestFollowRepository.findByRequesterAndTarget(requester, me)
-                .orElseGet( () -> new RequestFollows(requester, me));
+        RequestFollows requestRelation = requestFollowRepository.findByRequesterAndTarget(me, target)
+                .orElseGet( () -> new RequestFollows(me, target));
 
         if(requestRelation.getFollowStatus().equals(FollowStatus.REQUESTED))
         {
@@ -67,12 +61,13 @@ public class RequestFollowService {
     //팔로우 승인
     public RequestFollowResponseDto acceptFollow (UserDetailsImpl userDetails, Long userId) {
 
+        Long meId = userDetails.getUserId();
 
-        RequestFollows requestRelation =getRelationOrThrow(userDetails, userId);
+        valid(meId,userId);
 
-        //승인이 되었으니, 팔로우 테이블에 팔로우 여부를 true 값으로 변경하여 넣어준다.
+        RequestFollows requestRelation =getRelationOrThrow(userId, meId);
 
-        Follows relation = getRelation(userDetails, userId);
+        Follows relation = getRelation(userId, meId);
 
         requestRelation.accept();
 
@@ -87,8 +82,11 @@ public class RequestFollowService {
     //팔로우 거절
     public RequestFollowResponseDto rejectedFollow (UserDetailsImpl userDetails, Long userId) {
 
+        Long meId = userDetails.getUserId();
 
-        RequestFollows requestRelation = getRelationOrThrow(userDetails, userId);
+        valid(meId, userId);
+
+        RequestFollows requestRelation = getRelationOrThrow(userId, meId);
 
         requestRelation.reject();
 
@@ -96,11 +94,19 @@ public class RequestFollowService {
     }
 
 
-    //팔로우 취소
+    //팔로우 요청 취소
     public RequestFollowResponseDto cancelFollow (UserDetailsImpl userDetails, Long userId) {
 
+        Long meId = userDetails.getUserId();
 
-        RequestFollows requestRelation = getRelationOrThrow(userDetails, userId);
+        valid(meId, userId);
+
+        RequestFollows requestRelation = getRelationOrThrow(meId, userId);
+
+        if(requestRelation.getFollowStatus().equals(FollowStatus.ACCEPTED)){
+            throw new FollowErrorException(ALREADY_FOLLOW);
+        }
+
         requestRelation.cancel();
 
         return new RequestFollowResponseDto(requestRelation.getFollowStatus());
@@ -116,7 +122,7 @@ public class RequestFollowService {
         Page<RequestFollows> requestMePage = requestFollowRepository.findByTargetAndFollowStatus(me , FollowStatus.REQUESTED, pageable);
 
 
-        return requestMePage.map(ReadRequestFollowUsersDto::todto);
+        return requestMePage.map(ReadRequestFollowUsersDto::toDto);
     }
 
     //내가 요청을 보낸 아이디
@@ -128,14 +134,11 @@ public class RequestFollowService {
 
         Page<RequestFollows> myRequestPage = requestFollowRepository.findByRequesterAndFollowStatus(me, FollowStatus.REQUESTED, pageable);
 
-        return  myRequestPage.map(ReadMyRequestResponseDto::todto);
+        return  myRequestPage.map(ReadMyRequestResponseDto::toDto);
     }
 
 
-
-
-    private RequestFollows getRelationOrThrow(UserDetailsImpl userDetails, Long userId) {
-        Long meId =userDetails.getUserId();
+    private void valid(Long meId , Long userId) {
 
         if (meId.equals(userId)) {
             throw new FollowErrorException(SELF_FOLLOW_NOT);
@@ -145,36 +148,32 @@ public class RequestFollowService {
             throw new FollowErrorException(USER_NOT_FOUND);
         }
 
-        Users me =  usersRepository.getReferenceById(meId);
+    }
 
-        Users requester = usersRepository.getReferenceById(userId);
 
-        return requestFollowRepository.findByRequesterAndTarget(requester, me)
+    private RequestFollows getRelationOrThrow(Long requesterId, Long targetId) {
+
+        Users requester =  usersRepository.getReferenceById(requesterId);
+
+        Users target = usersRepository.getReferenceById(targetId);
+
+        return requestFollowRepository.findByRequesterAndTarget(requester, target)
                 .orElseThrow(() -> new FollowErrorException(NOT_REQUEST));
     }
 
 
 
 
-    private Follows getRelation(UserDetailsImpl userDetails, Long userId) {
+    private Follows getRelation(Long followerId, Long followeeId) {
 
-        Long meId = userDetails.getUserId();
 
-        if (meId.equals(userId)) {
-            throw new FollowErrorException(SELF_FOLLOW_NOT);
-        }
+        Users follower = usersRepository.getReferenceById(followerId);
 
-        if (!usersRepository.existsById(userId)) {
-            throw new FollowErrorException(USER_NOT_FOUND);
-        }
-
-        Users me = usersRepository.getReferenceById(meId);
-
-        Users followee = usersRepository.getReferenceById(userId);
+        Users followee = usersRepository.getReferenceById(followeeId);
 
         return  followsRepository
-                .findByFollowerAndFollowee(me, followee)
-                .orElseGet(() -> new Follows(me, followee));
+                .findByFollowerAndFollowee(follower, followee)
+                .orElseGet(() -> new Follows(follower, followee));
     }
 
    

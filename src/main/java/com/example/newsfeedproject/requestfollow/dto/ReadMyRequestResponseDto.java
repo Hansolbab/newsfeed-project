@@ -15,18 +15,13 @@ public class ReadMyRequestResponseDto {
     private String profileImageUrl;
 
 
-    public ReadMyRequestResponseDto(Users users) {
-        this.userId = users.getUserId();
-        this.userName= users.getUserName();
-        this.profileImageUrl = users.getProfileImageUrl();
-    }
-
-    public static ReadMyRequestResponseDto todto(RequestFollows target) {
+    public static ReadMyRequestResponseDto toDto(RequestFollows requestFollows) {
+        Users target = requestFollows.getTarget();
 
         return new ReadMyRequestResponseDto(
-                target.getRequester().getUserId(),
-                target.getRequester().getUserName(),
-                target.getRequester().getProfileImageUrl()
+                target.getUserId(),
+                target.getUserName(),
+                target.getProfileImageUrl()
         );
 
     }
