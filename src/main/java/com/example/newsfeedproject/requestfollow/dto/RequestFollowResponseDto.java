@@ -1,4 +1,4 @@
-package com.example.newsfeedproject.follow.dto;
+package com.example.newsfeedproject.requestfollow.dto;
 
 
 import com.example.newsfeedproject.follow.entity.FollowStatus;
@@ -7,6 +7,6 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class FollowResponseDto {
-    private final boolean followed;
+public class RequestFollowResponseDto {
+    private final FollowStatus followStatus;
 }
