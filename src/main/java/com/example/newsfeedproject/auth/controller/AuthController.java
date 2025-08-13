@@ -1,10 +1,10 @@
 package com.example.newsfeedproject.auth.controller;
 
-
-import com.example.newsfeedproject.auth.dto.signin.SigninRequestDto;
-import com.example.newsfeedproject.auth.dto.signin.SigninResponseDto;
-import com.example.newsfeedproject.auth.service.signin.SigninService;
-import com.example.newsfeedproject.auth.service.signup.SignupService;
+import com.example.newsfeedproject.auth.dto.signin.SignInRequestDto;
+import com.example.newsfeedproject.auth.dto.signin.SignInResponseDto;
+import com.example.newsfeedproject.auth.dto.signup.SignUpRequestDto;
+import com.example.newsfeedproject.auth.service.signin.SignInService;
+import com.example.newsfeedproject.auth.service.signup.SignUpService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -22,18 +22,21 @@ import java.time.Duration;
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
 public class AuthController {
-    private final SignupService signupService;
-    private final SigninService signinService;
-    @PostMapping("/signup")
-    public ResponseEntity<String> signup(@Valid @RequestBody SignupRequestDto dto){
-        Long userId=signupService.signup(dto);
+    private final SignUpService signUpService;
+    private final SignInService signInService;
+
+    // 회원가입
+    @PostMapping("/signUp")
+    public ResponseEntity<String> signUp(@Valid @RequestBody SignUpRequestDto signUpRequestDto){
+        Long userId = signUpService.signUp(signUpRequestDto);
+
         return ResponseEntity.status(HttpStatus.CREATED).body("회원가입 성공!"+userId);
     }
 
-    //로그인은 200OK
-    @PostMapping("/signin")
-    public ResponseEntity<SigninResponseDto> signin(@Valid @RequestBody SigninRequestDto dto) {
-        SigninResponseDto tokens = signinService.signin(dto);
+    //로그인
+    @PostMapping("/signIn")
+    public ResponseEntity<SignInResponseDto> signIn(@Valid @RequestBody SignInRequestDto signInRequestDto) {
+        SignInResponseDto tokens = signInService.signIn(signInRequestDto);
 
         //리프레시 토큰을 HttpOnly 쿠키로 보내기
         ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", tokens.getRefreshToken())
@@ -48,25 +51,20 @@ public class AuthController {
                 // 여기서 쿠키로 내려보냄
                 .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
                 //바디에는 access만 내려도 됨(refresh는 쿠키로 보냈으니까 null -> 세션으로 보내주세요)
- //               .body(new SigninResponseDto(tokens.getAccessToken(), null));
-        
-                // (개발용) 바디에도 같이 넣기
-                .body(new SigninResponseDto(tokens.getAccessToken(), tokens.getRefreshToken()));
+                .body(new SignInResponseDto(tokens.getAccessToken(), null));
     }
-    //TODO: 로그아웃
-    @PostMapping("/signout")
-    public ResponseEntity<Void> signout() {
-        // refreshToken= : 값 비움
-        //Max-Age=0 + Expires=Thu, 01 Jan 1970…: 즉시 만료
-        //Path=/api/auth/refresh: 쿠키만 삭제
-        // HttpOnly; SameSite=Strict: 아래 옵션 맞춰서 제거
-        ResponseCookie deleteCookie =ResponseCookie.from("refreshToken", "")
-                .httpOnly(true)
+
+    // 로그아웃
+    @PostMapping("/signOut")
+    public ResponseEntity<Void> signOut() {
+        ResponseCookie deleteCookie =ResponseCookie.from("refreshToken", "")// refreshToken= : 값 비움
+                .httpOnly(true)// HttpOnly; SameSite=Strict: 아래 옵션 맞춰서 제거
                 .secure(false)
                 .sameSite("Strict")
-                .path("/api/auth/refresh")
-                .maxAge(0)
+                .path("/api/auth/refresh")//Path=/api/auth/refresh: 쿠키만 삭제
+                .maxAge(0)//Max-Age=0 + Expires=Thu, 01 Jan 1970…: 즉시 만료
                 .build();
+
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, deleteCookie.toString())
                 .build();

@@ -2,10 +2,11 @@ package com.example.newsfeedproject.follow.service;
 
 
 import com.example.newsfeedproject.auth.impl.UserDetailsImpl;
-import com.example.newsfeedproject.common.dto.ReadFollowUsersDto;
+
 import com.example.newsfeedproject.common.exception.FollowErrorCode;
 import com.example.newsfeedproject.common.exception.FollowErrorException;
 import com.example.newsfeedproject.follow.dto.FollowResponseDto;
+import com.example.newsfeedproject.follow.dto.ReadFollowUsersDto;
 import com.example.newsfeedproject.follow.entity.FollowStatus;
 import com.example.newsfeedproject.follow.entity.Follows;
 import com.example.newsfeedproject.follow.repository.FollowsRepository;
@@ -211,6 +212,8 @@ public class FollowsService {
         return requestFollowRepository.findByRequesterAndTarget(requester, me)
                 .orElseThrow(() -> new FollowErrorException(NOT_REQUEST));
     }
+
+
 
 
 }

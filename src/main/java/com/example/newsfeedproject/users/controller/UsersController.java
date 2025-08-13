@@ -2,8 +2,8 @@ package com.example.newsfeedproject.users.controller;
 
 import com.example.newsfeedproject.auth.impl.UserDetailsImpl;
 import com.example.newsfeedproject.common.dto.PrincipalRequestDto;
-import com.example.newsfeedproject.common.dto.ReadUserSimpleResponseDto;
-import com.example.newsfeedproject.users.dto.ReadUsersFeedsResponseDto;
+import com.example.newsfeedproject.users.dto.ReadUserSimpleResponseDto;
+import com.example.newsfeedproject.common.dto.ReadUsersFeedsResponseDto;
 import com.example.newsfeedproject.users.dto.SearchUserResponseDto;
 import com.example.newsfeedproject.users.service.UsersService;
 import lombok.RequiredArgsConstructor;
@@ -30,8 +30,8 @@ public class UsersController {
     @Transactional(readOnly = true)
     public ResponseEntity<ReadUserSimpleResponseDto> readUserSimple(
             @PathVariable Long userId,
-            @AuthenticationPrincipal UserDetailsImpl userDetails){
-
+            @AuthenticationPrincipal UserDetailsImpl userDetails
+    ){
         // 로그인 안한 경우
         if (userDetails==null) {
             throw new IllegalStateException("로그인이 필요합니다.");

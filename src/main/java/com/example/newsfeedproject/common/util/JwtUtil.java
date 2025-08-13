@@ -30,8 +30,7 @@ public class JwtUtil {
         verifier  = JWT.require(algorithm).build();
     }
 
-
-    //Access  Token 생성
+    //AccessToken 생성
     public static String createAccessToken(Long userId, String email) {
         return JWT.create()
                 .withSubject(email)
@@ -40,7 +39,7 @@ public class JwtUtil {
                 .sign(algorithm);
     }
 
-    // Refresh Token 생성
+    // RefreshToken 생성
     public static String createRefreshToken(Long userId) {
         return JWT.create()
                 .withSubject("refresh")
@@ -69,20 +68,10 @@ public class JwtUtil {
         return decode(token).getSubject();
     }
 
-    //토큰에서 userId 클레임(Long) 추출
-    public static Long getUserIdFromToken(String token) {
-        return decode(token).getClaim("userId").asLong();
-    }
-
-    //Spring Security Authentication 객체 생성(권한은 빈 리스트)
-//    public static Authentication getAuthentication(String token) {
-//        String email = getUserEmailFromToken(token);
-//        return new UsernamePasswordAuthenticationToken(email, null, List.of());
-//    }
     public static Authentication getAuthentication(String token, UserDetailsServiceImpl userDetailsServiceImpl) {
         String email = getUserEmailFromToken(token);
         UserDetailsImpl userDetails = userDetailsServiceImpl.loadUserByUsername(email);
+
         return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-        // userDetails에 넣어둔 Autorities 사용
     }
 }

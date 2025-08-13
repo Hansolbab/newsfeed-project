@@ -13,8 +13,10 @@ import java.time.LocalDateTime;
 @Table(name = "follows" ,uniqueConstraints = {
         @UniqueConstraint(columnNames = {"followerId" ,"followeeId"}) // @사용자가 같은 유저를 팔로우 하지 못하게 하기 위함
 })
+@Setter
 @Getter
 public class Follows {
+
 
 
     //Follow Id
@@ -44,6 +46,11 @@ public class Follows {
     @Column(name = "createdAt", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "followStatus", nullable = false)
+    @Setter(AccessLevel.NONE)
+    private FollowStatus followStatus = FollowStatus.NONE;
+
     @PrePersist
     public void prePersist() { // 다시 팔로우 시 새로 세팅
         this.createdAt = LocalDateTime.now();
@@ -67,7 +74,3 @@ public class Follows {
         this.followed = false;
     }
 }
-
-
-
-
