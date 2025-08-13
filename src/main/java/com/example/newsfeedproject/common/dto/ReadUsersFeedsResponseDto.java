@@ -1,7 +1,6 @@
-package com.example.newsfeedproject.users.dto;
+package com.example.newsfeedproject.common.dto;
 
 
-import com.example.newsfeedproject.feedimg.entity.FeedImg;
 import lombok.Getter;
 
 import java.util.List;

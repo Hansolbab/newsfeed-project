@@ -19,17 +19,15 @@ public class ProfileImageService {
 
     // 프로필사진 수정
     @Transactional
-    public void updateProfileImageUrl(Long meId, String newprofileImageUrl) {
+    public void updateProfileImageUrl(Long meId, String newProfileImageUrl) {
         Users user = usersRepository.findById(meId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "사용자 정보를 찾을 수 없습니다."));
 
         //409
-        if (newprofileImageUrl.equals(user.getProfileImageUrl())) {
+        if (newProfileImageUrl.equals(user.getProfileImageUrl())) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "현재 프로필이미지와 동일합니다.");
-
-            //변경
         }
-        user.setProfileImageUrl(newprofileImageUrl);
+        user.setProfileImageUrl(newProfileImageUrl);
     }
 
     //삭제

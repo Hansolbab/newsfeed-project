@@ -5,7 +5,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -18,11 +17,11 @@ public interface LikesRepository extends JpaRepository<Likes, Long> {
     Optional<Likes> findByUserIdAndFeedIdAndLikedTrue(Long userId, Long feedId);
 
     //너무 복잡하고 쿼리를 사용하지 않으면 메서드가 너무 길고 모든 엔티티를 돌지만 이러면, 걸러서 줍니다.
-    @Query("select distinct  l.feedId " + // 중복되지 않는 feedId
-            "from Likes l" + // Like 테이블에서
-            " where l.userId = :userId " + // 유저를 포함하고
-            "and l.liked = true " + //좋아요도 눌려 있고
-            "and l.feedId in :feedIds") // feedIds 목록이 포함
+    @Query("SELECT DISTINCT  l.feedId " + // 중복되지 않는 feedId
+            "FROM Likes l " + // Like 테이블에서
+            "WHERE l.userId = :userId " + // 유저를 포함하고
+            "AND l.liked = true " + //좋아요도 눌려 있고
+            "AND l.feedId IN :feedIds") // feedIds 목록이 포함
     Set<Long> findLikedFeedIds(@Param("userId") Long userId , @Param("feedIds") Collection<Long> feedIds);
 
     // Query문으로 진행, Likes Table의 feedId로 Count
@@ -34,7 +33,8 @@ public interface LikesRepository extends JpaRepository<Likes, Long> {
 
     @Query("SELECT l.feedId, l.liked " +
             "FROM Likes l " +                // Likes Table as l
-            "WHERE l.feedId IN :feedIds AND l.userId = :userId "  // feedIds 리스트 IN AND Likes Table의 liked = true 값
+            "WHERE l.feedId IN :feedIds " +
+            "AND l.userId = :userId "  // feedIds 리스트 IN AND Likes Table의 liked = true 값
             )
     List<Object []> isLikedByFeedIdsANDUserId(@Param("feedIds") List<Long> feedIds, @Param("userId") Long userId);
 
@@ -43,6 +43,6 @@ public interface LikesRepository extends JpaRepository<Likes, Long> {
     Long countByFeedIdAndLikedTrue(Long feedId);
 
 
-    @Query("select l.feedId from  Likes l where  l.userId = :meId")
+    @Query("SELECT l.feedId FROM  Likes l WHERE  l.userId = :meId")
     Set<Long> findLikesByFeedId(@Param(("meId")) Long meId);
 }

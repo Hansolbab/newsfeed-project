@@ -1,15 +1,16 @@
 package com.example.newsfeedproject.feeds.service;
 
+import com.example.newsfeedproject.auth.impl.UserDetailsImpl;
 import com.example.newsfeedproject.category.entity.Category;
 import com.example.newsfeedproject.feeds.entity.Feeds;
-import com.example.newsfeedproject.feeds.dto.CreateFeedRequestDto;
-import com.example.newsfeedproject.feeds.dto.FeedResponseDto;
-import com.example.newsfeedproject.feeds.dto.UpdateFeedRequestDto;
+import com.example.newsfeedproject.feeds.dto.CreateFeedsRequestDto;
+import com.example.newsfeedproject.feeds.dto.FeedsResponseDto;
+import com.example.newsfeedproject.feeds.dto.UpdateFeedsRequestDto;
 import com.example.newsfeedproject.feeds.repository.FeedsRepository;
 import com.example.newsfeedproject.likes.repository.LikesRepository;
 import com.example.newsfeedproject.users.entity.Users;
 import com.example.newsfeedproject.users.repository.UsersRepository;
-import com.example.newsfeedproject.feedimg.entity.FeedImg;
+import com.example.newsfeedproject.feedimg.entity.FeedImage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -17,21 +18,19 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-
-
 // 게시글 관련 비즈니스 로직 처리 서비스
 @Service
 @RequiredArgsConstructor
 public class FeedsService {
-
     private final FeedsRepository feedsRepository;
     private final UsersRepository usersRepository;
     private final LikesRepository likesRepository;
 
     // 게시글 생성 기능
     @Transactional
-    public Feeds createFeed(CreateFeedRequestDto requestDto, String userEmail) { // userEmail 기반
+    public Feeds createFeed(CreateFeedsRequestDto createFeedsRequestDto, UserDetailsImpl userDetails) { // userEmail 기반
+
+        String userEmail = userDetails.getUsername(); // 이메일 값 들고옴
         // 1. 게시글 작성 사용자 조회
         Users user = usersRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다.")); // Custom Exception으로 변경 권장
@@ -39,42 +38,39 @@ public class FeedsService {
         // 2. Feeds 엔티티 생성
         Feeds feeds = Feeds.builder()
                 .user(user)
-                .contents(requestDto.getContents())
-                .category(requestDto.getCategory())
+                .contents(createFeedsRequestDto.getContents())
+                .category(createFeedsRequestDto.getCategory())
                 // likeTotal, commentTotal은 @Builder에 초기화되지 않음 (엔티티에 필드 없음)
                 .build();
 
         // 3. 이미지 URL 목록을 FeedImg 엔티티로 변환하여 Feeds에 연결
-        for (String imageUrl : requestDto.getFeedImageUrlList()) {
-            FeedImg feedImg = FeedImg.builder()
+        for (String imageUrl : createFeedsRequestDto.getFeedImageUrlList()) {
+            FeedImage feedImg = FeedImage.builder()
                     .feedImageUrl(imageUrl)
+                    .feed(feeds)
                     .deleted(false)
-                    // feed 필드는 addFeedImg에서 설정
                     .build();
-            feeds.addFeedImg(feedImg); // Feeds 엔티티의 addFeedImg 편의 메소드 사용
+            feeds.getFeedImageList().add(feedImg);
         }
-
         // 4. Feeds 엔티티 저장
         feedsRepository.save(feeds);
-
         // 생성된 Feeds 엔티티 자체를 반환 (Controller에서 DTO 변환)
         return feeds;
     }
 
     // 게시글 전체 조회 (페이징, 최신순)
     @Transactional(readOnly = true)
-    public Page<FeedResponseDto> getAllFeeds(int page, int size, String currentUserEmail, Category category) {
+    public Page<FeedsResponseDto> readAllFeeds(int page, int size, UserDetailsImpl userDetails) {
+
+
         Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
         Pageable pageable = PageRequest.of(page, size, sort);
 
+        String currentUserEmail = userDetails.getUsername(); // 이메일 값 들고옴
+
         Page<Feeds> feedsPage;
-        if (category != null) {
-            // 카테고리 필터링이 있는 경우 - deleted=false 조건 추가
-            feedsPage = feedsRepository.findByCategoryAndDeletedFalse(category, pageable);
-        } else {
-            // 카테고리 필터링이 없는 경우 - deleted=false 조건 추가
-            feedsPage = feedsRepository.findByDeletedFalse(pageable);
-        }
+
+        feedsPage = feedsRepository.findByDeletedFalse(pageable);
 
         // 현재 사용자 ID 조회 (liked 판단용)
         Long currentUserId = usersRepository.findByEmail(currentUserEmail)
@@ -84,17 +80,21 @@ public class FeedsService {
         // Feeds 엔티티를 FeedResponseDto로 변환
         return feedsPage.map(feeds -> {
             boolean liked = (currentUserId != null) && likesRepository.findByUserIdAndFeedIdAndLikedTrue(currentUserId, feeds.getFeedId()).isPresent();
+
+
             // likeTotal, commentTotal은 Feeds 엔티티에 없으므로 DTO에서 0으로 초기화될 것
-            return new FeedResponseDto(feeds, liked);
+            return new FeedsResponseDto(feeds, liked);
         });
     }
 
     // 게시글 단건 조회
     @Transactional(readOnly = true)
-    public FeedResponseDto getFeedById(Long feedId, String currentUserEmail) {
+    public FeedsResponseDto readFeedById(Long feedId,  UserDetailsImpl userDetails) {
         // deleted=false 조건 추가
         Feeds feeds = feedsRepository.findByFeedIdAndDeletedFalse(feedId)
                 .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다."));
+
+        String currentUserEmail = userDetails.getUsername(); // 이메일 값 들고옴
 
         // 현재 사용자 ID 조회 (liked 판단용)
         Long currentUserId = usersRepository.findByEmail(currentUserEmail)
@@ -104,12 +104,16 @@ public class FeedsService {
         // 현재 사용자가 해당 게시글에 좋아요를 눌렀는지 확인
         boolean liked = (currentUserId != null) && likesRepository.findByUserIdAndFeedIdAndLikedTrue(currentUserId, feeds.getFeedId()).isPresent();
 
-        return new FeedResponseDto(feeds, liked);
+        return new FeedsResponseDto(feeds, liked);
     }
 
     // 게시글 수정
     @Transactional
-    public FeedResponseDto updateFeed(Long feedId, UpdateFeedRequestDto requestDto, String currentUserEmail) {
+    public FeedsResponseDto updateFeed(Long feedId, UpdateFeedsRequestDto updateFeedsRequestDto,
+                                       UserDetailsImpl userDetails) {
+
+        String currentUserEmail = userDetails.getUsername(); // 이메일 값 들고옴
+
         // 1. 게시글 조회 (존재 여부 및 작성자 권한 확인)
         Feeds feeds = feedsRepository.findById(feedId)
                 .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다.")); // Custom Exception으로 변경 권장
@@ -124,28 +128,32 @@ public class FeedsService {
         }
 
         // 4. 게시글 내용 및 카테고리 업데이트
-        feeds.update(requestDto.getContents(), requestDto.getCategory());
+        feeds.update(updateFeedsRequestDto.getContents(), updateFeedsRequestDto.getCategory());
 
         // 5. 이미지 목록 업데이트 (기존 이미지 삭제 후 새로 추가)
         feeds.getFeedImageList().clear(); // 기존 이미지 목록 삭제
 
         // 요청 DTO의 새 이미지 URL 목록으로 FeedImg 엔티티 재생성 및 연결
-        for (String imageUrl : requestDto.getFeedImageUrlList()) {
-            FeedImg newFeedImg = FeedImg.builder()
+        for (String imageUrl : updateFeedsRequestDto.getFeedImageUrlList()) {
+            FeedImage newFeedImg = FeedImage.builder()
                     .feedImageUrl(imageUrl)
+                    .feed(feeds)
                     .deleted(false)
                     .build();
-            feeds.addFeedImg(newFeedImg); // 새 이미지 추가 (Feeds 엔티티의 addFeedImg 메소드 사용)
+            feeds.getFeedImageList().add(newFeedImg); // 새 이미지 추가 (Feeds 엔티티의 addFeedImg 메소드 사용)
         }
 
         // 6. 업데이트된 Feeds 엔티티를 기반으로 응답 DTO 반환
         boolean liked = likesRepository.findByUserIdAndFeedIdAndLikedTrue(currentUser.getUserId(), feeds.getFeedId()).isPresent();
-        return new FeedResponseDto(feeds, liked);
+        return new FeedsResponseDto(feeds, liked);
     }
 
     // 게시글 삭제
     @Transactional
-    public void deleteFeed(Long feedId, String currentUserEmail) {
+    public void deleteFeed(Long feedId,  UserDetailsImpl userDetails) {
+
+        String currentUserEmail = userDetails.getUsername(); // 이메일 값 들고옴
+
         // 1. 게시글 조회 (존재 여부 및 작성자 권한 확인)
         Feeds feeds = feedsRepository.findById(feedId)
                 .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다.")); // Custom Exception으로 변경 권장
@@ -167,7 +175,11 @@ public class FeedsService {
 
     // 1. 모든 소프트 삭제된 게시글 조회
     @Transactional(readOnly = true)
-    public Page<FeedResponseDto> getAllDeletedFeeds(int page, int size, String currentUserEmail) {
+    public Page<FeedsResponseDto> readAllDeletedFeeds(int page, int size, UserDetailsImpl userDetails) {
+
+
+        String currentUserEmail = userDetails.getUsername(); // 이메일 값 들고옴
+
         Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
         Pageable pageable = PageRequest.of(page, size, sort);
 
@@ -179,13 +191,17 @@ public class FeedsService {
 
         return feedsPage.map(feeds -> {
             boolean liked = (currentUserId != null) && likesRepository.findByUserIdAndFeedIdAndLikedTrue(currentUserId, feeds.getFeedId()).isPresent();
-            return new FeedResponseDto(feeds, liked);
+            return new FeedsResponseDto(feeds, liked);
         });
     }
 
     // 2. 특정 소프트 삭제된 게시글 단건 조회
     @Transactional(readOnly = true)
-    public FeedResponseDto getDeletedFeedById(Long feedId, String currentUserEmail) {
+    public FeedsResponseDto readDeletedFeedById(Long feedId,  UserDetailsImpl userDetails) {
+
+
+        String currentUserEmail = userDetails.getUsername(); // 이메일 값 들고옴
+
         Feeds feeds = feedsRepository.findByFeedIdAndDeletedTrue(feedId) // deleted=true인 게시글만 조회
                 .orElseThrow(() -> new IllegalArgumentException("삭제된 게시글을 찾을 수 없습니다."));
 
@@ -195,12 +211,16 @@ public class FeedsService {
 
         boolean liked = (currentUserId != null) && likesRepository.findByUserIdAndFeedIdAndLikedTrue(currentUserId, feeds.getFeedId()).isPresent();
 
-        return new FeedResponseDto(feeds, liked);
+        return new FeedsResponseDto(feeds, liked);
     }
 
     // 소프트 삭제된 게시글 복구 (restore) 메소드
     @Transactional
-    public FeedResponseDto restoreFeed(Long feedId, String userEmail) {
+    public FeedsResponseDto restoreFeed(Long feedId,  UserDetailsImpl userDetails) {
+
+
+        String userEmail = userDetails.getUsername(); // 이메일 값 들고옴
+
         Feeds feeds = feedsRepository.findByFeedIdAndDeletedTrue(feedId) // 삭제된 게시글만 조회
                 .orElseThrow(() -> new IllegalArgumentException("복구할 게시글이 없거나 삭제된 상태가 아닙니다."));
 
@@ -214,7 +234,7 @@ public class FeedsService {
 
         // 복구 후 다시 정상 게시글처럼 DTO 반환
         boolean liked = likesRepository.findByUserIdAndFeedIdAndLikedTrue(currentUser.getUserId(), feeds.getFeedId()).isPresent();
-        return new FeedResponseDto(feeds, liked);
+        return new FeedsResponseDto(feeds, liked);
     }
 
 

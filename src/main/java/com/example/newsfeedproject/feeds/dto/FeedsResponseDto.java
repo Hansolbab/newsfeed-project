@@ -2,7 +2,7 @@ package com.example.newsfeedproject.feeds.dto;
 
 import com.example.newsfeedproject.feeds.entity.Feeds;
 import com.example.newsfeedproject.category.entity.Category;
-import com.example.newsfeedproject.feedimg.entity.FeedImg;
+import com.example.newsfeedproject.feedimg.entity.FeedImage;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 
 @Getter
 @Setter
-public class FeedResponseDto {
+public class FeedsResponseDto {
 
     // 게시글 고유 ID
     private Long feedId;
@@ -45,12 +45,12 @@ public class FeedResponseDto {
     private LocalDateTime updatedAt;
 
     // Feeds 엔티티와 'liked' 여부로부터 DTO 생성
-    public FeedResponseDto(Feeds feeds, boolean liked) {
+    public FeedsResponseDto(Feeds feeds, boolean liked) {
         this.feedId = feeds.getFeedId();
         this.user = new UserInfo(feeds.getUser().getUserName(), feeds.getUser().getProfileImageUrl());
         this.contents = feeds.getContents();
         this.feedImageUrlList = feeds.getFeedImageList().stream() // Feeds 엔티티의 feedImgs에서 imageUrl 추출
-                .map(FeedImg::getFeedImageUrl)
+                .map(FeedImage::getFeedImageUrl)
                 .collect(Collectors.toList());
         this.category = feeds.getCategory(); // Feeds 엔티티에서 가져옴
         // likeTotal, commentTotal은 Feeds 엔티티에 없으므로 DTO에서 0으로 초기화
@@ -59,8 +59,8 @@ public class FeedResponseDto {
         this.updatedAt = feeds.getUpdatedAt();
     }
 
-    public static FeedResponseDto toDto( Feeds feeds, boolean liked) {
-        return  new FeedResponseDto( feeds , liked);
+    public static FeedsResponseDto toDto(Feeds feeds, boolean liked) {
+        return  new FeedsResponseDto( feeds , liked);
     }
 
 

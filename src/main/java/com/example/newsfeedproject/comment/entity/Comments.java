@@ -12,14 +12,12 @@ import java.time.LocalDateTime;
 
 @Entity
 @Getter
-@Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
 @EntityListeners(AuditingEntityListener.class)
 @Table(name = "Comments")
 public class Comments {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long commentId;
@@ -34,9 +32,7 @@ public class Comments {
 
     // Feed 랑 mapping
     @ManyToOne(fetch = FetchType.LAZY)
-
     @JoinColumn(name = "feedId", nullable = false)
-
     private Feeds feedComments;
 
     // 댓글 생성일

@@ -11,7 +11,7 @@ import java.util.List;
 
 @Getter
 @Setter
-public class UpdateFeedRequestDto {
+public class UpdateFeedsRequestDto {
 
     // 게시글 내용 (필수, 길이 제한)
     @NotBlank(message = "게시글 내용은 필수 입력 항목입니다.")

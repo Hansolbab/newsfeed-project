@@ -1,7 +1,6 @@
 package com.example.newsfeedproject.common.dto;
 
 import lombok.Getter;
-
 import java.util.Set;
 
 @Getter
@@ -11,7 +10,11 @@ public class PrincipalRequestDto {
 
     public PrincipalRequestDto(Long userId, Set<String> authorities) {
         this.userId = userId;
-        if (authorities.isEmpty()){ this.authorities = Set.of(); }
-        else { this.authorities = Set.copyOf(authorities); }
+        if (authorities.isEmpty()){
+            this.authorities = Set.of();
+        }
+        else {
+            this.authorities = Set.copyOf(authorities);
+        }
     }
 }

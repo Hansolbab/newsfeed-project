@@ -2,8 +2,7 @@ package com.example.newsfeedproject.follow.service;
 
 
 import com.example.newsfeedproject.auth.impl.UserDetailsImpl;
-import com.example.newsfeedproject.common.dto.ReadFollowUsersDto;
-import com.example.newsfeedproject.common.exception.FollowErrorCode;
+import com.example.newsfeedproject.follow.dto.ReadFollowUsersDto;
 import com.example.newsfeedproject.common.exception.FollowErrorException;
 import com.example.newsfeedproject.follow.dto.FollowResponseDto;
 import com.example.newsfeedproject.follow.entity.FollowStatus;
@@ -12,14 +11,10 @@ import com.example.newsfeedproject.follow.repository.FollowsRepository;
 import com.example.newsfeedproject.users.entity.Users;
 import com.example.newsfeedproject.users.repository.UsersRepository;
 import jakarta.transaction.Transactional;
-import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
-import org.apache.catalina.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -37,11 +32,13 @@ public class FollowsService {
     public FollowResponseDto follow(UserDetailsImpl userDetails, Long userId) {
 
         Follows relation = getRelation(userDetails, userId);
-        relation.accept();
+
 
         if(relation.isFollowed()){
+
             throw new FollowErrorException(ALREADY_FOLLOW);
         }
+        relation.accept();
 
         followsRepository.save(relation);
 
@@ -263,8 +260,4 @@ public class FollowsService {
         return followsRepository.findByFollowerAndFollowee(follower, me)
                 .orElseThrow(() -> new FollowErrorException(NOT_REQUEST));
     }
-
-
-
-
 }

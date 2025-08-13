@@ -3,7 +3,7 @@ package com.example.newsfeedproject.feeds.entity;
 import com.example.newsfeedproject.category.entity.Category;
 import com.example.newsfeedproject.comment.entity.Comments;
 import com.example.newsfeedproject.users.entity.Users;
-import com.example.newsfeedproject.feedimg.entity.FeedImg;
+import com.example.newsfeedproject.feedimg.entity.FeedImage;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
@@ -15,8 +15,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Getter
-@Setter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+
+@NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @Entity
@@ -46,7 +46,7 @@ public class Feeds {
     // 게시글 이미지 목록 (FeedImg 엔티티와의 1:N 관계, cascade = ALL로 연관 작업 자동화)
     @Builder.Default
     @OneToMany(mappedBy = "feed", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<FeedImg> feedImageList = new ArrayList<>();
+    private List<FeedImage> feedImageList = new ArrayList<>();
 
     @Builder.Default
     @OneToMany(mappedBy = "feedComments", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -63,6 +63,7 @@ public class Feeds {
     private LocalDateTime updatedAt;
 
     @Builder.Default // 빌더 사용 시 기본값 설정
+    @Setter
     @Column(name = "deleted", nullable = false)
     private boolean deleted = false;
 
@@ -73,15 +74,13 @@ public class Feeds {
         this.category = category;
     }
 
-    // FeedImg 추가 시 양방향 연관관계 설정 편의 메소드
-    public void addFeedImg(FeedImg feedImg) {
-        this.feedImageList.add(feedImg);
-        feedImg.setFeed(this); // FeedImg 엔티티에도 현재 Feeds 엔티티 연결
-    }
-
     // 소프트 삭제 처리 메서드 추가
     public void softDelete() {
         this.deleted = true;
+    }
+
+    public void restore() {
+        this.deleted = false;
     }
 
     // (참고: likeTotal, commentTotal 관련 메소드는 엔티티에 필드가 없으므로 포함하지 않음)
