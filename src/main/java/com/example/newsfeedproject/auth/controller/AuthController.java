@@ -3,7 +3,6 @@ package com.example.newsfeedproject.auth.controller;
 
 import com.example.newsfeedproject.auth.dto.signin.SigninRequestDto;
 import com.example.newsfeedproject.auth.dto.signin.SigninResponseDto;
-import com.example.newsfeedproject.auth.dto.signup.SignupRequestDto;
 import com.example.newsfeedproject.auth.service.signin.SigninService;
 import com.example.newsfeedproject.auth.service.signup.SignupService;
 import jakarta.validation.Valid;
