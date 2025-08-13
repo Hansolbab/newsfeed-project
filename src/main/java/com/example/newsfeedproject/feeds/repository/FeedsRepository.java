@@ -46,4 +46,10 @@ public interface FeedsRepository extends JpaRepository<Feeds, Long> {
               countQuery = "select count(f) from Feeds f where f.feedId in :feedIds")
     Page<Feeds> findByIdIn(@Param("feedIds")Set<Long> feedIds, Pageable pageable);
 
+    // 1. 모든 소프트 삭제된 게시글 조회 (페이징 포함)
+    Page<Feeds> findByDeletedTrue(Pageable pageable);
+
+    // 2. 특정 소프트 삭제된 게시글 단건 조회
+    Optional<Feeds> findByFeedIdAndDeletedTrue(Long feedId);
+
 }

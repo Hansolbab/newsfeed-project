@@ -118,4 +118,40 @@ public class FeedsController {
         // 성공 시 204 No Content 상태 코드 반환 (응답 본문 없음)
         return ResponseEntity.noContent().build();
     }
+
+    // 소프트 삭제된 게시글 조회)
+
+    // 1. 모든 소프트 삭제된 게시글 조회 API (GET /api/feeds/deleted)
+    @GetMapping("/deleted")
+    public ResponseEntity<Page<FeedResponseDto>> getAllDeletedFeeds(
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size,
+            @AuthenticationPrincipal UserDetailsImpl userDetailsImpl
+    ) {
+        String userEmail = userDetailsImpl.getUsername();
+        Page<FeedResponseDto> feedsPage = feedsService.getAllDeletedFeeds(page, size, userEmail);
+        return ResponseEntity.ok(feedsPage);
+    }
+
+    // 2. 특정 소프트 삭제된 게시글 단건 조회 API (GET /api/feeds/deleted/{feedId})
+    @GetMapping("/deleted/{feedId}")
+    public ResponseEntity<FeedResponseDto> getDeletedFeedById(
+            @PathVariable Long feedId,
+            @AuthenticationPrincipal UserDetailsImpl userDetailsImpl
+    ) {
+        String userEmail = userDetailsImpl.getUsername();
+        FeedResponseDto responseDto = feedsService.getDeletedFeedById(feedId, userEmail);
+        return ResponseEntity.ok(responseDto);
+    }
+
+    // 게시글 복구 API (PUT /api/feeds/restore/{feedId})
+    @PutMapping("/restore/{feedId}")
+    public ResponseEntity<FeedResponseDto> restoreFeed(
+            @PathVariable Long feedId,
+            @AuthenticationPrincipal UserDetailsImpl userDetailsImpl
+    ) {
+        String userEmail = userDetailsImpl.getUsername();
+        FeedResponseDto responseDto = feedsService.restoreFeed(feedId, userEmail);
+        return ResponseEntity.ok(responseDto);
+    }
 }
