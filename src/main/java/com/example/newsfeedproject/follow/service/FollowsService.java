@@ -159,8 +159,7 @@ public class FollowsService {
     //팔로우 목록 조회
 
 
-
-    //이 사람을 팔로우 하는 사람
+    //이 사람을 팔로우 하는 사람 == 이사람의 팔로워 목록  재혁님이 -> 재민(나를 팔로워 하는) => 팔로워 재혁
     public Page<ReadFollowUsersDto> readFollowerList(Long meId, Long userId , Pageable pageable) {
 
         if (!usersRepository.existsById(userId)) {

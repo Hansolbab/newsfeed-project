@@ -24,7 +24,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.stream.Collectors;
 
@@ -106,6 +105,19 @@ public class MyinfoController {
     public ResponseEntity<Void> deleteProfileImage(@AuthenticationPrincipal UserDetailsImpl me){
         profileImageService.setPlaceholderUrl(me.getUserId());
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/likefeeds")
+    @Transactional(readOnly = true)
+    public ResponseEntity<Page<FeedResponseDto>> readFeedsByMyLikes(
+            @AuthenticationPrincipal UserDetailsImpl userDetails,
+            @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+    ) {
+        if(userDetails == null) {
+            throw new IllegalArgumentException("로그인이 필요합니다.");
+        }
+
+        return new ResponseEntity<>(myinfoService.readFeedsByMyLikes(userDetails, pageable) ,HttpStatus.OK);
     }
 
 }

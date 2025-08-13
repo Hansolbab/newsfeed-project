@@ -1,5 +1,6 @@
 package com.example.newsfeedproject.feeds.service;
 
+import com.example.newsfeedproject.category.entity.Category;
 import com.example.newsfeedproject.feeds.entity.Feeds;
 import com.example.newsfeedproject.feeds.dto.CreateFeedRequestDto;
 import com.example.newsfeedproject.feeds.dto.FeedResponseDto;
@@ -62,11 +63,18 @@ public class FeedsService {
 
     // 게시글 전체 조회 (페이징, 최신순)
     @Transactional(readOnly = true)
-    public Page<FeedResponseDto> getAllFeeds(int page, int size, String currentUserEmail) {
+    public Page<FeedResponseDto> getAllFeeds(int page, int size, String currentUserEmail, Category category) {
         Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
         Pageable pageable = PageRequest.of(page, size, sort);
 
-        Page<Feeds> feedsPage = feedsRepository.findAll(pageable);
+        Page<Feeds> feedsPage;
+        if (category != null) {
+            // 카테고리 필터링이 있는 경우 - deleted=false 조건 추가
+            feedsPage = feedsRepository.findByCategoryAndDeletedFalse(category, pageable);
+        } else {
+            // 카테고리 필터링이 없는 경우 - deleted=false 조건 추가
+            feedsPage = feedsRepository.findByDeletedFalse(pageable);
+        }
 
         // 현재 사용자 ID 조회 (liked 판단용)
         Long currentUserId = usersRepository.findByEmail(currentUserEmail)
@@ -84,7 +92,8 @@ public class FeedsService {
     // 게시글 단건 조회
     @Transactional(readOnly = true)
     public FeedResponseDto getFeedById(Long feedId, String currentUserEmail) {
-        Feeds feeds = feedsRepository.findById(feedId)
+        // deleted=false 조건 추가
+        Feeds feeds = feedsRepository.findByFeedIdAndDeletedFalse(feedId)
                 .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다."));
 
         // 현재 사용자 ID 조회 (liked 판단용)
@@ -151,6 +160,62 @@ public class FeedsService {
         }
 
         // 4. 게시글 삭제
-        feedsRepository.delete(feeds);
+        feeds.softDelete();
+
+
     }
+
+    // 1. 모든 소프트 삭제된 게시글 조회
+    @Transactional(readOnly = true)
+    public Page<FeedResponseDto> getAllDeletedFeeds(int page, int size, String currentUserEmail) {
+        Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        Page<Feeds> feedsPage = feedsRepository.findByDeletedTrue(pageable); // deleted=true인 게시글만 조회
+
+        Long currentUserId = usersRepository.findByEmail(currentUserEmail)
+                .map(Users::getUserId)
+                .orElse(null);
+
+        return feedsPage.map(feeds -> {
+            boolean liked = (currentUserId != null) && likesRepository.findByUserIdAndFeedIdAndLikedTrue(currentUserId, feeds.getFeedId()).isPresent();
+            return new FeedResponseDto(feeds, liked);
+        });
+    }
+
+    // 2. 특정 소프트 삭제된 게시글 단건 조회
+    @Transactional(readOnly = true)
+    public FeedResponseDto getDeletedFeedById(Long feedId, String currentUserEmail) {
+        Feeds feeds = feedsRepository.findByFeedIdAndDeletedTrue(feedId) // deleted=true인 게시글만 조회
+                .orElseThrow(() -> new IllegalArgumentException("삭제된 게시글을 찾을 수 없습니다."));
+
+        Long currentUserId = usersRepository.findByEmail(currentUserEmail)
+                .map(Users::getUserId)
+                .orElse(null);
+
+        boolean liked = (currentUserId != null) && likesRepository.findByUserIdAndFeedIdAndLikedTrue(currentUserId, feeds.getFeedId()).isPresent();
+
+        return new FeedResponseDto(feeds, liked);
+    }
+
+    // 소프트 삭제된 게시글 복구 (restore) 메소드
+    @Transactional
+    public FeedResponseDto restoreFeed(Long feedId, String userEmail) {
+        Feeds feeds = feedsRepository.findByFeedIdAndDeletedTrue(feedId) // 삭제된 게시글만 조회
+                .orElseThrow(() -> new IllegalArgumentException("복구할 게시글이 없거나 삭제된 상태가 아닙니다."));
+
+        Users currentUser = usersRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new IllegalArgumentException("현재 사용자를 찾을 수 없습니다."));
+
+        if (!feeds.getUser().getUserId().equals(currentUser.getUserId())) {
+            throw new IllegalArgumentException("게시글 복구 권한이 없습니다."); // 삭제한 사용자만 복구 가능 등 정책 필요
+        }
+        feeds.setDeleted(false); // deleted 필드를 false로 변경하여 복구
+
+        // 복구 후 다시 정상 게시글처럼 DTO 반환
+        boolean liked = likesRepository.findByUserIdAndFeedIdAndLikedTrue(currentUser.getUserId(), feeds.getFeedId()).isPresent();
+        return new FeedResponseDto(feeds, liked);
+    }
+
+
 }

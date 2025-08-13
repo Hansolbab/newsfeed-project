@@ -37,4 +37,16 @@ public class MyinfoService {
 
         return  feedsPage.map(feeds -> FeedResponseDto.toDto(feeds, likedIdSet.contains(feeds.getFeedId())));
     }
+
+    public Page<FeedResponseDto> readFeedsByMyLikes(UserDetailsImpl userDetails, Pageable pageable) {
+
+        Long meId =  userDetails.getUserId();
+
+        Set<Long> likesIdSet =  likesRepository.findLikesByFeedId(meId);
+
+
+        return (likesIdSet.isEmpty()) ? Page.empty(pageable)
+                :feedsRepository.findByIdIn(likesIdSet, pageable)
+                .map(feeds -> FeedResponseDto.toDto(feeds , true));
+    }
 }

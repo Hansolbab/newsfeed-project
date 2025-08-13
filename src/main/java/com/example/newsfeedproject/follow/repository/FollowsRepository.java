@@ -27,7 +27,7 @@ public interface FollowsRepository extends JpaRepository<Follows , Long> {
 
     @Query("select f.followee.userId " + //팔로우 당하는 사람의 아이디 값을 찾아온다.
             "from  Follows f" + // 팔로우 테이블로부터
-            " where f.follower.userId = :meId") // 내가 팔로워하는 사람과 은
+            " where f.follower.userId = :meId") // 내가 팔로워하는 사람과
     Set<Long> findFolloweeIdsOf(@Param("meId") Long meId);
 
 

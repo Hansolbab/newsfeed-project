@@ -5,11 +5,7 @@ import com.example.newsfeedproject.comment.entity.Comments;
 import com.example.newsfeedproject.users.entity.Users;
 import com.example.newsfeedproject.feedimg.entity.FeedImg;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -21,6 +17,8 @@ import java.util.List;
 @Getter
 @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
+@Builder
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 @Table(name = "feeds")
@@ -46,9 +44,11 @@ public class Feeds {
     private Category category;
 
     // 게시글 이미지 목록 (FeedImg 엔티티와의 1:N 관계, cascade = ALL로 연관 작업 자동화)
+    @Builder.Default
     @OneToMany(mappedBy = "feed", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<FeedImg> feedImageList = new ArrayList<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "feedComments", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comments> comments = new ArrayList<>();
 
@@ -62,14 +62,10 @@ public class Feeds {
     @Column
     private LocalDateTime updatedAt;
 
-    // Feeds 객체 생성자 (빌더 패턴)
-    @Builder
-    public Feeds(Users user, String contents, Category category) {
-        this.user = user;
-        this.contents = contents;
-        this.category = category;
-        // likeTotal, commentTotal은 엔티티에 없으므로 초기화 로직 없음
-    }
+    @Builder.Default // 빌더 사용 시 기본값 설정
+    @Column(name = "deleted", nullable = false)
+    private boolean deleted = false;
+
 
     // 게시글 내용 및 카테고리 수정 메소드
     public void update(String contents, Category category) {
@@ -81,6 +77,11 @@ public class Feeds {
     public void addFeedImg(FeedImg feedImg) {
         this.feedImageList.add(feedImg);
         feedImg.setFeed(this); // FeedImg 엔티티에도 현재 Feeds 엔티티 연결
+    }
+
+    // 소프트 삭제 처리 메서드 추가
+    public void softDelete() {
+        this.deleted = true;
     }
 
     // (참고: likeTotal, commentTotal 관련 메소드는 엔티티에 필드가 없으므로 포함하지 않음)
