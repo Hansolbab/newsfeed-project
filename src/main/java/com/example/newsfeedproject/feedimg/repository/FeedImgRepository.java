@@ -1,17 +1,15 @@
 package com.example.newsfeedproject.feedimg.repository;
 
-import com.example.newsfeedproject.feedimg.entity.FeedImg;
+import com.example.newsfeedproject.feedimg.entity.FeedImage;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.Map;
 
 @Repository
-public interface FeedImgRepository extends JpaRepository<FeedImg, Long> {
-
+public interface FeedImgRepository extends JpaRepository<FeedImage, Long> {
 
     // Query문으로 진행, Comments Table의 feedId로 Count
     @Query("SELECT f.feedId, i.feedImageUrl " +
@@ -19,5 +17,4 @@ public interface FeedImgRepository extends JpaRepository<FeedImg, Long> {
             "LEFT JOIN f.feedImageList i " +
             "WHERE f.feedId IN (:feedIds) ")// 연관관계 있으므로 LEFT JOIN 사용
     List<Object[]> findFeedImgByFeedId(@Param("feedIds") List<Long> feedIds);
-
 }

@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Service
@@ -34,6 +33,6 @@ public class WithdrawAccountService {
 
         String scrambled=passwordEncoder.encode("DELETE:"+ UUID.randomUUID());
 
-        user.softDelete(scrambled, LocalDateTime.now());
+        user.softDelete(scrambled);
     }
 }

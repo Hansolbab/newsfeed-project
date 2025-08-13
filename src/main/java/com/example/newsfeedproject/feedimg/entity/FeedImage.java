@@ -6,22 +6,20 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import lombok.AllArgsConstructor;
 
 @Entity
 @Getter
-@Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
-@Table(name = "FeedImg")
-public class FeedImg {
+@Table(name = "FeedImage")
+public class FeedImage {
 
     // 이미지 고유 ID (Primary Key)
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long feedImgId;
+    private Long feedImageId;
 
     // 이미지가 속한 게시글 참조 (N:1 관계)
     @ManyToOne(fetch = FetchType.LAZY)
@@ -35,4 +33,14 @@ public class FeedImg {
     // 삭제 여부
     @Column(name="deleted", nullable = false) // not null
     private boolean deleted;
+
+    public FeedImage(String feedImageUrl, Feeds feed) {
+        this.feedImageUrl = feedImageUrl;
+        this.feed = feed;
+    }
+
+    public void setDeleted(boolean deleted) {
+        this.deleted = deleted;
+    }
+
 }

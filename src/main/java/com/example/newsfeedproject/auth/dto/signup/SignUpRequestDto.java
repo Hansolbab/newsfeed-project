@@ -2,11 +2,9 @@ package com.example.newsfeedproject.auth.dto.signup;
 
 import jakarta.validation.constraints.*;
 import lombok.Getter;
-import lombok.Setter;
 
 @Getter
-@Setter
-public class SignupRequestDto {
+public class SignUpRequestDto {
     @NotBlank
     @Size(min = 2, max = 8, message = "최소 2글자 이상 8글자 이하로 작성해주세요.")
     private String userName;
@@ -18,8 +16,7 @@ public class SignupRequestDto {
 
     @NotBlank
     @Pattern(
-            // 전화번호 - 제외
-            regexp = "^\\d{10,11}$",
+            regexp = "^\\d{10,11}$", // 전화번호 - 제외
             message = "전화번호 형식이 올바르지 않습니다."
     )
     private String phoneNumber;
@@ -35,7 +32,7 @@ public class SignupRequestDto {
     private String confirmPassword;
 
     @AssertTrue(message = "비밀번호가 일치하지 않습니다.")
-    public boolean isPasswordsMatch() {
+    public boolean isPasswordMatch() {
         return password.equals(confirmPassword);
     }
 }

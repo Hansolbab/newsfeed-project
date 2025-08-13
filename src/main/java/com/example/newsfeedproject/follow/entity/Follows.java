@@ -1,6 +1,5 @@
 package com.example.newsfeedproject.follow.entity;
 
-
 import com.example.newsfeedproject.users.entity.Users;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -16,16 +15,12 @@ import java.time.LocalDateTime;
 @Setter
 @Getter
 public class Follows {
-
-
-
-    //Follow Id
+        //Follow Id
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "followId", nullable = false)
     @Setter(AccessLevel.NONE)
     private Long followId;
-
 
     //팔로우 하는 사람
     @ManyToOne(fetch = FetchType.LAZY)
@@ -56,15 +51,12 @@ public class Follows {
         this.createdAt = LocalDateTime.now();
     }
 
-
     public Follows(){}
 
     public Follows(Users follower, Users followee){
         this.follower = follower;
         this.followee = followee;
     }
-
-
 
     public void request() {
         this.followStatus = FollowStatus.REQUESTED;

@@ -1,8 +1,7 @@
 package com.example.newsfeedproject.follow.Controller;
 
-
 import com.example.newsfeedproject.auth.impl.UserDetailsImpl;
-import com.example.newsfeedproject.common.dto.ReadFollowUsersDto;
+import com.example.newsfeedproject.follow.dto.ReadFollowUsersDto;
 import com.example.newsfeedproject.follow.dto.FollowResponseDto;
 import com.example.newsfeedproject.follow.service.FollowsService;
 import jakarta.validation.constraints.NotNull;
@@ -17,30 +16,22 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-
 @RestController
 @RequestMapping("/api/follows")
 @RequiredArgsConstructor
 @Validated
 public class FollowsController {
-
     private final FollowsService followsService;
-
 
     @PostMapping("/{userId}/follow") // 팔로우 url 추가
     public ResponseEntity<FollowResponseDto> follow(
             @PathVariable @NotNull Long userId,
             @AuthenticationPrincipal  UserDetailsImpl userDetails
     ) {
-
         followsService.follow(userDetails, userId);
-
 
         return new ResponseEntity<>(followsService.follow(userDetails, userId), HttpStatus.OK);
     }
-
-
-
 
     @PostMapping("/private/{userId}/request") // 팔로우 url 추가
     public  ResponseEntity<FollowResponseDto> requestFollow(
@@ -57,8 +48,6 @@ public class FollowsController {
             @PathVariable @NotNull Long userId,
             @AuthenticationPrincipal  UserDetailsImpl userDetails
     ) {
-
-
         return new ResponseEntity<>(followsService.acceptFollow(userDetails, userId), HttpStatus.OK);
     }
 
@@ -71,8 +60,6 @@ public class FollowsController {
 
         return new ResponseEntity<>(followsService.rejectedFollow(userDetails, userId), HttpStatus.OK);
     }
-
-
 
 
 
@@ -123,12 +110,8 @@ public class FollowsController {
 
       Page<ReadFollowUsersDto> followerMeList = followsService.readFollowerList(meId, meId, pageable);
 
-
-
         return new ResponseEntity<>(followerMeList, HttpStatus.OK);
-
     }
-
 
     //상대 팔로워 목록 조회
     @GetMapping("/{userId}/followers")
@@ -143,7 +126,6 @@ public class FollowsController {
         return new ResponseEntity<>(followsService.readFollowerList(meId, userId ,pageable), HttpStatus.OK);
     }
 
-
     //내가 팔로우 하는 사람들
     @GetMapping("/followees")
     public ResponseEntity<Page<ReadFollowUsersDto>> readFolloweeMeList(
@@ -154,7 +136,6 @@ public class FollowsController {
         Long meId = userDetails.getUser().getUserId();
 
         Page<ReadFollowUsersDto> followeeMeList = followsService.readFolloweeList(meId, meId, pageable);
-
 
         return new ResponseEntity<>(followeeMeList, HttpStatus.OK);
     }
@@ -170,6 +151,5 @@ public class FollowsController {
 
         return new ResponseEntity<>(followsService.readFolloweeList(userId, meId, pageable), HttpStatus.OK);
     }
-
 }
 

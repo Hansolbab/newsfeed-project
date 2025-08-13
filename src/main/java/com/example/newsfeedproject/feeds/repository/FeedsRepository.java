@@ -11,16 +11,11 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 import java.util.Set;
-
 // Feeds 엔티티 데이터 접근
 @Repository
 public interface FeedsRepository extends JpaRepository<Feeds, Long> {
-
     // 삭제되지 않은 게시글 전체 조회
     Page<Feeds> findByDeletedFalse(Pageable pageable);
-
-    // 특정 카테고리, 삭제되지 않은 게시글 조회
-    Page<Feeds> findByCategoryAndDeletedFalse(Category category, Pageable pageable);
 
     // 삭제되지 않은 게시글 단건 조회
     Optional<Feeds> findByFeedIdAndDeletedFalse(Long feedId);
@@ -40,7 +35,6 @@ public interface FeedsRepository extends JpaRepository<Feeds, Long> {
                 "join  f.comments c" + // commnets를 들고 온다
                 " where  c.userComments.userId = : meId") // 유저 아이디가 나
     Page<Feeds> findFeedsByCommentsBy(@Param("meId") Long meId, Pageable pageable);
-
 
     @Query(value = "select f from Feeds f where f.feedId in :feedIds " ,
               countQuery = "select count(f) from Feeds f where f.feedId in :feedIds")

@@ -1,5 +1,4 @@
-package com.example.newsfeedproject.common.dto;
-
+package com.example.newsfeedproject.follow.dto;
 
 import com.example.newsfeedproject.users.entity.Users;
 import lombok.AllArgsConstructor;
@@ -8,7 +7,6 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class ReadFollowUsersDto {
-
     private Long userId;
     private String userName;
     private String profileImageUrl;
@@ -22,8 +20,6 @@ public class ReadFollowUsersDto {
     }
 
     public static ReadFollowUsersDto todto(Users follower, boolean contains) {
-
-      return new ReadFollowUsersDto( follower, contains);
-
+      return new ReadFollowUsersDto(follower, contains);
     }
 }

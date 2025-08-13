@@ -2,9 +2,7 @@ package com.example.newsfeedproject.category.entity;
 
 import com.fasterxml.jackson.annotation.JsonCreator; // JsonCreator 임포트
 import lombok.Getter;
-
 import java.util.Arrays;
-
 
 @Getter
 public enum Category {
@@ -42,11 +40,10 @@ public enum Category {
     }
 
     //문자열-> 이넘 타입으로 변경
-    public  static Category sortedType(String name){
+    public static Category sortedType(String name){
         return Arrays.stream(Category.values())
                 .filter(category -> category.getKoreanName().contains(name) || category.name().equalsIgnoreCase(name))
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 카테고리입니다: " + name));
-
     }
 }
