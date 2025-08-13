@@ -6,14 +6,17 @@ import com.example.newsfeedproject.common.dto.ReadUserSimpleResponseDto;
 import com.example.newsfeedproject.feedimg.repository.FeedImgRepository;
 import com.example.newsfeedproject.feeds.entity.Feeds;
 import com.example.newsfeedproject.feeds.repository.FeedsRepository;
+import com.example.newsfeedproject.follow.entity.Follows;
 import com.example.newsfeedproject.follow.repository.FollowsRepository;
 import com.example.newsfeedproject.likes.repository.LikesRepository;
 import com.example.newsfeedproject.users.dto.ReadUsersFeedsResponseDto;
+import com.example.newsfeedproject.users.dto.SearchUserResponseDto;
 import com.example.newsfeedproject.users.entity.Users;
 import com.example.newsfeedproject.users.repository.UsersRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 
 import java.util.List;
@@ -102,4 +105,24 @@ public class UsersService {
         return new PageImpl<>(feedResponseDtoList, pageable, feeds.getTotalElements());
     }
 
+
+    @Transactional
+    public Page<SearchUserResponseDto> searchUser(String keyword, PrincipalRequestDto principalRequestDto, Pageable pageable){
+        Page<Users> resultUserList = usersRepository.findByUserNameContaining(keyword, pageable);
+
+        List<Long> resultUserIdList = resultUserList.stream()
+                .map(user -> user.getUserId())
+                .collect(Collectors.toList());
+
+        Map<Long, Boolean> resultUserFollow = followsRepository.isFollowedByMyIdANDUserIds(principalRequestDto.getUserId(), resultUserIdList).stream()
+                .collect(Collectors.toMap(row->(Long) row[0], row ->(Boolean) row[1]));
+
+        Page<SearchUserResponseDto> resultUser = resultUserList.map(
+                user-> new SearchUserResponseDto(
+                        user.getUserName(),
+                        user.getProfileImageUrl(),
+                        resultUserFollow.getOrDefault(user.getUserId(), false)
+                ));
+        return resultUser;
+    }
 }
