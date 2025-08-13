@@ -1,6 +1,7 @@
 package com.example.newsfeedproject.feeds.controller;
 
 import com.example.newsfeedproject.auth.impl.UserDetailsImpl;
+import com.example.newsfeedproject.category.entity.Category;
 import com.example.newsfeedproject.feeds.dto.CreateFeedRequestDto;
 import com.example.newsfeedproject.feeds.dto.CreateFeedResponseDto;
 import com.example.newsfeedproject.feeds.dto.FeedResponseDto;
@@ -15,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping("/api/feeds")
@@ -45,13 +47,24 @@ public class FeedsController {
     public ResponseEntity<Page<FeedResponseDto>> getAllFeeds(
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "10") int size,
+            @RequestParam(value = "category", required = false) String categoryString,
             @AuthenticationPrincipal UserDetailsImpl userDetailsImpl // 현재 인증된 사용자 정보 주입
     ) {
         // userDetailsImpl에서 사용자 이메일(식별자) 추출
         String userEmail = userDetailsImpl.getUsername(); // UserDetailsImpl에서 이메일 반환 가정
 
+
+        Category category = null;
+        if (categoryString != null && !categoryString.isEmpty()) {
+            try {
+                category = Category.fromString(categoryString);
+            } catch (IllegalArgumentException e) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+            }
+        }
+
         // 서비스 계층을 통해 게시글 목록 조회
-        Page<FeedResponseDto> feedsPage = feedsService.getAllFeeds(page, size, userEmail);
+        Page<FeedResponseDto> feedsPage = feedsService.getAllFeeds(page, size, userEmail, category);
 
         // 조회된 페이지(Page 객체) 반환
         return ResponseEntity.ok(feedsPage);

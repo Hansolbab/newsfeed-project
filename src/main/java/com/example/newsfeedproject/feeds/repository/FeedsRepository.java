@@ -9,12 +9,21 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
 import java.util.Set;
 
 // Feeds 엔티티 데이터 접근
 @Repository
 public interface FeedsRepository extends JpaRepository<Feeds, Long> {
 
+    // 삭제되지 않은 게시글 전체 조회
+    Page<Feeds> findByDeletedFalse(Pageable pageable);
+
+    // 특정 카테고리, 삭제되지 않은 게시글 조회
+    Page<Feeds> findByCategoryAndDeletedFalse(Category category, Pageable pageable);
+
+    // 삭제되지 않은 게시글 단건 조회
+    Optional<Feeds> findByFeedIdAndDeletedFalse(Long feedId);
 
     Page<Feeds> findByCategory(Category category, Pageable pageable);
     // 필요한 사용자 정의 쿼리 메소드 추가 가능

@@ -1,5 +1,6 @@
 package com.example.newsfeedproject.feeds.service;
 
+import com.example.newsfeedproject.category.entity.Category;
 import com.example.newsfeedproject.feeds.entity.Feeds;
 import com.example.newsfeedproject.feeds.dto.CreateFeedRequestDto;
 import com.example.newsfeedproject.feeds.dto.FeedResponseDto;
@@ -62,11 +63,18 @@ public class FeedsService {
 
     // 게시글 전체 조회 (페이징, 최신순)
     @Transactional(readOnly = true)
-    public Page<FeedResponseDto> getAllFeeds(int page, int size, String currentUserEmail) {
+    public Page<FeedResponseDto> getAllFeeds(int page, int size, String currentUserEmail, Category category) {
         Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
         Pageable pageable = PageRequest.of(page, size, sort);
 
-        Page<Feeds> feedsPage = feedsRepository.findAll(pageable);
+        Page<Feeds> feedsPage;
+        if (category != null) {
+            // 카테고리 필터링이 있는 경우 - deleted=false 조건 추가
+            feedsPage = feedsRepository.findByCategoryAndDeletedFalse(category, pageable);
+        } else {
+            // 카테고리 필터링이 없는 경우 - deleted=false 조건 추가
+            feedsPage = feedsRepository.findByDeletedFalse(pageable);
+        }
 
         // 현재 사용자 ID 조회 (liked 판단용)
         Long currentUserId = usersRepository.findByEmail(currentUserEmail)
@@ -84,7 +92,8 @@ public class FeedsService {
     // 게시글 단건 조회
     @Transactional(readOnly = true)
     public FeedResponseDto getFeedById(Long feedId, String currentUserEmail) {
-        Feeds feeds = feedsRepository.findById(feedId)
+        // deleted=false 조건 추가
+        Feeds feeds = feedsRepository.findByFeedIdAndDeletedFalse(feedId)
                 .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다."));
 
         // 현재 사용자 ID 조회 (liked 판단용)
@@ -151,6 +160,6 @@ public class FeedsService {
         }
 
         // 4. 게시글 삭제
-        feedsRepository.delete(feeds);
+        feeds.softDelete();
     }
 }

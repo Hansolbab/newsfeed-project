@@ -55,7 +55,7 @@ public class CommentsService {
     @Transactional(readOnly = true)
     public Page<CommentResponseDto> getCommentsByFeed(Long feedId, Pageable pageable) {
 
-        Feeds feed = feedsRepository.findById(feedId)
+        Feeds feed = feedsRepository.findByFeedIdAndDeletedFalse(feedId)
                 .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다."));
 
         Page<Comments> commentsPage = commentsRepository.findByFeedComments(feed, pageable);
