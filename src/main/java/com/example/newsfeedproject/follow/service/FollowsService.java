@@ -159,22 +159,6 @@ public class FollowsService {
     //팔로우 목록 조회
 
 
-
-    // 재민 -> 한솔
-    // 재혁 -> 재민
-
-    //전체 공개
-    //비공개는 아무도
-    //재민 팔로워만 보게 하겠다. 재혁님 o
-
-    //flag 재혁 -> 재민 요청 column 보류 = true
-    //flag 승인 or 거절 보류 = false
-    //승인-> followed = ture(!보류) , followed = false
-
-
-    //재혁님 => 재민
-    //follower : 팔로우 하는 사람 재혁님 followee : 팔로우 당하는 사람 재민
-
     //이 사람을 팔로우 하는 사람 == 이사람의 팔로워 목록  재혁님이 -> 재민(나를 팔로워 하는) => 팔로워 재혁
     public Page<ReadFollowUsersDto> readFollowerList(Long meId, Long userId , Pageable pageable) {
 
