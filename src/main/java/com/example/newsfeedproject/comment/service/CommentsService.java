@@ -15,9 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 @Service
 @RequiredArgsConstructor
 public class CommentsService {
@@ -55,7 +52,7 @@ public class CommentsService {
     @Transactional(readOnly = true)
     public Page<CommentResponseDto> getCommentsByFeed(Long feedId, Pageable pageable) {
 
-        Feeds feed = feedsRepository.findById(feedId)
+        Feeds feed = feedsRepository.findByFeedIdAndDeletedFalse(feedId)
                 .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다."));
 
         Page<Comments> commentsPage = commentsRepository.findByFeedComments(feed, pageable);
