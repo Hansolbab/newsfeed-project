@@ -67,6 +67,10 @@ public class RequestFollowService {
 
         RequestFollows requestRelation =getRelationOrThrow(userId, meId);
 
+        if(requestRelation.getFollowStatus().equals(FollowStatus.ACCEPTED)){
+            throw new FollowErrorException(ALREADY_FOLLOW);
+        }
+
         Follows relation = getRelation(userId, meId);
 
         requestRelation.accept();
