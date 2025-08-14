@@ -126,40 +126,50 @@ public class FeedsService {
 
         Long meId = user.getUserId();
 
+        // 권한별로 나눠서 Feed 조회 후 페이징
         Page<Feeds> feedsPage = feedsRepository.findAccessibleFeedsBasedOnProfile(meId, pageable);
 
         List<Long> feedIdList = feedsPage.getContent().stream()
                 .map(Feeds::getFeedId)
                 .toList();
 
-        Map<Long, List<String>> feedImages = feedImgRepository.findFeedImgByFeedId(feedIdList).stream()
+        Map<Long, List<String>> feedImagesMap = feedImgRepository.findFeedImgByFeedId(feedIdList).stream()
                 .collect(Collectors.groupingBy(row -> (Long) row[0], // feedId를 기준으로 그룹화
                         Collectors.mapping(row -> (String) row[1], // feedImageUrl만 뽑아서
                                 Collectors.toList() // 리스트로 묶음
                         )));
 
-        Map<Long, LikesInfoDto> likesInfoMap = likesRepository.countLikesAndIsLikedByFeedIds(feedIdList, meId).stream()
-                .collect(Collectors.toMap(
-                        row -> (Long) row[0],
-                        row -> new LikesInfoDto(
-                                 ((Long) row[2]).intValue(),
-                            ((Long) row[1]) > 0
-                        )));
+        Map<Long, Integer> likeTaotalMap = likesRepository.countLikedByFeedIds(feedIdList).stream()
+                .collect(Collectors.toMap(row -> (Long) row[0],
+                        row-> ((Long) row[1]).intValue()));
+
+        // 개선사항으로 했지만 오류 발견후 추후 수정
+//        Map<Long, LikesInfoDto> likesInfoMap = likesRepository.countLikesAndIsLikedByFeedIds(feedIdList, meId).stream()
+//                .collect(Collectors.toMap(
+//                        row -> (Long) row[0],
+//                        row -> new LikesInfoDto(
+//                                 ((Long) row[2]).intValue(),
+//                            ((Long) row[1]) > 0
+//                        )));
 
         //댓글 토탈
         Map<Long, Integer> commentsTotalMap = commentsRepository.countCommentsByFeedIds(feedIdList).stream()
                 .collect(Collectors.toMap(row -> (Long) row[0],
                         row -> ((Long) row[1]).intValue()));
 
+        Map<Long, Boolean> likedMap = likesRepository.isLikedByFeedIdsANDUserId(feedIdList, user.getUserId()).stream()
+                .collect(Collectors.toMap(row -> (Long) row[0],
+                        row ->(boolean) row[1]));
+
         List<ReadUsersFeedsResponseDto> feedsResponseDtoList = feedsPage.stream()
                 .map(feed -> new ReadUsersFeedsResponseDto(
                         feed.getFeedId(),
-                        feedImages.get(feed.getFeedId()),
+                        feedImagesMap.get(feed.getFeedId()),
                         feed.getContents(),
-                        likesInfoMap.getOrDefault(feed.getFeedId(), new LikesInfoDto(0, false)).getLikeTotal(),
+                        likeTaotalMap.getOrDefault(feed.getFeedId(),  0),
                         commentsTotalMap.getOrDefault(feed.getFeedId(), 0),
-                        likesInfoMap.getOrDefault(feed.getFeedId(),new LikesInfoDto(0,false)).isLiked()
-                )).toList();
+                        likedMap.getOrDefault(feed.getFeedId(),false))
+                ).toList();
 
         return new PageImpl<>(feedsResponseDtoList, pageable, feedsPage.getTotalElements());
         }
