@@ -2,6 +2,7 @@ package com.example.newsfeedproject.myinfo.controller;
 
 import com.example.newsfeedproject.auth.impl.UserDetailsImpl;
 import com.example.newsfeedproject.common.dto.ReadUserSimpleResponseDto;
+import com.example.newsfeedproject.common.exception.users.UsersErrorException;
 import com.example.newsfeedproject.feeds.dto.FeedsResponseDto;
 import com.example.newsfeedproject.myinfo.dto.UpdateProfileImageRequestDto;
 import com.example.newsfeedproject.myinfo.service.MyInfoService;
@@ -19,6 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+import static com.example.newsfeedproject.common.exception.users.UsersErrorCode.*;
 
 @RestController
 @RequestMapping("/api/myInfo")
@@ -58,7 +60,7 @@ public class MyInfoController {
             @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC)Pageable pageable
     ) {
         if(userDetails == null) {
-            throw new IllegalArgumentException("로그인이 필요합니다.");
+            throw new UsersErrorException(LOGIN_REQUIRED);
         }
 
        return new ResponseEntity<>(myInfoService.readFeedsByMyComment(userDetails, pageable), HttpStatus.OK);

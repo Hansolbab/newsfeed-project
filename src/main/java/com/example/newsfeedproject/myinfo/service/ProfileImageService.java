@@ -1,13 +1,12 @@
 package com.example.newsfeedproject.myinfo.service;
 
+import com.example.newsfeedproject.common.exception.auth.AuthErrorException;
 import com.example.newsfeedproject.users.entity.Users;
 import com.example.newsfeedproject.users.repository.UsersRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
-
+import static com.example.newsfeedproject.common.exception.auth.AuthErrorCode.*;
 @Service
 @RequiredArgsConstructor
 public class ProfileImageService {
@@ -21,11 +20,11 @@ public class ProfileImageService {
     @Transactional
     public void updateProfileImageUrl(Long meId, String newProfileImageUrl) {
         Users user = usersRepository.findById(meId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "사용자 정보를 찾을 수 없습니다."));
+                .orElseThrow(() -> new AuthErrorException(USER_NOT_FOUND));
 
         //409
         if (newProfileImageUrl.equals(user.getProfileImageUrl())) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "현재 프로필이미지와 동일합니다.");
+            throw new AuthErrorException(PROFILE_IMAGE_SAME);
         }
         user.setProfileImageUrl(newProfileImageUrl);
     }
@@ -34,7 +33,7 @@ public class ProfileImageService {
     @Transactional
     public void setPlaceholderUrl(Long meId) {
         Users user=usersRepository.findById(meId)
-                .orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND,"사용자 정보를 찾을 수 없습니다."));
+                .orElseThrow(()->new AuthErrorException(USER_NOT_FOUND));
         //만약 이미 기본값이면 넘어가고, 아니면 PLACEHOLDER_URL
         if(!PLACEHOLDER_URL.equals(user.getProfileImageUrl())) {
             user.setProfileImageUrl(PLACEHOLDER_URL);

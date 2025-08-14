@@ -4,6 +4,7 @@ import com.example.newsfeedproject.auth.impl.UserDetailsImpl;
 import com.example.newsfeedproject.comment.repository.CommentsRepository;
 import com.example.newsfeedproject.common.dto.PrincipalRequestDto;
 import com.example.newsfeedproject.common.dto.ReadUserSimpleResponseDto;
+import com.example.newsfeedproject.common.exception.users.UsersErrorException;
 import com.example.newsfeedproject.feedimg.repository.FeedImgRepository;
 import com.example.newsfeedproject.feeds.entity.Feeds;
 import com.example.newsfeedproject.feeds.repository.FeedsRepository;
@@ -18,9 +19,8 @@ import org.springframework.data.domain.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import static com.example.newsfeedproject.common.exception.users.UsersErrorCode.*;
 
-
-import java.security.Principal;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -44,20 +44,20 @@ public class UsersService {
                         .map(GrantedAuthority::getAuthority)
                         .collect(Collectors.toSet()));   // Set으로 변환해서 반환
         if (!principalUser.getAuthorities().equals("ROLE_USER")){
-            throw  new IllegalArgumentException("유저가 아닙니다.");
+            throw  new UsersErrorException(NOT_A_USER);
         }
 
-        if (userDetails==null) {throw new IllegalStateException("로그인이 필요합니다.");}
+        if (userDetails==null) {throw new UsersErrorException(LOGIN_REQUIRED);}
 
         Optional<Users> user = usersRepository.findById(userId);
-        if (user.isEmpty()) {throw new IllegalArgumentException("없는 유저입니다.");}
+        if (user.isEmpty()) {throw new UsersErrorException(NOT_A_USER);}
 
 
         // 보는 사람 : principalUser.getUserId(), 볼 사람 : userId가 다를 때 (본인 프로필이 아닐 때)
         if (!principalUser.getUserId().equals(userId)) {
             // 보는 사람 : principalUser.getUserId(), 볼 사람 : userId 팔로우가 아닐 때
             if(!followsRepository.existsByFollower_UserIdAndFollowee_UserIdAndFollowedTrue(principalUser.getUserId(), userId)){
-                throw new IllegalArgumentException("팔로우 필요");
+                throw new UsersErrorException(FOLLOW_REQUIRED);
             }
         }
 
