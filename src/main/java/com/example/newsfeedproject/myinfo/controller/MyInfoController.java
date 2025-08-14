@@ -4,6 +4,7 @@ import com.example.newsfeedproject.auth.impl.UserDetailsImpl;
 import com.example.newsfeedproject.common.dto.ReadUserSimpleResponseDto;
 import com.example.newsfeedproject.common.exception.users.UsersErrorException;
 import com.example.newsfeedproject.feeds.dto.FeedsResponseDto;
+import com.example.newsfeedproject.feeds.dto.ReadFeedsResponseDto;
 import com.example.newsfeedproject.myinfo.service.MyInfoService;
 import com.example.newsfeedproject.common.dto.ReadUsersFeedsResponseDto;
 import com.example.newsfeedproject.users.service.UsersService;
@@ -51,7 +52,7 @@ public class MyInfoController {
 
     @GetMapping("/commentFeeds")
     @Transactional(readOnly = true)
-    public ResponseEntity<Page<FeedsResponseDto>> readFeedsByMyComment(
+    public ResponseEntity<Page<ReadFeedsResponseDto>> readFeedsByMyComment(
             @AuthenticationPrincipal UserDetailsImpl userDetails,
             @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC)Pageable pageable
     ) {
@@ -66,7 +67,7 @@ public class MyInfoController {
 
     @GetMapping("/likeFeeds")
     @Transactional(readOnly = true)
-    public ResponseEntity<Page<FeedsResponseDto>> readFeedsByMyLikes(
+    public ResponseEntity<Page<ReadFeedsResponseDto>> readFeedsByMyLikes(
             @AuthenticationPrincipal UserDetailsImpl userDetails,
             @PageableDefault( sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
