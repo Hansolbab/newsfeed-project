@@ -75,10 +75,25 @@ public class FeedsService {
             return true;
         }
 
-        // 2. 공개 범위에 따라 접근 허용
-        AccessAble accessAble = feed.getAccessAble();
+        Users feedOwner = feed.getUser();
+        AccessAble ownerProfileVisibility = feedOwner.getVisibility();
 
-        switch (accessAble) {
+        switch (ownerProfileVisibility) {
+            case ALL_ACCESS:
+                break;
+            case FOLLOWER_ACCESS:
+                if (!followsRepository.existsByFollower_UserIdAndFollowee_UserIdAndFollowedTrue(currentUserId, feedOwnerId)) {
+                    return false;
+                }
+                break;
+            case NONE_ACCESS:
+            default:
+                return false;
+        }
+
+        AccessAble feedAccessAble = feed.getAccessAble();
+
+        switch (feedAccessAble) {
             case ALL_ACCESS:
                 return true;
             case FOLLOWER_ACCESS:
@@ -99,21 +114,16 @@ public class FeedsService {
 
         String currentUserEmail = userDetails.getUsername(); // 이메일 값 들고옴
 
-        // 현재 사용자 ID 조회 (liked 판단용)
         Long currentUserId = usersRepository.findByEmail(currentUserEmail)
                 .map(Users::getUserId)
                 .orElse(null); // 사용자를 찾을 수 없다면 null (비로그인 사용자 혹은 오류 상황)
 
         Page<Feeds> feedsPage;
 
-        feedsPage = feedsRepository.findAccessibleFeeds(currentUserId, pageable);
+        feedsPage = feedsRepository.findAccessibleFeedsBasedOnProfile(currentUserId, pageable);
 
-        // Feeds 엔티티를 FeedResponseDto로 변환
         return feedsPage.map(feeds -> {
-            boolean liked = (currentUserId != null) && likesRepository.findByUserIdAndFeedIdAndLikedTrue(currentUserId, feeds.getFeedId()).isPresent();
-
-
-            // likeTotal, commentTotal은 Feeds 엔티티에 없으므로 DTO에서 0으로 초기화될 것
+            boolean liked = likesRepository.findByUserIdAndFeedIdAndLikedTrue(currentUserId, feeds.getFeedId()).isPresent();
             return new FeedsResponseDto(feeds, liked);
         });
     }
