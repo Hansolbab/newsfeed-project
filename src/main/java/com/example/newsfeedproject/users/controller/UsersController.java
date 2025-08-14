@@ -16,8 +16,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.stream.Collectors;
-
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
@@ -55,7 +53,6 @@ public class UsersController {
             @RequestParam String keyword,
             @AuthenticationPrincipal UserDetailsImpl userDetails,
             @PageableDefault() Pageable pageable){
-
 
         Page<SearchUserResponseDto> searchUserPage = usersService.searchUser(keyword, userDetails, pageable);
 
