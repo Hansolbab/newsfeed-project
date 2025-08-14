@@ -126,7 +126,7 @@ public class FollowsService {
 
         Users follower = usersRepository.getReferenceById(userId);
 
-        Page<Follows> followeePage = followsRepository.findByFollower( follower, pageable);
+        Page<Follows> followeePage = followsRepository.findByFollower(follower, pageable);
 
         Set<Long> myFollowerSet = followsRepository.findFolloweeIdsOf(meId);
 
