@@ -2,7 +2,7 @@ package com.example.newsfeedproject.requestfollow.service;
 
 
 import com.example.newsfeedproject.auth.impl.UserDetailsImpl;
-import com.example.newsfeedproject.common.exception.FollowErrorException;
+import com.example.newsfeedproject.common.exception.follow.FollowErrorException;
 import com.example.newsfeedproject.follow.entity.FollowStatus;
 import com.example.newsfeedproject.follow.entity.Follows;
 import com.example.newsfeedproject.follow.repository.FollowsRepository;
@@ -19,7 +19,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import static com.example.newsfeedproject.common.exception.FollowErrorCode.*;
+import static com.example.newsfeedproject.common.exception.follow.FollowErrorCode.*;
 
 @Service
 @RequiredArgsConstructor
@@ -67,8 +67,12 @@ public class RequestFollowService {
 
         RequestFollows requestRelation =getRelationOrThrow(userId, meId);
 
-        if(requestRelation.getFollowStatus().equals(FollowStatus.ACCEPTED)){
+        if(requestRelation.getFollowStatus().equals(FollowStatus.ACCEPTED)) {
             throw new FollowErrorException(ALREADY_FOLLOW);
+        }
+
+        if(requestRelation.getFollowStatus().equals(FollowStatus.NONE)){
+            throw new FollowErrorException(NOT_REQUEST);
         }
 
         Follows relation = getRelation(userId, meId);
@@ -100,6 +104,15 @@ public class RequestFollowService {
         valid(meId, userId);
 
         RequestFollows requestRelation = getRelationOrThrow(userId, meId);
+
+        if(requestRelation.getFollowStatus().equals(FollowStatus.ACCEPTED)){
+            throw new FollowErrorException(ALREADY_FOLLOW);
+        }
+
+        if(requestRelation.getFollowStatus().equals(FollowStatus.NONE)){
+            throw new FollowErrorException(NOT_REQUEST);
+        }
+
 
         requestRelation.reject();
 

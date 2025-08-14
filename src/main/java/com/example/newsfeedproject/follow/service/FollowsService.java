@@ -3,7 +3,7 @@ package com.example.newsfeedproject.follow.service;
 
 import com.example.newsfeedproject.auth.impl.UserDetailsImpl;
 
-import com.example.newsfeedproject.common.exception.FollowErrorException;
+import com.example.newsfeedproject.common.exception.follow.FollowErrorException;
 import com.example.newsfeedproject.follow.dto.FollowResponseDto;
 import com.example.newsfeedproject.follow.dto.ReadFollowUsersDto;
 import com.example.newsfeedproject.follow.entity.Follows;
@@ -21,7 +21,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Set;
-import static com.example.newsfeedproject.common.exception.FollowErrorCode.*;
+import static com.example.newsfeedproject.common.exception.follow.FollowErrorCode.*;
 
 @Service
 @RequiredArgsConstructor

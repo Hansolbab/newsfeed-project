@@ -1,6 +1,7 @@
 package com.example.newsfeedproject.myinfo.service;
 
 import com.example.newsfeedproject.auth.impl.UserDetailsImpl;
+import com.example.newsfeedproject.common.exception.users.UsersErrorException;
 import com.example.newsfeedproject.feeds.dto.FeedsResponseDto;
 import com.example.newsfeedproject.feeds.entity.Feeds;
 import com.example.newsfeedproject.feeds.repository.FeedsRepository;
@@ -13,7 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-
+import static com.example.newsfeedproject.common.exception.users.UsersErrorCode.*;
 @Service
 @AllArgsConstructor
 public class MyInfoService {
@@ -39,7 +40,7 @@ public class MyInfoService {
 
     public Page<FeedsResponseDto> readFeedsByMyLikes(UserDetailsImpl userDetails, Pageable pageable) {
         if(userDetails == null) {
-            throw new IllegalArgumentException("로그인이 필요합니다.");
+            throw new UsersErrorException(NOT_A_USER);
         }
 
         Long meId =  userDetails.getUserId();

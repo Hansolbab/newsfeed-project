@@ -3,7 +3,9 @@ package com.example.newsfeedproject.myinfo.controller;
 import com.example.newsfeedproject.auth.impl.UserDetailsImpl;
 import com.example.newsfeedproject.myinfo.dto.ResetPasswordRequestDto;
 import com.example.newsfeedproject.myinfo.dto.UpdatePhoneNumberRequestDto;
+import com.example.newsfeedproject.myinfo.dto.UpdateProfileImageRequestDto;
 import com.example.newsfeedproject.myinfo.dto.WithdrawAccountRequestDto;
+import com.example.newsfeedproject.myinfo.service.ProfileImageService;
 import com.example.newsfeedproject.myinfo.service.ResetPasswordService;
 import com.example.newsfeedproject.myinfo.service.UpdatePhoneNumberService;
 import com.example.newsfeedproject.myinfo.service.WithdrawAccountService;
@@ -20,6 +22,8 @@ public class MyInfoModifyController {
     private final UpdatePhoneNumberService updatePhoneNumberService;
     private final WithdrawAccountService withdrawAccountService;
     private final ResetPasswordService resetPasswordService;
+    private final ProfileImageService profileImageService ;
+
 
     @PostMapping("/phoneNumber")
     public ResponseEntity<String> updatePhoneNumber(
@@ -50,6 +54,23 @@ public class MyInfoModifyController {
             @Valid @RequestBody WithdrawAccountRequestDto withdrawAccountRequestDto
     ){
         withdrawAccountService.withdraw(userDetailsImpl.getUserId(), withdrawAccountRequestDto.getPassword());
+        return ResponseEntity.noContent().build();
+    }
+
+    // 내 프로필 이미지 URL로 수정
+    @PutMapping("/profileImage")
+    public ResponseEntity<String> uploadProfileImage(
+            @AuthenticationPrincipal UserDetailsImpl userDetailsImpl,
+            @Valid @RequestBody UpdateProfileImageRequestDto updateProfileImageRequestDto
+    ){
+        profileImageService.updateProfileImageUrl(userDetailsImpl.getUserId(), updateProfileImageRequestDto.getProfileImageUrl());
+        return ResponseEntity.ok("프로필 이미지 변경이 완료되었습니다.");
+    }
+
+    // 내 프로필 이미지 삭제
+    @DeleteMapping("/profileImage")
+    public ResponseEntity<Void> deleteProfileImage(@AuthenticationPrincipal UserDetailsImpl userDetailsImpl){
+        profileImageService.setPlaceholderUrl(userDetailsImpl.getUserId());
         return ResponseEntity.noContent().build();
     }
 }
