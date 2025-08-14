@@ -126,7 +126,7 @@ public class FeedsService {
                 .orElseThrow(() -> new FeedsErrorException(POST_NOT_FOUND));
 
         if (!hasAccess(feeds, userDetails)) {
-            throw new IllegalArgumentException("이 게시글에 접근할 권한이 없습니다.");
+            throw new FeedsErrorException(USER_NOT_FOUND_CURRENT);
         }
 
         String currentUserEmail = userDetails.getUsername(); // 이메일 값 들고옴
@@ -271,6 +271,4 @@ public class FeedsService {
         boolean liked = likesRepository.findByUserIdAndFeedIdAndLikedTrue(currentUser.getUserId(), feeds.getFeedId()).isPresent();
         return new FeedsResponseDto(feeds, liked);
     }
-
-
 }
