@@ -1,5 +1,7 @@
 package com.example.newsfeedproject.category.entity;
+import static com.example.newsfeedproject.common.exception.feeds.FeedsErrorCode.*;
 
+import com.example.newsfeedproject.common.exception.feeds.FeedsErrorException;
 import com.fasterxml.jackson.annotation.JsonCreator; // JsonCreator 임포트
 import lombok.Getter;
 import java.util.Arrays;
@@ -36,7 +38,7 @@ public enum Category {
             }
         }
         // 일치하는 카테고리가 없을 경우 예외 발생 (Bad Request)
-        throw new IllegalArgumentException("존재하지 않는 카테고리입니다: " + text);
+        throw new FeedsErrorException(NOT_FOUND_CATEGORY);
     }
 
     //문자열-> 이넘 타입으로 변경
@@ -44,6 +46,6 @@ public enum Category {
         return Arrays.stream(Category.values())
                 .filter(category -> category.getKoreanName().contains(name) || category.name().equalsIgnoreCase(name))
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 카테고리입니다: " + name));
+                .orElseThrow(() ->  new FeedsErrorException(NOT_FOUND_CATEGORY));
     }
 }

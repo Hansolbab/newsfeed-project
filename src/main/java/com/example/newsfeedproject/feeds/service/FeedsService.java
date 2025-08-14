@@ -1,7 +1,9 @@
 package com.example.newsfeedproject.feeds.service;
 
 import com.example.newsfeedproject.auth.impl.UserDetailsImpl;
-import com.example.newsfeedproject.category.entity.Category;
+import com.example.newsfeedproject.common.exception.feeds.FeedsErrorException;
+import static com.example.newsfeedproject.common.exception.users.UsersErrorCode.*;
+import com.example.newsfeedproject.common.exception.users.UsersErrorException;
 import com.example.newsfeedproject.feeds.entity.Feeds;
 import com.example.newsfeedproject.feeds.dto.CreateFeedsRequestDto;
 import com.example.newsfeedproject.feeds.dto.FeedsResponseDto;
@@ -20,6 +22,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import static com.example.newsfeedproject.common.exception.feeds.FeedsErrorCode.*;
+
 // 게시글 관련 비즈니스 로직 처리 서비스
 @Service
 @RequiredArgsConstructor
@@ -36,7 +40,7 @@ public class FeedsService {
         String userEmail = userDetails.getUsername(); // 이메일 값 들고옴
         // 1. 게시글 작성 사용자 조회
         Users user = usersRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다.")); // Custom Exception으로 변경 권장
+                .orElseThrow(() -> new FeedsErrorException(USER_NOT_FOUND_CURRENT)); // Custom Exception으로 변경 권장
 
         // 2. Feeds 엔티티 생성
         Feeds feeds = Feeds.builder()
@@ -119,10 +123,10 @@ public class FeedsService {
     public FeedsResponseDto readFeedById(Long feedId,  UserDetailsImpl userDetails) {
         // deleted=false 조건 추가
         Feeds feeds = feedsRepository.findByFeedIdAndDeletedFalse(feedId)
-                .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다."));
+                .orElseThrow(() -> new FeedsErrorException(POST_NOT_FOUND));
 
         if (!hasAccess(feeds, userDetails)) {
-            throw new IllegalArgumentException("이 게시글에 접근할 권한이 없습니다.");
+            throw new FeedsErrorException(USER_NOT_FOUND_CURRENT);
         }
 
         String currentUserEmail = userDetails.getUsername(); // 이메일 값 들고옴
@@ -147,15 +151,15 @@ public class FeedsService {
 
         // 1. 게시글 조회 (존재 여부 및 작성자 권한 확인)
         Feeds feeds = feedsRepository.findById(feedId)
-                .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다.")); // Custom Exception으로 변경 권장
+                .orElseThrow(() -> new FeedsErrorException(POST_NOT_FOUND)); // Custom Exception으로 변경 권장
 
         // 2. 현재 로그인한 사용자 정보 조회
         Users currentUser = usersRepository.findByEmail(currentUserEmail)
-                .orElseThrow(() -> new IllegalArgumentException("현재 사용자를 찾을 수 없습니다.")); // Custom Exception
+                .orElseThrow(() -> new FeedsErrorException(USER_NOT_FOUND_CURRENT)); // Custom Exception
 
         // 3. 현재 로그인한 사용자가 게시글 작성자인지 확인
         if (!feeds.getUser().getUserId().equals(currentUser.getUserId())) {
-            throw new IllegalArgumentException("게시글 수정 권한이 없습니다."); // Custom Exception으로 변경 권장
+            throw new UsersErrorException(NOT_POST_AUTHOR); // Custom Exception으로 변경 권장
         }
 
         // 4. 게시글 내용 및 카테고리 업데이트
@@ -187,15 +191,15 @@ public class FeedsService {
 
         // 1. 게시글 조회 (존재 여부 및 작성자 권한 확인)
         Feeds feeds = feedsRepository.findById(feedId)
-                .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다.")); // Custom Exception으로 변경 권장
+                .orElseThrow(() -> new FeedsErrorException(POST_NOT_FOUND)); // Custom Exception으로 변경 권장
 
         // 2. 현재 로그인한 사용자 정보 조회
         Users currentUser = usersRepository.findByEmail(currentUserEmail)
-                .orElseThrow(() -> new IllegalArgumentException("현재 사용자를 찾을 수 없습니다.")); // Custom Exception
+                .orElseThrow(() -> new UsersErrorException(NOT_POST_AUTHOR)); // Custom Exception
 
         // 3. 현재 로그인한 사용자가 게시글 작성자인지 확인
         if (!feeds.getUser().getUserId().equals(currentUser.getUserId())) {
-            throw new IllegalArgumentException("게시글 삭제 권한이 없습니다."); // Custom Exception으로 변경 권장
+            throw new UsersErrorException(NOT_POST_AUTHOR); // Custom Exception으로 변경 권장
         }
 
         // 4. 게시글 삭제
@@ -234,7 +238,7 @@ public class FeedsService {
         String currentUserEmail = userDetails.getUsername(); // 이메일 값 들고옴
 
         Feeds feeds = feedsRepository.findByFeedIdAndDeletedTrue(feedId) // deleted=true인 게시글만 조회
-                .orElseThrow(() -> new IllegalArgumentException("삭제된 게시글을 찾을 수 없습니다."));
+                .orElseThrow(() -> new FeedsErrorException(POST_NOT_FOUND));
 
         Long currentUserId = usersRepository.findByEmail(currentUserEmail)
                 .map(Users::getUserId)
@@ -253,13 +257,13 @@ public class FeedsService {
         String userEmail = userDetails.getUsername(); // 이메일 값 들고옴
 
         Feeds feeds = feedsRepository.findByFeedIdAndDeletedTrue(feedId) // 삭제된 게시글만 조회
-                .orElseThrow(() -> new IllegalArgumentException("복구할 게시글이 없거나 삭제된 상태가 아닙니다."));
+                .orElseThrow(() -> new FeedsErrorException(NOT_FOUND_RESET_POST));
 
         Users currentUser = usersRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new IllegalArgumentException("현재 사용자를 찾을 수 없습니다."));
+                .orElseThrow(() -> new UsersErrorException(NOT_POST_AUTHOR));
 
         if (!feeds.getUser().getUserId().equals(currentUser.getUserId())) {
-            throw new IllegalArgumentException("게시글 복구 권한이 없습니다."); // 삭제한 사용자만 복구 가능 등 정책 필요
+            throw new UsersErrorException(NOT_POST_AUTHOR); // 삭제한 사용자만 복구 가능 등 정책 필요
         }
         feeds.setDeleted(false); // deleted 필드를 false로 변경하여 복구
 
@@ -267,6 +271,4 @@ public class FeedsService {
         boolean liked = likesRepository.findByUserIdAndFeedIdAndLikedTrue(currentUser.getUserId(), feeds.getFeedId()).isPresent();
         return new FeedsResponseDto(feeds, liked);
     }
-
-
 }

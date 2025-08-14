@@ -1,12 +1,14 @@
 package com.example.newsfeedproject.auth.service.signup;
 
 import com.example.newsfeedproject.auth.dto.signup.SignUpRequestDto;
+import com.example.newsfeedproject.common.exception.auth.AuthErrorException;
 import com.example.newsfeedproject.users.entity.Users;
 import com.example.newsfeedproject.users.repository.UsersRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import static com.example.newsfeedproject.common.exception.auth.AuthErrorCode.*;
 
 @Service
 @RequiredArgsConstructor
@@ -17,11 +19,11 @@ public class SignUpService {
     @Transactional
     public Long signUp(SignUpRequestDto signUpRequestDto){
         if(usersRepository.existsByUserName(signUpRequestDto.getUserName())){
-            throw new IllegalArgumentException("이미 사용 중인 아이디입니다.");
+            throw new AuthErrorException(USER_ALREADY_EXISTS);
         }
 
         if(usersRepository.findByEmail(signUpRequestDto.getEmail()).isPresent()){
-            throw new IllegalArgumentException("이미 가입된 이메일입니다.");
+            throw new AuthErrorException(EMAIL_ALREADY_EXISTS);
         }
 
         String encode= passwordEncoder.encode(signUpRequestDto.getPassword());//비밀번호 암호화

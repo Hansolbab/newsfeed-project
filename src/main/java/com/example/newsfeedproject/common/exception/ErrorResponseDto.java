@@ -6,7 +6,7 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class FollowErrorResponseDto {
+public class ErrorResponseDto {
 
     private int status;
     private String message;
