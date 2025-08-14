@@ -33,7 +33,7 @@ public class MyInfoService {
     private final UsersRepository usersRepository;
 
     public Page<ReadFeedsResponseDto> readFeedsByMyComment(UserDetailsImpl userDetails, Pageable pageable) {
-//화장실로 떠난 그녀
+
         Long meId = userDetails.getUserId();
 
         Page<Feeds> feedsPage = feedsRepository.findFeedsByCommentsBy(meId,pageable);
