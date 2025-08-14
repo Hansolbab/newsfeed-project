@@ -12,6 +12,7 @@ import com.example.newsfeedproject.follow.repository.FollowsRepository;
 import com.example.newsfeedproject.likes.repository.LikesRepository;
 import com.example.newsfeedproject.common.dto.ReadUsersFeedsResponseDto;
 import com.example.newsfeedproject.users.dto.LikesInfoDto;
+import com.example.newsfeedproject.common.dto.ReadUserSimpleResponseDto;
 import com.example.newsfeedproject.users.entity.AccessAble;
 import com.example.newsfeedproject.users.entity.Users;
 import com.example.newsfeedproject.users.repository.UsersRepository;
@@ -134,9 +135,8 @@ public class UsersService {
 
     @Transactional
     public Page<ReadUserSimpleResponseDto> searchUser(String keyword, UserDetailsImpl userDetails, Pageable pageable){
-        // keyword가 포함된 UserName을 가진 User List를 Page 형태로 반환
         Page<Users> resultUserList = usersRepository.findByUserNameContaining(keyword, pageable);
-        // User List 에서 User Id 리스트 뽑아내기
+
         List<Long> resultUserIdList = resultUserList.stream()
                 .map(Users::getUserId)
                 .collect(Collectors.toList());
