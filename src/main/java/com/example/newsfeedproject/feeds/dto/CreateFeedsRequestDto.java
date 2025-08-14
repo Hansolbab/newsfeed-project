@@ -1,6 +1,7 @@
 package com.example.newsfeedproject.feeds.dto;
 
 import com.example.newsfeedproject.category.entity.Category; // Category Enum 임포트
+import com.example.newsfeedproject.users.entity.AccessAble;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -26,4 +27,7 @@ public class CreateFeedsRequestDto {
     // 게시글 카테고리 (필수)
     @NotNull(message = "게시글 카테고리는 필수 선택 항목입니다.")
     private Category category; // Category Enum 타입으로 요청 받음
+
+    @NotNull(message = "공개 범위 설정은 필수 항목입니다.")
+    private AccessAble accessAble;
 }

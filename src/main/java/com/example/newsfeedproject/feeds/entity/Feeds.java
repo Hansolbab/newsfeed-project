@@ -2,6 +2,7 @@ package com.example.newsfeedproject.feeds.entity;
 
 import com.example.newsfeedproject.category.entity.Category;
 import com.example.newsfeedproject.comment.entity.Comments;
+import com.example.newsfeedproject.users.entity.AccessAble;
 import com.example.newsfeedproject.users.entity.Users;
 import com.example.newsfeedproject.feedimg.entity.FeedImage;
 import jakarta.persistence.*;
@@ -65,6 +66,12 @@ public class Feeds {
     @Setter
     @Column(name = "deleted", nullable = false)
     private boolean deleted = false;
+
+    //AccessAble 필드 (공개범위)
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    @Builder.Default
+    private AccessAble accessAble = AccessAble.ALL_ACCESS; // 기본값: 전체 공개
 
 
     // 게시글 내용 및 카테고리 수정 메소드
