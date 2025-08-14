@@ -126,7 +126,7 @@ public class FeedsService {
                 .orElseThrow(() -> new FeedsErrorException(POST_NOT_FOUND));
 
         if (!hasAccess(feeds, userDetails)) {
-            throw new FeedsErrorException(USER_NOT_FOUND_CURRENT);
+            throw new FeedsErrorException(POST_IS_PRIVATE);
         }
 
         String currentUserEmail = userDetails.getUsername(); // 이메일 값 들고옴

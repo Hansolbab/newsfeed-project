@@ -10,7 +10,8 @@ public enum FeedsErrorCode {
     POST_NOT_FOUND(404, "게시글을 찾을 수 없습니다."), //재혁님 코드, 지훈님 코드 공용."
     USER_NOT_FOUND_CURRENT(404, "현재 사용자를 찾을 수 없습니다."),// 권한 관련 ex) "게시글 삭제 권한이 없습니다."
     NOT_FOUND_RESET_POST(404, "복구할 게시글이 없습니다."),
-    NOT_FOUND_CATEGORY(404, "존재하지 않는 카테고리입니다.");
+    NOT_FOUND_CATEGORY(404, "존재하지 않는 카테고리입니다."),
+    POST_IS_PRIVATE(404, "비공개 게시글입니다.");
     private final int status;
     private final String message;
 
