@@ -59,7 +59,7 @@ public class FeedsResponseDto {
         this.createdAt = feeds.getCreatedAt();
         this.updatedAt = feeds.getUpdatedAt();
     }
-    public FeedsResponseDto(Feeds feeds, boolean liked ,int likeTotal) {
+    public FeedsResponseDto(Feeds feeds, boolean liked ,int likeTotal, int commentTotal) {
         this.feedId = feeds.getFeedId();
         this.user = new UserInfo(feeds.getUser().getUserName(), feeds.getUser().getProfileImageUrl());
         this.contents = feeds.getContents();
@@ -69,13 +69,15 @@ public class FeedsResponseDto {
         this.category = feeds.getCategory(); // Feeds 엔티티에서 가져옴
         // likeTotal, commentTotal은 Feeds 엔티티에 없으므로 DTO에서 0으로 초기화
         this.likeTotal = likeTotal; //
+        this.commentTotal = commentTotal;
         this.liked = liked;
         this.createdAt = feeds.getCreatedAt();
         this.updatedAt = feeds.getUpdatedAt();
     }
 
-    public static FeedsResponseDto toDto(Feeds feeds, boolean liked, int likeTotal) {
-        return  new FeedsResponseDto( feeds , liked , likeTotal);
+
+    public static FeedsResponseDto toDto(Feeds feeds, boolean liked, int likeTotal, int commentTotal) {
+        return  new FeedsResponseDto( feeds , liked , likeTotal, commentTotal);
     }
 
     

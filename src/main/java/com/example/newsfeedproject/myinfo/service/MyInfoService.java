@@ -1,6 +1,7 @@
 package com.example.newsfeedproject.myinfo.service;
 
 import com.example.newsfeedproject.auth.impl.UserDetailsImpl;
+import com.example.newsfeedproject.comment.repository.CommentsRepository;
 import com.example.newsfeedproject.common.exception.users.UsersErrorException;
 import com.example.newsfeedproject.feeds.dto.FeedsResponseDto;
 import com.example.newsfeedproject.feeds.entity.Feeds;
@@ -20,6 +21,7 @@ import static com.example.newsfeedproject.common.exception.users.UsersErrorCode.
 public class MyInfoService {
     private final FeedsRepository feedsRepository;
     private final LikesRepository likesRepository;
+    private final CommentsRepository commentsRepository;
 
     public Page<FeedsResponseDto> readFeedsByMyComment(UserDetailsImpl userDetails, Pageable pageable) {
         Long meId = userDetails.getUserId();
@@ -35,7 +37,10 @@ public class MyInfoService {
         Map<Long, Integer> likeTotalMap =likesRepository.countLikedByFeedIds(likesRepository.findLikesByFeedId(meId).stream().toList()).stream()
                 .collect(Collectors.toMap(row ->(Long) row[0], row ->((Long) row[1]).intValue()));
 
-        return  feedsPage.map(feeds -> FeedsResponseDto.toDto(feeds, likedIdSet.contains(feeds.getFeedId()),likeTotalMap.getOrDefault(feeds.getFeedId(),0)));
+        Map<Long, Integer> commentTotalMap = commentsRepository.countCommentsByFeedIds(feedIdList).stream()
+                .collect(Collectors.toMap(row -> (Long) row[0], row -> ((Long) row[1]).intValue()));
+
+        return  feedsPage.map(feeds -> FeedsResponseDto.toDto(feeds, likedIdSet.contains(feeds.getFeedId()),likeTotalMap.getOrDefault(feeds.getFeedId(),0), commentTotalMap.getOrDefault(feeds.getFeedId(), 0)));
     }
 
     public Page<FeedsResponseDto> readFeedsByMyLikes(UserDetailsImpl userDetails, Pageable pageable) {
@@ -55,6 +60,6 @@ public class MyInfoService {
                 :feedsRepository.findByIdIn(likesIdSet, pageable)
                 .map(feeds ->
 
-                        FeedsResponseDto.toDto(feeds, true, likeTotalMap.getOrDefault(feeds.getFeedId(),0)));
+                        FeedsResponseDto.toDto(feeds, true, likeTotalMap.getOrDefault(feeds.getFeedId(),0), likeTotalMap.getOrDefault(feeds.getFeedId(),0)));
     }
 }
