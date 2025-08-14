@@ -7,7 +7,9 @@ import com.example.newsfeedproject.feeds.dto.CreateFeedsRequestDto;
 import com.example.newsfeedproject.feeds.dto.FeedsResponseDto;
 import com.example.newsfeedproject.feeds.dto.UpdateFeedsRequestDto;
 import com.example.newsfeedproject.feeds.repository.FeedsRepository;
+import com.example.newsfeedproject.follow.repository.FollowsRepository;
 import com.example.newsfeedproject.likes.repository.LikesRepository;
+import com.example.newsfeedproject.users.entity.AccessAble;
 import com.example.newsfeedproject.users.entity.Users;
 import com.example.newsfeedproject.users.repository.UsersRepository;
 import com.example.newsfeedproject.feedimg.entity.FeedImage;
@@ -25,6 +27,7 @@ public class FeedsService {
     private final FeedsRepository feedsRepository;
     private final UsersRepository usersRepository;
     private final LikesRepository likesRepository;
+    private final FollowsRepository followsRepository;
 
     // 게시글 생성 기능
     @Transactional
@@ -40,7 +43,7 @@ public class FeedsService {
                 .user(user)
                 .contents(createFeedsRequestDto.getContents())
                 .category(createFeedsRequestDto.getCategory())
-                // likeTotal, commentTotal은 @Builder에 초기화되지 않음 (엔티티에 필드 없음)
+                .accessAble(createFeedsRequestDto.getAccessAble())
                 .build();
 
         // 3. 이미지 URL 목록을 FeedImg 엔티티로 변환하여 Feeds에 연결
@@ -58,6 +61,30 @@ public class FeedsService {
         return feeds;
     }
 
+    // 게시글 접근 권한 확인 메소드
+    private boolean hasAccess(Feeds feed, UserDetailsImpl userDetails) {
+        Long currentUserId = userDetails.getUserId();
+        Long feedOwnerId = feed.getUser().getUserId();
+
+        // 1. 게시글 주인이면 언제든 접근 가능
+        if (currentUserId.equals(feedOwnerId)) {
+            return true;
+        }
+
+        // 2. 공개 범위에 따라 접근 허용
+        AccessAble accessAble = feed.getAccessAble();
+
+        switch (accessAble) {
+            case ALL_ACCESS:
+                return true;
+            case FOLLOWER_ACCESS:
+                return followsRepository.existsByFollower_UserIdAndFollowee_UserIdAndFollowedTrue(currentUserId, feedOwnerId);
+            case NONE_ACCESS:
+            default:
+                return false;
+        }
+    }
+
     // 게시글 전체 조회 (페이징, 최신순)
     @Transactional(readOnly = true)
     public Page<FeedsResponseDto> readAllFeeds(int page, int size, UserDetailsImpl userDetails) {
@@ -68,14 +95,14 @@ public class FeedsService {
 
         String currentUserEmail = userDetails.getUsername(); // 이메일 값 들고옴
 
-        Page<Feeds> feedsPage;
-
-        feedsPage = feedsRepository.findByDeletedFalse(pageable);
-
         // 현재 사용자 ID 조회 (liked 판단용)
         Long currentUserId = usersRepository.findByEmail(currentUserEmail)
                 .map(Users::getUserId)
                 .orElse(null); // 사용자를 찾을 수 없다면 null (비로그인 사용자 혹은 오류 상황)
+
+        Page<Feeds> feedsPage;
+
+        feedsPage = feedsRepository.findAccessibleFeeds(currentUserId, pageable);
 
         // Feeds 엔티티를 FeedResponseDto로 변환
         return feedsPage.map(feeds -> {
@@ -93,6 +120,10 @@ public class FeedsService {
         // deleted=false 조건 추가
         Feeds feeds = feedsRepository.findByFeedIdAndDeletedFalse(feedId)
                 .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다."));
+
+        if (!hasAccess(feeds, userDetails)) {
+            throw new IllegalArgumentException("이 게시글에 접근할 권한이 없습니다.");
+        }
 
         String currentUserEmail = userDetails.getUsername(); // 이메일 값 들고옴
 
