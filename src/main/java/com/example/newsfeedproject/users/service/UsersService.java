@@ -2,8 +2,8 @@ package com.example.newsfeedproject.users.service;
 
 import com.example.newsfeedproject.auth.impl.UserDetailsImpl;
 import com.example.newsfeedproject.comment.repository.CommentsRepository;
-import com.example.newsfeedproject.common.dto.PrincipalRequestDto;
 import com.example.newsfeedproject.common.dto.ReadUserSimpleResponseDto;
+import com.example.newsfeedproject.common.exception.feeds.FeedsErrorException;
 import com.example.newsfeedproject.common.exception.users.UsersErrorException;
 import com.example.newsfeedproject.feedimg.repository.FeedImgRepository;
 import com.example.newsfeedproject.feeds.entity.Feeds;
@@ -17,16 +17,15 @@ import com.example.newsfeedproject.users.entity.AccessAble;
 import com.example.newsfeedproject.users.entity.Users;
 import com.example.newsfeedproject.users.repository.UsersRepository;
 import lombok.RequiredArgsConstructor;
-import org.hibernate.boot.model.naming.IllegalIdentifierException;
 import org.springframework.data.domain.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import static com.example.newsfeedproject.common.exception.users.UsersErrorCode.*;
+import static com.example.newsfeedproject.common.exception.feeds.FeedsErrorCode.*;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -39,32 +38,6 @@ public class UsersService {
     private final FeedImgRepository feedImgRepository;
     private final FollowsRepository followsRepository;
 
-    // userId 값의 User를 읽을 수 있는 권한 있을 때 Users 형태로 반환
-//    public Users readUserAuthority(Long userId, UserDetailsImpl userDetails){
-//        // 로그인 안한 경우
-//        PrincipalRequestDto principalUser = new PrincipalRequestDto(userDetails.getUserId(),
-//                userDetails.getAuthorities().stream()
-//                        .map(GrantedAuthority::getAuthority)
-//                        .collect(Collectors.toSet()));   // Set으로 변환해서 반환
-//        if (!principalUser.getAuthorities().equals("ROLE_USER")){
-//            throw  new UsersErrorException(NOT_A_USER);
-//        }
-//
-//        if (userDetails==null) {throw new UsersErrorException(LOGIN_REQUIRED);}
-//
-//        Optional<Users> user = usersRepository.findById(userId);
-//        if (user.isEmpty()) {throw new UsersErrorException(NOT_A_USER);}
-//
-//
-//        // 보는 사람 : principalUser.getUserId(), 볼 사람 : userId가 다를 때 (본인 프로필이 아닐 때)
-//        if (!principalUser.getUserId().equals(userId)) {
-//            // 보는 사람 : principalUser.getUserId(), 볼 사람 : userId 팔로우가 아닐 때
-//            if(!followsRepository.existsByFollower_UserIdAndFollowee_UserIdAndFollowedTrue(principalUser.getUserId(), userId)){
-//                throw new UsersErrorException(FOLLOW_REQUIRED);
-//            }
-//        }
-//
-//        return user.get();
     // 유저 단일 권한 확인 // 권한이 있을때 true
     public boolean hasUserAuthorized(UserDetailsImpl userDetails, String authorities){
         return userDetails.getAuthorities().stream()
@@ -84,22 +57,22 @@ public class UsersService {
     // userId 값의 User를 읽을 수 있는 권한 있을 때 Users 형태로 반환
     public Users userById(Long userId){
         return usersRepository.findById(userId)
-                .orElseThrow(() -> new IllegalIdentifierException("유저 없음"));
+                .orElseThrow(() -> new UsersErrorException(NO_SUCH_USER));
     }
 
     // 프로필 (프로필 이미지, 이름, 팔로우 여부)
     public ReadUserSimpleResponseDto readUserSimple(Long userId, UserDetailsImpl userDetails) {
         // 권한확인 로그인한 사람이 유저인지
-        if (!hasUserAuthorized(userDetails, "ROLE_USER")) {throw new IllegalIdentifierException("권한이 없습니다.");}
+        if (!hasUserAuthorized(userDetails, "ROLE_USER")) {throw new FeedsErrorException(USER_NOT_FOUND_CURRENT);}
         // 보는 사람과 볼 사람이 같은지 여부 확인 // 비공개(나만보기) // 다른 사람 볼 때 그 사람이 비공개일때
         if (!isSameUser(userDetails.getUserId(), userId) && isUserAccessible(userId, AccessAble.NONE_ACCESS)){
-            throw new IllegalArgumentException("비공개유저");
+            throw new UsersErrorException(USER_IS_PRIVATE);
         }
         // 팔로우 여부 확인
         boolean isFollowed = isUserFollowingTarget(userDetails.getUserId(), userId);
         // 2. 팔로워 공개  // 다른 사람 볼 때 그 사람이 팔로워 공개일때
         if (!isSameUser(userDetails.getUserId(), userId) && isUserAccessible(userId,AccessAble.FOLLOWER_ACCESS) && !isFollowed){
-            throw new IllegalArgumentException("팔로우 필요");
+            throw new UsersErrorException(FOLLOW_REQUIRED);
         }
         // 볼 유저가 있는지 확인 후 반환
         Users userSimple = userById(userId);
@@ -113,16 +86,16 @@ public class UsersService {
             Pageable pageable
     ){
         // 권한확인 로그인한 사람이 유저인지
-        if (!hasUserAuthorized(userDetails, "ROLE_USER")) {throw new IllegalIdentifierException("권한이 없습니다.");}
+        if (!hasUserAuthorized(userDetails, "ROLE_USER")) {throw new FeedsErrorException(USER_NOT_FOUND_CURRENT);}
         // 보는 사람과 볼 사람이 같은지 여부 확인 // 비공개(나만보기) // 다른 사람 볼 때 그 사람이 비공개일때
         if (!isSameUser(userDetails.getUserId(), userId) && isUserAccessible(userId, AccessAble.NONE_ACCESS)){
-            throw new IllegalArgumentException("비공개유저");
+            throw new UsersErrorException(USER_IS_PRIVATE);
         }
         // 팔로우 여부 확인
         boolean isFollowed = isUserFollowingTarget(userDetails.getUserId(), userId);
         // 2. 팔로워 공개  // 다른 사람 볼 때 그 사람이 팔로워 공개일때
         if (!isSameUser(userDetails.getUserId(), userId) && isUserAccessible(userId,AccessAble.FOLLOWER_ACCESS) && !isFollowed){
-            throw new IllegalArgumentException("팔로우 필요");
+            throw new UsersErrorException(FOLLOW_REQUIRED);
         }
         // 볼 유저가 있는지 확인 후 반환
         Users user = userById(userId);
