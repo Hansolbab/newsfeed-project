@@ -104,4 +104,8 @@ public class Users {
     public void setProfileImageUrl(String profileImageUrl) {
         this.profileImageUrl = profileImageUrl;
     }
+
+    public void setVisibility(AccessAble accessAble) {
+        this.visibility = accessAble;
+    }
 }
