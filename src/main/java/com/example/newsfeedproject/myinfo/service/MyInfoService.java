@@ -38,6 +38,10 @@ public class MyInfoService {
     }
 
     public Page<FeedsResponseDto> readFeedsByMyLikes(UserDetailsImpl userDetails, Pageable pageable) {
+        if(userDetails == null) {
+            throw new IllegalArgumentException("로그인이 필요합니다.");
+        }
+
         Long meId =  userDetails.getUserId();
 
         Set<Long> likesIdSet =  likesRepository.findLikesByFeedId(meId);

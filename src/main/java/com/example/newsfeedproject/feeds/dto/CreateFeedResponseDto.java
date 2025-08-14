@@ -3,7 +3,7 @@ package com.example.newsfeedproject.feeds.dto;
 import com.example.newsfeedproject.feedimg.entity.FeedImage;
 import com.example.newsfeedproject.feeds.entity.Feeds;
 import com.example.newsfeedproject.category.entity.Category;
-import com.example.newsfeedproject.users.dto.ReadUserSimpleResponseDto;
+import com.example.newsfeedproject.common.dto.ReadUserSimpleResponseDto;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import java.time.LocalDateTime;
@@ -27,7 +27,7 @@ public class CreateFeedResponseDto {
     public CreateFeedResponseDto(Feeds feeds) {
         this.feedId = feeds.getFeedId();
         
-        this.user = new ReadUserSimpleResponseDto(feeds.getUser().getUserName(),feeds.getUser().getProfileImageUrl());
+        this.user = new ReadUserSimpleResponseDto(feeds.getUser().getUserName(),feeds.getUser().getProfileImageUrl(), false);
         this.contents = feeds.getContents();
         this.feedImageUrlList = feeds.getFeedImageList().stream() // Feeds 엔티티의 feedImgs에서 FeedImageUrl 추출
                 .map(FeedImage::getFeedImageUrl)
