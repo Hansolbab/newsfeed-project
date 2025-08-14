@@ -24,10 +24,10 @@ public interface FeedsRepository extends JpaRepository<Feeds, Long> {
     // 필요한 사용자 정의 쿼리 메소드 추가 가능
     Page<Feeds> findByUser_UserId(Long userId, Pageable pageable);
 
-
+    // f.deleted = false 추가했음 확인 요망
     @Query(value = "select f from Feeds f" + // 실제 데이터 조회용
             " join f.comments c" + // Feeds에 매핑된 comments 컬렉션을 들고 온다.
-            " where  c.userComments.userId = :meId" + // 유저 아이디가 나
+            " where  f.deleted = false And c.userComments.userId = :meId" + // 유저 아이디가 나
             " group by  f.feedId " + // 내가 단 여러개의 댓글을 그룹화
             "order by max(c.createdAt) desc", // 내 댓글 기준으로 최신순
         countQuery = "select count(distinct f.feedId)" + //총 페이지 수를 계산
