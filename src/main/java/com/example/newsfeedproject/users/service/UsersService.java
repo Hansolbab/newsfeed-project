@@ -99,8 +99,18 @@ public class UsersService {
         }
         // 볼 유저가 있는지 확인 후 반환
         Users user = userById(userId);
+        Page<Feeds> feedsPage;
+        // 본인 페이지 볼 때
+        if (isSameUser(userDetails.getUserId(), userId)){
+            feedsPage = feedsRepository.findAcceessibleFeedsMyPage(userId, pageable);
+        } else { // 다른사람 페이지 볼 때
+            if (isUserAccessible(userId, AccessAble.ALL_ACCESS)){ // 전체공개 유저 // 전체 공개 게시글
+                feedsPage = feedsRepository.findAllAccessFeedsUserPage(userId, pageable);
+            } else {
+                feedsPage = feedsRepository.findFollowerAccessFeedsUserPage(userId, pageable);  // userId에 맞는 Feed들 Page로 받음
+            }
+        }
 
-        Page<Feeds> feedsPage = feedsRepository.findByUser_UserId(userId, pageable);  // userId에 맞는 Feed들 Page로 받음
         List<Long> feedIdsList = feedsPage.stream().map(Feeds::getFeedId).toList(); // FeedId만 리스트로 정리
         //object로 받고 Map key: feedId, value LikeInfoDto
         Map<Long, LikesInfoDto> likesInfoMap = likeRepository.countLikesAndIsLikedByFeedIds(feedIdsList, userId).stream()
@@ -135,7 +145,7 @@ public class UsersService {
 
     @Transactional
     public Page<ReadUserSimpleResponseDto> searchUser(String keyword, UserDetailsImpl userDetails, Pageable pageable){
-        Page<Users> resultUserList = usersRepository.findByUserNameContaining(keyword, pageable);
+        Page<Users> resultUserList = usersRepository.findByUserNameContainingAndVisibilityNotAndDeletedFalse(keyword, AccessAble.NONE_ACCESS, pageable);
 
         List<Long> resultUserIdList = resultUserList.stream()
                 .map(Users::getUserId)

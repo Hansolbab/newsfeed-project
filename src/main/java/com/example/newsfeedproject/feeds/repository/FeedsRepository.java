@@ -70,4 +70,20 @@ public interface FeedsRepository extends JpaRepository<Feeds, Long> {
     // 2. 특정 소프트 삭제된 게시글 단건 조회
     Optional<Feeds> findByFeedIdAndDeletedTrue(Long feedId);
 
+    // 본인이 피드 (소프트 딜리트 한거 제외) 찾기
+    @Query("SELECT f FROM Feeds f " +
+            "WHERE f.deleted = false AND f.user.userId = :userId ")
+    Page<Feeds> findAcceessibleFeedsMyPage(@Param("userId") Long userId, Pageable pageable);
+
+    // 다른 사람 피드 (소프트 딜리트 한거 제외) and 게시글 all_access 찾기
+    @Query("SELECT f FROM Feeds f " +
+            "WHERE f.deleted = false AND f.user.userId <> :userId AND f.accessAble = 'ALL_ACCESS' ")
+    Page<Feeds> findAllAccessFeedsUserPage(@Param("userId") Long userId, Pageable pageable);
+
+    // 다른 사람 피드 팔로워 공개 유저 (소프트 딜리트 한거 제외) and 게시글 all_access 찾기
+    @Query("SELECT f FROM Feeds f " +
+            "WHERE f.deleted = false AND f.user.userId <> :userId AND f.accessAble <> 'NONE_ACCESS' ")
+    Page<Feeds> findFollowerAccessFeedsUserPage(@Param("userId") Long userId, Pageable pageable);
+
+
 }
