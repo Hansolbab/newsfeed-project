@@ -1,10 +1,8 @@
 package com.example.newsfeedproject.common.dto;
 
-
 import com.example.newsfeedproject.category.entity.Category;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
 import java.time.LocalDateTime;
 import java.util.List;
 

@@ -1,9 +1,15 @@
 package com.example.newsfeedproject.feeds.service;
 
 import com.example.newsfeedproject.auth.impl.UserDetailsImpl;
+import com.example.newsfeedproject.comment.repository.CommentsRepository;
+import com.example.newsfeedproject.common.dto.ReadUsersFeedsResponseDto;
+import com.example.newsfeedproject.common.exception.auth.AuthErrorException;
 import com.example.newsfeedproject.common.exception.feeds.FeedsErrorException;
+
+import static com.example.newsfeedproject.common.exception.auth.AuthErrorCode.USER_NOT_FOUND;
 import static com.example.newsfeedproject.common.exception.users.UsersErrorCode.*;
 import com.example.newsfeedproject.common.exception.users.UsersErrorException;
+import com.example.newsfeedproject.feedimg.repository.FeedImgRepository;
 import com.example.newsfeedproject.feeds.entity.Feeds;
 import com.example.newsfeedproject.feeds.dto.CreateFeedsRequestDto;
 import com.example.newsfeedproject.feeds.dto.FeedsResponseDto;
@@ -11,17 +17,20 @@ import com.example.newsfeedproject.feeds.dto.UpdateFeedsRequestDto;
 import com.example.newsfeedproject.feeds.repository.FeedsRepository;
 import com.example.newsfeedproject.follow.repository.FollowsRepository;
 import com.example.newsfeedproject.likes.repository.LikesRepository;
+import com.example.newsfeedproject.users.dto.LikesInfoDto;
 import com.example.newsfeedproject.users.entity.AccessAble;
 import com.example.newsfeedproject.users.entity.Users;
 import com.example.newsfeedproject.users.repository.UsersRepository;
 import com.example.newsfeedproject.feedimg.entity.FeedImage;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import static com.example.newsfeedproject.common.exception.feeds.FeedsErrorCode.*;
 
 // 게시글 관련 비즈니스 로직 처리 서비스
@@ -31,7 +40,9 @@ public class FeedsService {
     private final FeedsRepository feedsRepository;
     private final UsersRepository usersRepository;
     private final LikesRepository likesRepository;
+    private final CommentsRepository commentsRepository;
     private final FollowsRepository followsRepository;
+    private final FeedImgRepository feedImgRepository;
 
     // 게시글 생성 기능
     @Transactional
@@ -90,7 +101,7 @@ public class FeedsService {
             default:
                 return false;
         }
-
+//  유저는 전체공개, 게시글은 팔로우 공개에요   팔로우가 아닌 사람이 게시글을 볼 때 전체 공개인 게시글들은 보일거에요 팔로우 전용 게시글은 안보일거에요
         AccessAble feedAccessAble = feed.getAccessAble();
 
         switch (feedAccessAble) {
@@ -106,27 +117,59 @@ public class FeedsService {
 
     // 게시글 전체 조회 (페이징, 최신순)
     @Transactional(readOnly = true)
-    public Page<FeedsResponseDto> readAllFeeds(int page, int size, UserDetailsImpl userDetails) {
-
-
+    public Page<ReadUsersFeedsResponseDto> readAllFeeds(int page, int size, UserDetailsImpl userDetails) {
         Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
         Pageable pageable = PageRequest.of(page, size, sort);
 
-        String currentUserEmail = userDetails.getUsername(); // 이메일 값 들고옴
+        Users user = usersRepository.findById(userDetails.getUserId())
+                .orElseThrow(() -> new AuthErrorException(USER_NOT_FOUND));
 
-        Long currentUserId = usersRepository.findByEmail(currentUserEmail)
-                .map(Users::getUserId)
-                .orElse(null); // 사용자를 찾을 수 없다면 null (비로그인 사용자 혹은 오류 상황)
+        Long meId = user.getUserId();
 
-        Page<Feeds> feedsPage;
+        Page<Feeds> feedsPage = feedsRepository.findAccessibleFeedsBasedOnProfile(meId, pageable);
 
-        feedsPage = feedsRepository.findAccessibleFeedsBasedOnProfile(currentUserId, pageable);
+        List<Long> feedIdList = feedsPage.getContent().stream()
+                .map(Feeds::getFeedId)
+                .toList();
 
-        return feedsPage.map(feeds -> {
-            boolean liked = likesRepository.findByUserIdAndFeedIdAndLikedTrue(currentUserId, feeds.getFeedId()).isPresent();
-            return new FeedsResponseDto(feeds, liked);
-        });
-    }
+        Map<Long, List<String>> feedImages = feedImgRepository.findFeedImgByFeedId(feedIdList).stream()
+                .collect(Collectors.groupingBy(row -> (Long) row[0], // feedId를 기준으로 그룹화
+                        Collectors.mapping(row -> (String) row[1], // feedImageUrl만 뽑아서
+                                Collectors.toList() // 리스트로 묶음
+                        )));
+
+        Map<Long, LikesInfoDto> likesInfoMap = likesRepository.countLikesAndIsLikedByFeedIds(feedIdList, meId).stream()
+                .collect(Collectors.toMap(
+                        row -> (Long) row[0],
+                        row -> new LikesInfoDto(
+                                 ((Long) row[2]).intValue(),
+                            ((Long) row[1]) > 0
+                        )));
+
+        //댓글 토탈
+        Map<Long, Integer> commentsTotalMap = commentsRepository.countCommentsByFeedIds(feedIdList).stream()
+                .collect(Collectors.toMap(row -> (Long) row[0],
+                        row -> ((Long) row[1]).intValue()));
+
+        List<ReadUsersFeedsResponseDto> feedsResponseDtoList = feedsPage.stream()
+                .map(feed -> new ReadUsersFeedsResponseDto(
+                        feed.getFeedId(),
+                        feedImages.get(feed.getFeedId()),
+                        feed.getContents(),
+                        likesInfoMap.getOrDefault(feed.getFeedId(), new LikesInfoDto(0, false)).getLikeTotal(),
+                        commentsTotalMap.getOrDefault(feed.getFeedId(), 0),
+                        likesInfoMap.getOrDefault(feed.getFeedId(),new LikesInfoDto(0,false)).isLiked()
+                )).toList();
+
+        return new PageImpl<>(feedsResponseDtoList, pageable, feedsPage.getTotalElements());
+        }
+//
+//        this.feedId = feedId;
+//        this.feedImageURL = feedImgs;
+//        this.contents = contents;
+//        this.likeTotal = likeTotal;
+//        this.commentTotal = commentTotal;
+//        this.liked = liked;
 
     // 게시글 단건 조회
     @Transactional(readOnly = true)

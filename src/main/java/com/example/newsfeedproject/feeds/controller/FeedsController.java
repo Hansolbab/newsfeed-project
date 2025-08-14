@@ -2,6 +2,7 @@ package com.example.newsfeedproject.feeds.controller;
 
 import com.example.newsfeedproject.auth.impl.UserDetailsImpl;
 import com.example.newsfeedproject.category.entity.Category;
+import com.example.newsfeedproject.common.dto.ReadUsersFeedsResponseDto;
 import com.example.newsfeedproject.feeds.dto.CreateFeedsRequestDto;
 import com.example.newsfeedproject.feeds.dto.CreateFeedResponseDto;
 import com.example.newsfeedproject.feeds.dto.FeedsResponseDto;
@@ -41,14 +42,14 @@ public class FeedsController {
     // 게시글 전체 조회 API (GET /api/feeds)
     // 페이징 처리: page (페이지 번호, 0부터 시작), size (페이지당 게시글 수)
     @GetMapping
-    public ResponseEntity<Page<FeedsResponseDto>> readAllFeeds(
+    public ResponseEntity<Page<ReadUsersFeedsResponseDto>> readAllFeeds(
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "10") int size,
             @RequestParam(value = "category", required = false) String categoryString,
             @AuthenticationPrincipal UserDetailsImpl userDetailsImpl // 현재 인증된 사용자 정보 주입
     ) {
         // 서비스 계층을 통해 게시글 목록 조회
-        Page<FeedsResponseDto> feedsPage = feedsService.readAllFeeds(page, size, userDetailsImpl);
+        Page<ReadUsersFeedsResponseDto> feedsPage = feedsService.readAllFeeds(page, size, userDetailsImpl);
 
         // 조회된 페이지(Page 객체) 반환
         return ResponseEntity.ok(feedsPage);
