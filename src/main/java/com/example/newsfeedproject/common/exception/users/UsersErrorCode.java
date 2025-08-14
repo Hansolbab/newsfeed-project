@@ -13,7 +13,8 @@ public enum UsersErrorCode {
     USER_NOT_EXIST(404, "존재하지 않는 사용자입니다."),
     CURRENT_USER_NOT_FOUND(404, "현재 사용자를 찾을 수 없습니다."),
 
-    NOT_POST_AUTHOR(403, "작성자가 아닙니다.");//게시글 수정, 삭제 권한 , 댓글 수정, 삭제
+    NOT_POST_AUTHOR(403, "작성자가 아닙니다."),//게시글 수정, 삭제 권한 , 댓글 수정, 삭제
+    USER_IS_PRIVATE(403,"비공개 유저입니다.");//비공개유저저
 
     private final int status;
     private final String message;
