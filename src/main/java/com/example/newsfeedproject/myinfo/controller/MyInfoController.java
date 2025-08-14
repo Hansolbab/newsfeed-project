@@ -2,13 +2,11 @@ package com.example.newsfeedproject.myinfo.controller;
 
 import com.example.newsfeedproject.auth.impl.UserDetailsImpl;
 import com.example.newsfeedproject.common.dto.ReadUserSimpleResponseDto;
+import com.example.newsfeedproject.common.exception.users.UsersErrorException;
 import com.example.newsfeedproject.feeds.dto.FeedsResponseDto;
-import com.example.newsfeedproject.myinfo.dto.UpdateProfileImageRequestDto;
 import com.example.newsfeedproject.myinfo.service.MyInfoService;
-import com.example.newsfeedproject.myinfo.service.ProfileImageService;
 import com.example.newsfeedproject.common.dto.ReadUsersFeedsResponseDto;
 import com.example.newsfeedproject.users.service.UsersService;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+import static com.example.newsfeedproject.common.exception.users.UsersErrorCode.*;
 
 @RestController
 @RequestMapping("/api/myInfo")
@@ -26,7 +25,6 @@ import org.springframework.web.bind.annotation.*;
 public class MyInfoController {
     private final UsersService usersService;
     private final MyInfoService myInfoService;
-    private final ProfileImageService profileImageService ;
 
     @GetMapping("/{userId}")
     @Transactional(readOnly = true)
@@ -58,29 +56,13 @@ public class MyInfoController {
             @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC)Pageable pageable
     ) {
         if(userDetails == null) {
-            throw new IllegalArgumentException("로그인이 필요합니다.");
+            throw new UsersErrorException(LOGIN_REQUIRED);
         }
 
        return new ResponseEntity<>(myInfoService.readFeedsByMyComment(userDetails, pageable), HttpStatus.OK);
 
     }
 
-    // 내 프로필 이미지 URL로 수정 // 이미지 변경 후 DB에는 저장하는데 반환값은 없어도 괜찮은지 물어보기
-    @PutMapping("/profileImage")
-    public ResponseEntity<String> uploadProfileImage(
-            @AuthenticationPrincipal UserDetailsImpl userDetailsImpl,
-            @Valid @RequestBody UpdateProfileImageRequestDto updateProfileImageRequestDto
-    ){
-      profileImageService.updateProfileImageUrl(userDetailsImpl.getUserId(), updateProfileImageRequestDto.getProfileImageUrl());
-      return ResponseEntity.ok("프로필 이미지 변경이 완료되었습니다.");
-    }
-
-    // 내 프로필 이미지 삭제
-    @DeleteMapping("/profileImage")
-    public ResponseEntity<Void> deleteProfileImage(@AuthenticationPrincipal UserDetailsImpl userDetailsImpl){
-        profileImageService.setPlaceholderUrl(userDetailsImpl.getUserId());
-        return ResponseEntity.noContent().build();
-    }
 
     @GetMapping("/likeFeeds")
     @Transactional(readOnly = true)

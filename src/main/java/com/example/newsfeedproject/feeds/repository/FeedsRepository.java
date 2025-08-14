@@ -40,6 +40,18 @@ public interface FeedsRepository extends JpaRepository<Feeds, Long> {
               countQuery = "select count(f) from Feeds f where f.feedId in :feedIds")
     Page<Feeds> findByIdIn(@Param("feedIds")Set<Long> feedIds, Pageable pageable);
 
+
+    @Query("SELECT f FROM Feeds f " +
+            "WHERE f.deleted = false AND " + // 소프트 삭제되지 않은 게시글만
+            "(f.user.userId = :currentUserId OR " + //  내 게시글은 모두 접근 가능 OR
+            "(f.accessAble = 'ALL_ACCESS') OR " + //  전체 공개 게시글 접근 가능 OR
+            "(f.accessAble = 'FOLLOWER_ACCESS' AND EXISTS (" + //  팔로워 공개 게시글이면서
+            "   SELECT fw FROM Follows fw " + // 내가 작성자를 팔로우하는 경우
+            "   WHERE fw.follower.userId = :currentUserId AND fw.followee.userId = f.user.userId AND fw.followed = true" +
+            "))" +
+            ")")
+    Page<Feeds> findAccessibleFeeds(@Param("currentUserId") Long currentUserId, Pageable pageable);
+
     // 1. 모든 소프트 삭제된 게시글 조회 (페이징 포함)
     Page<Feeds> findByDeletedTrue(Pageable pageable);
 

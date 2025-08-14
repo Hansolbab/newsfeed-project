@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -22,6 +23,7 @@ import java.util.List;
 @NoArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
 @Table
+//@Table(name="users")
 public class Users {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -70,12 +72,18 @@ public class Users {
     @OneToMany(mappedBy = "followee", cascade = CascadeType.ALL,orphanRemoval = true)
     private List<Follows> followerList = new ArrayList<>();
 
+    @Builder.Default
+    @Enumerated(EnumType.STRING)
+    @Column(name = "visibility", nullable = false)
+    private AccessAble visibility = AccessAble.ALL_ACCESS;
+
     public Users ( String userName, String phoneNumber, String email,String encode){
         this.userName = userName;
         this.phoneNumber = phoneNumber;
         this.email = email;
         this.password = encode;
         this.profileImageUrl = "https://via.placeholder.com/150";
+        this.visibility = AccessAble.ALL_ACCESS;
     }
 
     public void setPhoneNumber(String phoneNumber) {
