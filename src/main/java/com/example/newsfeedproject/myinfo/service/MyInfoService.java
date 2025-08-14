@@ -3,7 +3,7 @@ package com.example.newsfeedproject.myinfo.service;
 import com.example.newsfeedproject.auth.impl.UserDetailsImpl;
 import com.example.newsfeedproject.comment.repository.CommentsRepository;
 import com.example.newsfeedproject.common.exception.users.UsersErrorException;
-import com.example.newsfeedproject.feeds.dto.FeedsResponseDto;
+import com.example.newsfeedproject.feeds.dto.ReadFeedsResponseDto;
 import com.example.newsfeedproject.feeds.entity.Feeds;
 import com.example.newsfeedproject.feeds.repository.FeedsRepository;
 import com.example.newsfeedproject.likes.repository.LikesRepository;
@@ -23,27 +23,32 @@ public class MyInfoService {
     private final LikesRepository likesRepository;
     private final CommentsRepository commentsRepository;
 
-    public Page<FeedsResponseDto> readFeedsByMyComment(UserDetailsImpl userDetails, Pageable pageable) {
+    public Page<ReadFeedsResponseDto> readFeedsByMyComment(UserDetailsImpl userDetails, Pageable pageable) {
         Long meId = userDetails.getUserId();
 
         Page<Feeds> feedsPage = feedsRepository.findFeedsByCommentsBy(meId,pageable);
 
-        List<Long> feedIdList = feedsPage.getContent().stream().map(Feeds::getFeedId).toList();
+        List<Long> feedIdsList = feedsPage.getContent().stream().map(Feeds::getFeedId).toList();
 
-        Set<Long> likedIdSet = feedIdList.isEmpty() // feedIdSet 이 0일 경우
+        Set<Long> likedIdSet = feedIdsList.isEmpty() // feedIdSet 이 0일 경우
                 ? Set.of() // 빈 셋을 반환 : DB 에러 방지
-                : likesRepository.findLikedFeedIds(meId, feedIdList);
+                : likesRepository.findLikedFeedIds(meId, feedIdsList);
 
-        Map<Long, Integer> likeTotalMap =likesRepository.countLikedByFeedIds(likesRepository.findLikesByFeedId(meId).stream().toList()).stream()
-                .collect(Collectors.toMap(row ->(Long) row[0], row ->((Long) row[1]).intValue()));
+        Map<Long, Integer> likesTotal = likesRepository.countLikedByFeedIds(feedIdsList).stream().collect(Collectors.toMap(row ->(Long) row[0],
+                row ->((Long) row[1]).intValue()));
 
-        Map<Long, Integer> commentTotalMap = commentsRepository.countCommentsByFeedIds(feedIdList).stream()
-                .collect(Collectors.toMap(row -> (Long) row[0], row -> ((Long) row[1]).intValue()));
+        Map<Long, Integer> commentsTotal = commentsRepository.countCommentsByFeedIds(feedIdsList).stream()
+                .collect(Collectors.toMap(row ->(Long) row[0],
+                        row ->((Long) row[1]).intValue()));
 
-        return  feedsPage.map(feeds -> FeedsResponseDto.toDto(feeds, likedIdSet.contains(feeds.getFeedId()),likeTotalMap.getOrDefault(feeds.getFeedId(),0), commentTotalMap.getOrDefault(feeds.getFeedId(), 0)));
+
+        return  feedsPage.map(feeds -> ReadFeedsResponseDto.toDto(feeds,
+                likedIdSet.contains(feeds.getFeedId()),
+                likesTotal.getOrDefault(feeds.getFeedId(), 0),
+                commentsTotal.getOrDefault(feeds.getFeedId(),0)));
     }
 
-    public Page<FeedsResponseDto> readFeedsByMyLikes(UserDetailsImpl userDetails, Pageable pageable) {
+    public Page<ReadFeedsResponseDto> readFeedsByMyLikes(UserDetailsImpl userDetails, Pageable pageable) {
         if(userDetails == null) {
             throw new UsersErrorException(NOT_A_USER);
         }
@@ -52,14 +57,20 @@ public class MyInfoService {
 
         Set<Long> likesIdSet =  likesRepository.findLikesByFeedId(meId);
 
+        List<Long> feedIdsList = likesRepository.findLikesByFeedId(meId).stream().toList();
 
-        Map<Long, Integer> likeTotalMap =likesRepository.countLikedByFeedIds(likesRepository.findLikesByFeedId(meId).stream().toList()).stream()
+        Map<Long, Integer> likeTotalMap =likesRepository.countLikedByFeedIds(feedIdsList.stream().toList()).stream()
                 .collect(Collectors.toMap(row ->(Long) row[0], row ->((Long) row[1]).intValue()));
+
+        Map<Long, Integer> commentsTotal = commentsRepository.countCommentsByFeedIds(feedIdsList).stream()
+                .collect(Collectors.toMap(row ->(Long) row[0],
+                        row ->((Long) row[1]).intValue()));
+
 
         return (likesIdSet.isEmpty()) ? Page.empty(pageable)
                 :feedsRepository.findByIdIn(likesIdSet, pageable)
                 .map(feeds ->
 
-                        FeedsResponseDto.toDto(feeds, true, likeTotalMap.getOrDefault(feeds.getFeedId(),0), likeTotalMap.getOrDefault(feeds.getFeedId(),0)));
+                        ReadFeedsResponseDto.toDto(feeds, true, likeTotalMap.getOrDefault(feeds.getFeedId(),0),commentsTotal.getOrDefault(feeds.getFeedId(),0)));
     }
 }
