@@ -103,7 +103,7 @@ public class FollowsController {
 
         Long meId = userDetails.getUserId();
 
-        return new ResponseEntity<>(followsService.readFolloweeList(userId, meId, pageable), HttpStatus.OK);
+        return new ResponseEntity<>(followsService.readFolloweeList(meId, userId, pageable), HttpStatus.OK);
     }
 
 }
