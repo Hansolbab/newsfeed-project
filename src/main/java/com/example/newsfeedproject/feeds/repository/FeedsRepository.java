@@ -61,7 +61,6 @@ public interface FeedsRepository extends JpaRepository<Feeds, Long> {
             // (C. 프로필이 '나만 보기' (NONE_ACCESS)인 경우는 여기에 포함되지 않음. 본인 외에는 볼 수 없으므로 쿼리에서 자동 제외됨)
             "   ))" +
             ")")
-
     Page<Feeds> findAccessibleFeedsBasedOnProfile(@Param("currentUserId") Long currentUserId, Pageable pageable);
 
     // 1. 모든 소프트 삭제된 게시글 조회 (페이징 포함)
