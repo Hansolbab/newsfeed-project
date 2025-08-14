@@ -79,8 +79,10 @@ public class MyInfoController {
 
     @PostMapping("/accessAble")
     @Transactional
-    public ResponseEntity<AccessAble> accessAbleMyPage(UserDetailsImpl userDetails, AccessAbleDto accessAble)
-    {
+    public ResponseEntity<AccessAble> accessAbleMyPage(
+        @AuthenticationPrincipal UserDetailsImpl userDetails,
+        @RequestBody AccessAbleDto accessAble
+    ){
         return new ResponseEntity<>(myInfoService.accessAbleMyPage(userDetails,accessAble),HttpStatus.OK);
     }
 
