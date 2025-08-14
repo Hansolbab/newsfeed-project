@@ -1,5 +1,6 @@
 package com.example.newsfeedproject.users.repository;
 
+import com.example.newsfeedproject.users.entity.AccessAble;
 import com.example.newsfeedproject.users.entity.Users;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -14,4 +15,6 @@ public interface UsersRepository extends JpaRepository<Users, Long> {
     boolean existsByUserName(String userName);
 
     Page<Users> findByUserNameContaining(String username, Pageable pageable);
+
+    boolean existsByUserIdAndVisibility(Long userId, AccessAble visibility);
 }
