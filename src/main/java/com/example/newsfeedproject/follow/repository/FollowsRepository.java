@@ -37,4 +37,5 @@ public interface FollowsRepository extends JpaRepository<Follows , Long> {
             "FROM Follows f " +
             "WHERE f.follower.userId = :meId AND f.followee.userId IN :userId ")
     List<Object[]> isFollowedByMyIdANDUserIds(@Param("meId") Long meId, @Param("userId") List<Long> userId);
+
 }

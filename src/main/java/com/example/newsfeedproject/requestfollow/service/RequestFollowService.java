@@ -77,6 +77,15 @@ public class RequestFollowService {
 
         Follows relation = getRelation(userId, meId);
 
+        if(requestRelation.getFollowStatus().equals(FollowStatus.ACCEPTED)){
+            throw new FollowErrorException(ALREADY_FOLLOW);
+        }
+
+        if(requestRelation.getFollowStatus().equals(FollowStatus.NONE)) {
+            throw new FollowErrorException(NOT_REQUEST);
+        }
+
+
         requestRelation.accept();
 
 
@@ -122,6 +131,10 @@ public class RequestFollowService {
 
         if(requestRelation.getFollowStatus().equals(FollowStatus.ACCEPTED)){
             throw new FollowErrorException(ALREADY_FOLLOW);
+        }
+
+        if(requestRelation.getFollowStatus().equals(FollowStatus.NONE)) {
+            throw new FollowErrorException(NOT_REQUEST);
         }
 
         requestRelation.cancel();
