@@ -18,7 +18,7 @@ public interface UsersRepository extends JpaRepository<Users, Long> {
     boolean existsByUserName(String userName);
     Page<Users> findByUserNameContainingAndVisibilityNotAndDeletedFalse(String userName, AccessAble visibilities,
                                                                         Pageable pageable);
-
+//whdfy
     boolean existsByUserIdAndVisibility(Long userId, AccessAble visibility);
 
     @Query("SELECT u FROM Users u " +
