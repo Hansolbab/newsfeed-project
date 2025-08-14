@@ -6,6 +6,7 @@ import com.example.newsfeedproject.common.exception.users.UsersErrorException;
 import com.example.newsfeedproject.feeds.dto.ReadFeedsResponseDto;
 import com.example.newsfeedproject.feeds.entity.Feeds;
 import com.example.newsfeedproject.feeds.repository.FeedsRepository;
+import com.example.newsfeedproject.follow.repository.FollowsRepository;
 import com.example.newsfeedproject.likes.repository.LikesRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -22,8 +23,10 @@ public class MyInfoService {
     private final FeedsRepository feedsRepository;
     private final LikesRepository likesRepository;
     private final CommentsRepository commentsRepository;
+    private final FollowsRepository followsRepository;
 
     public Page<ReadFeedsResponseDto> readFeedsByMyComment(UserDetailsImpl userDetails, Pageable pageable) {
+
         Long meId = userDetails.getUserId();
 
         Page<Feeds> feedsPage = feedsRepository.findFeedsByCommentsBy(meId,pageable);
@@ -42,10 +45,14 @@ public class MyInfoService {
                         row ->((Long) row[1]).intValue()));
 
 
+        Set<Long> followedUserIdSet = followsRepository.findFolloweeIdsByMe(meId);
+
+
         return  feedsPage.map(feeds -> ReadFeedsResponseDto.toDto(feeds,
                 likedIdSet.contains(feeds.getFeedId()),
                 likesTotal.getOrDefault(feeds.getFeedId(), 0),
-                commentsTotal.getOrDefault(feeds.getFeedId(),0)));
+                commentsTotal.getOrDefault(feeds.getFeedId(),0),
+                followedUserIdSet.contains(feeds.getUser().getUserId())));
     }
 
     public Page<ReadFeedsResponseDto> readFeedsByMyLikes(UserDetailsImpl userDetails, Pageable pageable) {
@@ -66,11 +73,17 @@ public class MyInfoService {
                 .collect(Collectors.toMap(row ->(Long) row[0],
                         row ->((Long) row[1]).intValue()));
 
+        Set<Long> followedUserIdSet = followsRepository.findFolloweeIdsByMe(meId);
+
 
         return (likesIdSet.isEmpty()) ? Page.empty(pageable)
                 :feedsRepository.findByIdIn(likesIdSet, pageable)
                 .map(feeds ->
 
-                        ReadFeedsResponseDto.toDto(feeds, true, likeTotalMap.getOrDefault(feeds.getFeedId(),0),commentsTotal.getOrDefault(feeds.getFeedId(),0)));
+                        ReadFeedsResponseDto.toDto(feeds,
+                                true, likeTotalMap.getOrDefault(feeds.getFeedId(), 0),
+                                commentsTotal.getOrDefault(feeds.getFeedId(),0),
+                                followedUserIdSet.contains(feeds.getUser().getUserId())));
+
     }
 }

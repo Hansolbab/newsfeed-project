@@ -45,9 +45,9 @@ public class ReadFeedsResponseDto {
     private LocalDateTime updatedAt;
 
     // Feeds 엔티티와 'liked' 여부로부터 DTO 생성
-    public ReadFeedsResponseDto(Feeds feeds, boolean liked , int likeTotal, int commentTotal) {
+    public ReadFeedsResponseDto(Feeds feeds, boolean liked , int likeTotal, int commentTotal ,boolean followed) {
         this.feedId = feeds.getFeedId();
-        this.user = new UserInfo(feeds.getUser().getUserName(), feeds.getUser().getProfileImageUrl());
+        this.user = new UserInfo(feeds.getUser().getUserName(), feeds.getUser().getProfileImageUrl(), followed);
         this.contents = feeds.getContents();
         this.feedImageUrlList = feeds.getFeedImageList().stream() // Feeds 엔티티의 feedImgs에서 imageUrl 추출
                 .map(FeedImage::getFeedImageUrl)
@@ -60,8 +60,11 @@ public class ReadFeedsResponseDto {
         this.updatedAt = feeds.getUpdatedAt();
     }
 
-    public static ReadFeedsResponseDto toDto(Feeds feeds, boolean liked, int likeTotal, int commentTotal) {
-        return  new ReadFeedsResponseDto( feeds , liked , likeTotal, commentTotal);
+
+
+
+    public static ReadFeedsResponseDto toDto(Feeds feeds, boolean liked, int likeTotal, int commentTotal, boolean followed) {
+        return  new ReadFeedsResponseDto( feeds , liked , likeTotal, commentTotal, followed);
     }
 
 
@@ -72,10 +75,12 @@ public class ReadFeedsResponseDto {
     public static class UserInfo {
         private String userName;
         private String profileImageUrl;
+        private boolean followed;
 
-        public UserInfo(String userName, String profileImageUrl) {
+        public UserInfo(String userName, String profileImageUrl, boolean followed) {
             this.userName = userName;
             this.profileImageUrl = profileImageUrl;
+            this.followed = followed;
         }
     }
 }
