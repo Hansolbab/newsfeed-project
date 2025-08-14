@@ -16,9 +16,7 @@ import java.util.Optional;
 public interface UsersRepository extends JpaRepository<Users, Long> {
     Optional<Users> findByEmail(String email);
     boolean existsByUserName(String userName);
-    Page<Users> findByUserNameContainingAndVisibilityNotAndDeletedFalse(String userName, AccessAble visibilities,
-                                                                        Pageable pageable);
-//whdfyㄴㅇ
+
     boolean existsByUserIdAndVisibility(Long userId, AccessAble visibility);
 
     @Query("SELECT u FROM Users u " +
