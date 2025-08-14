@@ -64,7 +64,7 @@ public class MyInfoModifyController {
             @Valid @RequestBody UpdateProfileImageRequestDto updateProfileImageRequestDto
     ){
         profileImageService.updateProfileImageUrl(userDetailsImpl.getUserId(), updateProfileImageRequestDto.getProfileImageUrl());
-        return ResponseEntity.ok("프로필 이미지 변경이 완료되었습니다.");
+        return ResponseEntity.ok(updateProfileImageRequestDto.getProfileImageUrl());
     }
 
     // 내 프로필 이미지 삭제
