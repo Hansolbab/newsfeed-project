@@ -40,6 +40,35 @@ public interface FeedsRepository extends JpaRepository<Feeds, Long> {
               countQuery = "select count(f) from Feeds f where f.feedId in :feedIds")
     Page<Feeds> findByIdIn(@Param("feedIds")Set<Long> feedIds, Pageable pageable);
 
+    // FeedsService.readAllFeeds 에서 사용될 쿼리 // 테스트.. 언제해봐..
+    @Query("SELECT f FROM Feeds f " +
+            "WHERE f.deleted = false AND (" + // 소프트 삭제되지 않은 게시글
+            // 1. 자신의 게시글은 언제나 접근 가능
+            "   f.user.userId = :currentUserId OR " +
+            // 2. 다른 사람의 게시글인 경우, 프로필 접근 레벨 및 게시글 접근 레벨에 따라 판단
+            "   (f.user.userId <> :currentUserId AND (" + // 게시글 주인이 내가 아닌 경우 ⭐
+            // A. 프로필이 '전체 공개' (ALL_ACCESS)인 경우:
+            "       (f.user.visibility = 'ALL_ACCESS' AND (" +
+            "           f.accessAble = 'ALL_ACCESS' OR " + // 게시글도 전체 공개 이거나
+            "           (f.accessAble = 'FOLLOWER_ACCESS' AND EXISTS (SELECT fw FROM Follows fw WHERE fw.follower.userId = :currentUserId AND fw.followee.userId = f.user.userId AND fw.followed = true))" + // 게시글은 팔로워 공개인데, 내가 팔로우하는 경우
+            "       )) OR " +
+            // B. 프로필이 '팔로워 공개' (FOLLOWER_ACCESS)인데, 내가 작성자를 팔로우하는 경우:
+            "       (f.user.visibility = 'FOLLOWER_ACCESS' AND EXISTS (SELECT fw FROM Follows fw WHERE fw.follower.userId = :currentUserId AND fw.followee.userId = f.user.userId AND fw.followed = true) AND (" +
+            "           f.accessAble = 'ALL_ACCESS' OR " + // 게시글은 전체 공개 이거나
+            "           (f.accessAble = 'FOLLOWER_ACCESS' AND EXISTS (SELECT fw FROM Follows fw WHERE fw.follower.userId = :currentUserId AND fw.followee.userId = f.user.userId AND fw.followed = true))" + // 게시글도 팔로워 공개 & 내가 팔로우 (중복 확인)
+            "       )) " +
+            // (C. 프로필이 '나만 보기' (NONE_ACCESS)인 경우는 여기에 포함되지 않음. 본인 외에는 볼 수 없으므로 쿼리에서 자동 제외됨)
+            "   ))" +
+            ")" +
+            "ORDER BY " +
+            "case " +
+            "when EXISTS (SELECT fw FROM Follows fw WHERE fw.follower.userId = :currentUserId AND fw.followee.userId = f.user.userId AND fw.followed = true) then 1  " +
+            "when f.category = :likeCategory then 2 " +
+            "when f.user.visibility = 'ALL_ACCESS' OR f.accessAble = 'ALL_ACCESS' then 3 " +
+            "else 4 " +
+            "end, f.createdAt desc")
+    Page<Feeds> findAllFeedConditional(@Param("currentUserId") Long currentUserId, @Param("likeCategory") Category category, Pageable pageable);
+
 
     // FeedsService.readAllFeeds 에서 사용될 쿼리
     @Query("SELECT f FROM Feeds f " +
