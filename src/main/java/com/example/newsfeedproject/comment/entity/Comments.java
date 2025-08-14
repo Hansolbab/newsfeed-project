@@ -40,7 +40,7 @@ public class Comments {
     @Column(updatable = false)
     private LocalDateTime createdAt;
 
-    // 댓글 최종 수정일
+    // 댓글 수정일
     @LastModifiedDate
     @Column
     private LocalDateTime updatedAt;
