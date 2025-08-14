@@ -30,8 +30,6 @@ public class FeedsController {
             @Valid @RequestBody CreateFeedsRequestDto createFeedsRequestDto,
             @AuthenticationPrincipal UserDetailsImpl userDetailsImpl
     ) {
-// userDetailsImpl에서 사용자 이메일(식별자) 추출
-        String userEmail = userDetailsImpl.getUsername(); // UserDetailsImpl에서 이메일 반환 가정
 
         // 서비스 계층을 통해 게시글 생성 비즈니스 로직 수행
         Feeds createdFeeds = feedsService.createFeed(createFeedsRequestDto, userDetailsImpl);
