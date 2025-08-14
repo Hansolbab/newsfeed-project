@@ -145,7 +145,7 @@ public class UsersService {
 
     @Transactional
     public Page<ReadUserSimpleResponseDto> searchUser(String keyword, UserDetailsImpl userDetails, Pageable pageable){
-        Page<Users> resultUserList = usersRepository.findByUserNameContainingAndVisibilityNotAndDeletedFalse(keyword, AccessAble.NONE_ACCESS, pageable);
+        Page<Users> resultUserList = usersRepository.findByUserNameContainingAndDeletedFalseAndNOTNoneAccess(keyword, pageable);
 
         List<Long> resultUserIdList = resultUserList.stream()
                 .map(Users::getUserId)
