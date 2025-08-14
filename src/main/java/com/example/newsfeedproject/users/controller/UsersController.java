@@ -3,7 +3,6 @@ package com.example.newsfeedproject.users.controller;
 import com.example.newsfeedproject.auth.impl.UserDetailsImpl;
 import com.example.newsfeedproject.common.dto.ReadUserSimpleResponseDto;
 import com.example.newsfeedproject.common.dto.ReadUsersFeedsResponseDto;
-import com.example.newsfeedproject.users.dto.SearchUserResponseDto;
 import com.example.newsfeedproject.users.service.UsersService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -15,8 +14,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/users")
@@ -51,13 +48,12 @@ public class UsersController {
 
     @GetMapping("/search")
     @Transactional(readOnly = true)
-    public ResponseEntity<Page<SearchUserResponseDto>> searchUsers(
+    public ResponseEntity<Page<ReadUserSimpleResponseDto>> searchUsers(
             @RequestParam String keyword,
             @AuthenticationPrincipal UserDetailsImpl userDetails,
-            @PageableDefault() Pageable pageable){
-
-
-        Page<SearchUserResponseDto> searchUserPage = usersService.searchUser(keyword, userDetails, pageable);
+            @PageableDefault() Pageable pageable
+    ){
+        Page<ReadUserSimpleResponseDto> searchUserPage = usersService.searchUser(keyword, userDetails, pageable);
 
         return new ResponseEntity<>(searchUserPage, HttpStatus.OK);
     }

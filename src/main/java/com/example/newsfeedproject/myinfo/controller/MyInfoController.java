@@ -3,10 +3,10 @@ package com.example.newsfeedproject.myinfo.controller;
 import com.example.newsfeedproject.auth.impl.UserDetailsImpl;
 import com.example.newsfeedproject.common.dto.ReadUserSimpleResponseDto;
 import com.example.newsfeedproject.common.exception.users.UsersErrorException;
-import com.example.newsfeedproject.feeds.dto.FeedsResponseDto;
 import com.example.newsfeedproject.feeds.dto.ReadFeedsResponseDto;
 import com.example.newsfeedproject.myinfo.service.MyInfoService;
 import com.example.newsfeedproject.common.dto.ReadUsersFeedsResponseDto;
+import com.example.newsfeedproject.users.entity.AccessAble;
 import com.example.newsfeedproject.users.service.UsersService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -76,4 +76,9 @@ public class MyInfoController {
         return new ResponseEntity<>(myInfoService.readFeedsByMyLikes(userDetails, pageable) ,HttpStatus.OK);
     }
 
+    @PostMapping("/accessAble")
+    @Transactional
+    public ResponseEntity<String> accessAbleMyInfo(@AuthenticationPrincipal UserDetailsImpl userDetails, AccessAble accessAble){
+        return new ResponseEntity<>(myInfoService.accessAlbeMyPage(userDetails, accessAble),HttpStatus.OK);
+    }
 }

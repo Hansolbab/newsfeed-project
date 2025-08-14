@@ -2,11 +2,15 @@ package com.example.newsfeedproject.myinfo.service;
 
 import com.example.newsfeedproject.auth.impl.UserDetailsImpl;
 import com.example.newsfeedproject.comment.repository.CommentsRepository;
+import com.example.newsfeedproject.common.exception.auth.AuthErrorException;
 import com.example.newsfeedproject.common.exception.users.UsersErrorException;
 import com.example.newsfeedproject.feeds.dto.ReadFeedsResponseDto;
 import com.example.newsfeedproject.feeds.entity.Feeds;
 import com.example.newsfeedproject.feeds.repository.FeedsRepository;
 import com.example.newsfeedproject.likes.repository.LikesRepository;
+import com.example.newsfeedproject.users.entity.AccessAble;
+import com.example.newsfeedproject.users.entity.Users;
+import com.example.newsfeedproject.users.repository.UsersRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -15,6 +19,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import static com.example.newsfeedproject.common.exception.auth.AuthErrorCode.USER_NOT_FOUND;
 import static com.example.newsfeedproject.common.exception.users.UsersErrorCode.*;
 @Service
 @AllArgsConstructor
@@ -22,6 +28,7 @@ public class MyInfoService {
     private final FeedsRepository feedsRepository;
     private final LikesRepository likesRepository;
     private final CommentsRepository commentsRepository;
+    private final UsersRepository usersRepository;
 
     public Page<ReadFeedsResponseDto> readFeedsByMyComment(UserDetailsImpl userDetails, Pageable pageable) {
         Long meId = userDetails.getUserId();
@@ -72,5 +79,12 @@ public class MyInfoService {
                 .map(feeds ->
 
                         ReadFeedsResponseDto.toDto(feeds, true, likeTotalMap.getOrDefault(feeds.getFeedId(),0),commentsTotal.getOrDefault(feeds.getFeedId(),0)));
+    }
+
+    public String accessAlbeMyPage(UserDetailsImpl userDetails, AccessAble accessAble) {
+        Users user = usersRepository.findById(userDetails.getUserId())
+                .orElseThrow(() -> new AuthErrorException(USER_NOT_FOUND));
+        user.setVisibility(accessAble);
+        return accessAble.getAccessAble();
     }
 }
