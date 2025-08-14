@@ -1,5 +1,6 @@
 package com.example.newsfeedproject.follow.entity;
 
+
 import com.example.newsfeedproject.users.entity.Users;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -15,12 +16,16 @@ import java.time.LocalDateTime;
 @Setter
 @Getter
 public class Follows {
-        //Follow Id
+
+
+
+    //Follow Id
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "followId", nullable = false)
     @Setter(AccessLevel.NONE)
     private Long followId;
+
 
     //팔로우 하는 사람
     @ManyToOne(fetch = FetchType.LAZY)
@@ -36,45 +41,32 @@ public class Follows {
     //팔로우 이력 기록
     @Column(name = "isFollowed", nullable = false)
     //isFollowed Getter 생성 금지
-    private boolean followed = false; //만들어질때 null값 사용 X
+    private boolean followed; //만들어질때 null값 사용 X
 
-    @Column( name = "createdAt", nullable = false, updatable = false)
+    @Column(name = "createdAt", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "followStatus", nullable = false)
-    @Setter(AccessLevel.NONE)
-    private FollowStatus followStatus = FollowStatus.NONE;
 
     @PrePersist
     public void prePersist() { // 다시 팔로우 시 새로 세팅
         this.createdAt = LocalDateTime.now();
     }
 
-    public Follows(){}
 
-    public Follows(Users follower, Users followee){
+    public Follows() {
+    }
+
+    public Follows(Users follower, Users followee) {
         this.follower = follower;
         this.followee = followee;
     }
 
-    public void request() {
-        this.followStatus = FollowStatus.REQUESTED;
-        this.followed = false;
-    }
 
-    public void accept() {
-        this.followStatus = FollowStatus.ACCEPTED;
+    public void follow() {
         this.followed = true;
     }
 
-    public void reject() {
-        this.followStatus = FollowStatus.REJECTED;
-        this.followed = false;
-    }
-
-    public void reset() {
-        this.followStatus = FollowStatus.NONE;
+    public void unfollow() {
         this.followed = false;
     }
 }
