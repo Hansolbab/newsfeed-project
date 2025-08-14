@@ -12,7 +12,7 @@ import com.example.newsfeedproject.follow.repository.FollowsRepository;
 import com.example.newsfeedproject.likes.repository.LikesRepository;
 import com.example.newsfeedproject.common.dto.ReadUsersFeedsResponseDto;
 import com.example.newsfeedproject.users.dto.LikesInfoDto;
-import com.example.newsfeedproject.users.dto.SearchUserResponseDto;
+import com.example.newsfeedproject.common.dto.ReadUserSimpleResponseDto;
 import com.example.newsfeedproject.users.entity.AccessAble;
 import com.example.newsfeedproject.users.entity.Users;
 import com.example.newsfeedproject.users.repository.UsersRepository;
@@ -134,7 +134,7 @@ public class UsersService {
 
 
     @Transactional
-    public Page<SearchUserResponseDto> searchUser(String keyword, UserDetailsImpl userDetails, Pageable pageable){
+    public Page<ReadUserSimpleResponseDto> searchUser(String keyword, UserDetailsImpl userDetails, Pageable pageable){
         Page<Users> resultUserList = usersRepository.findByUserNameContaining(keyword, pageable);
 
         List<Long> resultUserIdList = resultUserList.stream()
@@ -144,8 +144,8 @@ public class UsersService {
         Map<Long, Boolean> resultUserFollow = followsRepository.isFollowedByMyIdANDUserIds(userDetails.getUserId(), resultUserIdList).stream()
                 .collect(Collectors.toMap(row->(Long) row[0], row ->(Boolean) row[1]));
 
-        Page<SearchUserResponseDto> resultUser = resultUserList.map(
-                user-> new SearchUserResponseDto(
+        Page<ReadUserSimpleResponseDto> resultUser = resultUserList.map(
+                user-> new ReadUserSimpleResponseDto(
                         user.getUserName(),
                         user.getProfileImageUrl(),
                         resultUserFollow.getOrDefault(user.getUserId(), false)
