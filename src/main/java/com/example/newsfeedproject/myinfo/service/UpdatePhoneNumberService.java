@@ -23,8 +23,6 @@ public class UpdatePhoneNumberService {
             //409 Conflict
             throw new ResponseStatusException(HttpStatus.CONFLICT, "현재 전화번호와 동일합니다.");
         }
-
-        // 변경
         user.setPhoneNumber(newPhoneNumber);
     }
 

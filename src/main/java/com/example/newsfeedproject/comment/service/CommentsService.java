@@ -1,5 +1,6 @@
 package com.example.newsfeedproject.comment.service;
 
+import com.example.newsfeedproject.auth.impl.UserDetailsImpl;
 import com.example.newsfeedproject.comment.dto.CommentResponseDto;
 import com.example.newsfeedproject.comment.dto.CreateCommentRequestDto;
 import com.example.newsfeedproject.comment.dto.UpdateCommentRequestDto;
@@ -15,31 +16,27 @@ import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 @Service
 @RequiredArgsConstructor
 public class CommentsService {
-
     private final CommentsRepository commentsRepository;
     private final FeedsRepository feedsRepository;
     private final UsersRepository usersRepository;
 
     // 댓글 생성
     @Transactional
-    public CommentResponseDto createComment(Long feedId, CreateCommentRequestDto requestDto, String userEmail) {
+    public CommentResponseDto createComment(Long feedId, CreateCommentRequestDto createCommentRequestDto, String email) {
         // 1. 게시글 존재 여부 확인
         Feeds feed = feedsRepository.findById(feedId)
                 .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다."));
 
         // 2. 사용자 정보 조회
-        Users user = usersRepository.findByEmail(userEmail)
+        Users user = usersRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
 
         // 3. Comments 엔티티 생성
         Comments comment = Comments.builder()
-                .contents(requestDto.getContents())
+                .contents(createCommentRequestDto.getContents())
                 .userComments(user)
                 .feedComments(feed)
                 .build();
@@ -53,12 +50,11 @@ public class CommentsService {
 
     // 특정 게시글의 모든 댓글 조회
     @Transactional(readOnly = true)
-    public Page<CommentResponseDto> getCommentsByFeed(Long feedId, Pageable pageable) {
-
-        Feeds feed = feedsRepository.findById(feedId)
+    public Page<CommentResponseDto> readCommentsByFeed(Long feedId, Pageable pageable) {
+        Feeds feed = feedsRepository.findByFeedIdAndDeletedFalse(feedId)
                 .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다."));
 
-        Page<Comments> commentsPage = commentsRepository.findByFeedComments(feed, pageable);
+        Page<Comments> commentsPage = commentsRepository.findByFeedComments(feedId, pageable);
 
         return commentsPage.map(CommentResponseDto::new);
     }

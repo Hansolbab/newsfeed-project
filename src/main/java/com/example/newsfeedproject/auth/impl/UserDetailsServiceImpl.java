@@ -15,7 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserDetailsServiceImpl implements UserDetailsService {
     private final UsersRepository usersRepository;
 
-    //Spring Security 로그인 처리 시 호출됨
     //@param username: 여기선 email을 받도록 설정
     @Override
     public UserDetailsImpl loadUserByUsername(String email) throws UsernameNotFoundException {
@@ -23,6 +22,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                 // 탈퇴한 계정 차단, deleted=true면 제외
                 .filter(u->!Boolean.TRUE.equals(u.getDeleted()))
                 .orElseThrow(() -> new UsernameNotFoundException("가입된 사용자가 아닙니다: " + email));
+
         return new UserDetailsImpl(user);
     }
 }
