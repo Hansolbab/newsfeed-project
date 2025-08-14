@@ -28,73 +28,62 @@ public class Users {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(nullable = false)
-//    @Column(nullable = false, name="userId")
-    // User Id
-    private Long userId;
+    private Long userId;    // User Id
 
     @NotBlank
     @Column(nullable = false)
-//    @Column(nullable = false, name="userName")
-    // User 이름
-    private String userName;
+    private String userName;   // User 이름
 
     @NotBlank
     @Column(nullable = false)
-//    @Column(nullable = false, name="phoneNumber")
-    // 전화번호
-    private String phoneNumber;
+    private String phoneNumber; // 전화번호
 
     @NotBlank
     @Column(nullable = false, unique = true)
-//    @Column(unique = true, nullable = false, name="email")
-    // Email 주소
-    private String email;
+    private String email;  // Email 주소
 
     @NotBlank
     @Column(nullable = false)
-//    @Column(nullable = false, name="password")
-    // 비밀번호
-    private String password;
+    private String password;  // 비밀번호
 
-//    @Column
     @Builder.Default//초기값 유지용
     @Column(name="deleted")
-    // 소프트 삭제 여부 확인
-    private Boolean deleted= false;
+    private Boolean deleted= false;// 소프트 삭제 여부 확인
 
     @Column
-//    @Column(name="createdAt")
     @CreatedDate
-    // 생성일
-    private LocalDateTime createdAt;
+    private LocalDateTime createdAt;    // 생성일
 
     @Column
-//    @Column(name="updatedAt")
     @LastModifiedDate
-    // 수정일
-    private LocalDateTime updatedAt;
+    private LocalDateTime updatedAt;    // 수정일
 
-    @Column
-//    @Column(nullable = false, name="profileImageUrl")
-    // 외부 이미지 가져오기, 랜덤으로 이미지 제공해주는 사이트입니다.
+    @Column(nullable = false, name="profileImageUrl", length = 255)
     @Builder.Default//초기값 유지용
-    private String profileImageUrl = "https://via.placeholder.com/150";
+    private String profileImageUrl = "https://via.placeholder.com/150";   // 외부 이미지 가져오기, 랜덤으로 이미지 제공해주는 사이트입니다.
 
 //  followings
     @Builder.Default//초기값 유지용
     @OneToMany(mappedBy = "follower", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Follows> followingList = new ArrayList<>();
-//   followers
 
+//   followers
     @Builder.Default//초기값 유지용
     @OneToMany(mappedBy = "followee", cascade = CascadeType.ALL,orphanRemoval = true)
     private List<Follows> followerList = new ArrayList<>();
+
+    @Builder.Default
+    @Enumerated(EnumType.STRING)
+    @Column(name = "visibility", nullable = false)
+    private AccessAble visibility = AccessAble.ALL_ACCESS;
 
     public Users ( String userName, String phoneNumber, String email,String encode){
         this.userName = userName;
         this.phoneNumber = phoneNumber;
         this.email = email;
         this.password = encode;
+        this.profileImageUrl = "https://via.placeholder.com/150";
+        this.visibility = AccessAble.ALL_ACCESS;
     }
 
     public void setPhoneNumber(String phoneNumber) {
@@ -106,9 +95,13 @@ public class Users {
     }
 
     //회원탈퇴 처리 메서드
-    public void softDelete(String scrambledPassword, LocalDateTime when){
-        //재로그인 원천 차단
-        this.password = scrambledPassword;
+    public void softDelete(String scrambledPassword){
+        this.password = scrambledPassword;//재로그인 원천 차단
         this.deleted = true;
+    }
+
+    //유저프로필 처리 메서드(수정/삭제)
+    public void setProfileImageUrl(String profileImageUrl) {
+        this.profileImageUrl = profileImageUrl;
     }
 }

@@ -1,31 +1,32 @@
 package com.example.newsfeedproject.users.service;
 
+import com.example.newsfeedproject.auth.impl.UserDetailsImpl;
 import com.example.newsfeedproject.comment.repository.CommentsRepository;
-import com.example.newsfeedproject.common.dto.PrincipalRequestDto;
 import com.example.newsfeedproject.common.dto.ReadUserSimpleResponseDto;
 import com.example.newsfeedproject.feedimg.repository.FeedImgRepository;
 import com.example.newsfeedproject.feeds.entity.Feeds;
 import com.example.newsfeedproject.feeds.repository.FeedsRepository;
 import com.example.newsfeedproject.follow.repository.FollowsRepository;
 import com.example.newsfeedproject.likes.repository.LikesRepository;
-import com.example.newsfeedproject.users.dto.ReadUsersFeedsResponseDto;
+import com.example.newsfeedproject.common.dto.ReadUsersFeedsResponseDto;
+import com.example.newsfeedproject.users.dto.LikesInfoDto;
+import com.example.newsfeedproject.users.dto.SearchUserResponseDto;
+import com.example.newsfeedproject.users.entity.AccessAble;
 import com.example.newsfeedproject.users.entity.Users;
 import com.example.newsfeedproject.users.repository.UsersRepository;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.boot.model.naming.IllegalIdentifierException;
 import org.springframework.data.domain.*;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
-
-
+import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
-
 
 @Service
 @RequiredArgsConstructor
 public class UsersService {
-
     private final UsersRepository usersRepository;
     private final FeedsRepository feedsRepository;
     private final LikesRepository likeRepository;
@@ -33,73 +34,118 @@ public class UsersService {
     private final FeedImgRepository feedImgRepository;
     private final FollowsRepository followsRepository;
 
-    public ReadUserSimpleResponseDto readUserSimple(Long userId, PrincipalRequestDto principalRequestDto) {
-        // userId(프로필 보려는 대상 userId) null 확인
-        Optional<Users> user = usersRepository.findById(userId);
-        if (user.isEmpty()) {
-            throw new IllegalArgumentException("없는 유저입니다.");
-        }
-        // 본인 프로필 확인할때
-//        if (principalRequestDto.getUserId() == userId) {
-//          현재는 반환하는 값이 다른게 없어서 그대로 진행
-//        }
-
-        Users userSimple = user.get();
-        return new ReadUserSimpleResponseDto(userSimple.getUserName(),userSimple.getProfileImageUrl());
+    // 유저 단일 권한 확인 // 권한이 있을때 true
+    public boolean hasUserAuthorized(UserDetailsImpl userDetails, String authorities){
+        return userDetails.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .anyMatch(role->role.equals(authorities));
+    }
+    // 접근 가능 한지 판단 // visibility 상태일때 true
+    public boolean isUserAccessible(Long userId, AccessAble visibility){
+        return usersRepository.existsByUserIdAndVisibility(userId, visibility);
+    }
+    // 팔로우 여부 판단 // Follow 상태일때 true
+    public boolean isUserFollowingTarget(Long userId, Long targetId){
+        return followsRepository.existsByFollower_UserIdAndFollowee_UserIdAndFollowedTrue(userId, targetId);
+    }
+    // 같은 사람인지 확인 // 본인일때 true
+    public boolean isSameUser(Long userId, Long targetId){return userId.equals(targetId);}
+    // userId 값의 User를 읽을 수 있는 권한 있을 때 Users 형태로 반환
+    public Users userById(Long userId){
+        return usersRepository.findById(userId)
+                .orElseThrow(() -> new IllegalIdentifierException("유저 없음"));
     }
 
-
-    public Page<ReadUsersFeedsResponseDto> readUserFeed(Long userId, PrincipalRequestDto principalRequestDto, Pageable pageable) {
-        Optional<Users> user = usersRepository.findById(userId);
-        if (user.isEmpty()) {
-            throw new IllegalArgumentException("없는 유저입니다.");
+    // 프로필 (프로필 이미지, 이름, 팔로우 여부)
+    public ReadUserSimpleResponseDto readUserSimple(Long userId, UserDetailsImpl userDetails) {
+        // 권한확인 로그인한 사람이 유저인지
+        if (!hasUserAuthorized(userDetails, "ROLE_USER")) {throw new IllegalIdentifierException("권한이 없습니다.");}
+        // 보는 사람과 볼 사람이 같은지 여부 확인 // 비공개(나만보기) // 다른 사람 볼 때 그 사람이 비공개일때
+        if (!isSameUser(userDetails.getUserId(), userId) && isUserAccessible(userId, AccessAble.NONE_ACCESS)){
+            throw new IllegalArgumentException("비공개유저");
         }
-        // 상대방 userId와 로그인한 principalRequestDto.getUserId() 값 비교
-        if (!userId.equals(principalRequestDto.getUserId())){       // 다르면 상대 유저
-            // 내 id = follower id  상대 유저 id = followee id, 내가 상대를 Follow 상태일때만 피드 정보 노출
-            if (!followsRepository.existsByFollower_UserIdAndFollowee_UserIdAndFollowedTrue(principalRequestDto.getUserId(), userId))
-            {
-                throw new IllegalArgumentException("팔로우를 하세요");
-            }
+        // 팔로우 여부 확인
+        boolean isFollowed = isUserFollowingTarget(userDetails.getUserId(), userId);
+        // 2. 팔로워 공개  // 다른 사람 볼 때 그 사람이 팔로워 공개일때
+        if (!isSameUser(userDetails.getUserId(), userId) && isUserAccessible(userId,AccessAble.FOLLOWER_ACCESS) && !isFollowed){
+            throw new IllegalArgumentException("팔로우 필요");
         }
-        // 본인 페이지 or 내가 상대를 Follow한 상태일때 피드 정보 값
-        // 현재는 두개의 값이 다른점이 없어서 하나로 진행
+        // 볼 유저가 있는지 확인 후 반환
+        Users userSimple = userById(userId);
 
-        Page<Feeds> feeds = feedsRepository.findByUser_UserId(userId, pageable);  // userId에 맞는 Feed들 Page로 받음
-        List<Long> feedIds = feeds.stream().map(Feeds::getFeedId).toList(); // Feed내에서 Id값만 리스트로 정리
+        return new ReadUserSimpleResponseDto(userSimple.getUserName(),userSimple.getProfileImageUrl(), isFollowed);
+    }
 
-        //null 값 때문에 Object로 받고 Map으로 key: feedId, value: count한 like값
-        Map<Long, Integer> likeTotal =likeRepository.countLikedByFeedIds(feedIds).stream()
-                                        .collect(Collectors.toMap(row ->(Long) row[0], row ->((Long) row[1]).intValue()));
+    public Page<ReadUsersFeedsResponseDto> readUserFeed(
+            Long userId,
+            UserDetailsImpl userDetails,
+            Pageable pageable
+    ){
+        // 권한확인 로그인한 사람이 유저인지
+        if (!hasUserAuthorized(userDetails, "ROLE_USER")) {throw new IllegalIdentifierException("권한이 없습니다.");}
+        // 보는 사람과 볼 사람이 같은지 여부 확인 // 비공개(나만보기) // 다른 사람 볼 때 그 사람이 비공개일때
+        if (!isSameUser(userDetails.getUserId(), userId) && isUserAccessible(userId, AccessAble.NONE_ACCESS)){
+            throw new IllegalArgumentException("비공개유저");
+        }
+        // 팔로우 여부 확인
+        boolean isFollowed = isUserFollowingTarget(userDetails.getUserId(), userId);
+        // 2. 팔로워 공개  // 다른 사람 볼 때 그 사람이 팔로워 공개일때
+        if (!isSameUser(userDetails.getUserId(), userId) && isUserAccessible(userId,AccessAble.FOLLOWER_ACCESS) && !isFollowed){
+            throw new IllegalArgumentException("팔로우 필요");
+        }
+        // 볼 유저가 있는지 확인 후 반환
+        Users user = userById(userId);
 
-        //null 값 때문에 Object로 받고 Map으로 Key: feedId, value: count한 comments값
-        Map<Long, Integer> commentsTotal = commentsRepository.countCommentsByFeedIds(feedIds).stream()
+        Page<Feeds> feedsPage = feedsRepository.findByUser_UserId(userId, pageable);  // userId에 맞는 Feed들 Page로 받음
+        List<Long> feedIdsList = feedsPage.stream().map(Feeds::getFeedId).toList(); // FeedId만 리스트로 정리
+        //object로 받고 Map key: feedId, value LikeInfoDto
+        Map<Long, LikesInfoDto> likesInfoMap = likeRepository.countLikesAndIsLikedByFeedIds(feedIdsList, userId).stream()
+                .collect(Collectors.toMap(row -> (Long) row[0],
+                        row-> new LikesInfoDto(
+                                ((Long) row[1]).intValue(),
+                           ((Long) row[2]) > 0)));
+        //null 값 때문에 Object로 받고 Map Key: feedId, value: count한 comments값
+        Map<Long, Integer> commentsTotal = commentsRepository.countCommentsByFeedIds(feedIdsList).stream()
                                             .collect(Collectors.toMap(row ->(Long) row[0], row ->((Long) row[1]).intValue()));
 
-
-        // null 값 때문에 Object로 받고 Map으로 Key: feedId, value: liked true값
-        Map<Long, Boolean> liked = likeRepository.isLikedByFeedIdsANDUserId(feedIds, principalRequestDto.getUserId()).stream()
-                                        .collect(Collectors.toMap(row->(Long) row[0], row ->(Boolean) row[1]));
-
-
-        Map<Long, List<String>> feedImgs = feedImgRepository.findFeedImgByFeedId(feedIds).stream()
+        Map<Long, List<String>> feedImages = feedImgRepository.findFeedImgByFeedId(feedIdsList).stream()
                         .collect(Collectors.groupingBy(row -> (Long) row[0], // feedId를 기준으로 그룹화
                                  Collectors.mapping(row -> (String) row[1], // feedImageUrl만 뽑아서
                                  Collectors.toList() // 리스트로 묶음
                         )));
 
-        List<ReadUsersFeedsResponseDto> feedResponseDtoList = feeds.stream()
+        List<ReadUsersFeedsResponseDto> feedResponseDtoList = feedsPage.stream()
                 .map(feed -> new ReadUsersFeedsResponseDto(
                         feed.getFeedId(),                                               // FeedId 값
-                        feedImgs.get(feed.getFeedId()),                                 // FeedImageUrl List값
+                        feedImages.get(feed.getFeedId()),                                 // FeedImageUrl List값
                         feed.getContents(),                                             // Contents 값
-                        likeTotal.getOrDefault(feed.getFeedId(),0),           // likeTotal 값, 기본 0
+                        likesInfoMap.getOrDefault(feed.getFeedId(),new LikesInfoDto(0, false)).getLikeTotal(),           // likeTotal 값, 기본 0
                         commentsTotal.getOrDefault(feed.getFeedId(), 0),      // commentsTotal 값, 기본 0
-                        liked.getOrDefault(feed.getFeedId(), false)         // liked 값, 기본 false
+                        likesInfoMap.getOrDefault(feed.getFeedId(),new LikesInfoDto(0, false)).isLiked()         // liked 값, 기본 false
                         ))
                 .toList();
 
-        return new PageImpl<>(feedResponseDtoList, pageable, feeds.getTotalElements());
+        return new PageImpl<>(feedResponseDtoList, pageable, feedsPage.getTotalElements());
     }
 
+
+    @Transactional
+    public Page<SearchUserResponseDto> searchUser(String keyword, UserDetailsImpl userDetails, Pageable pageable){
+        Page<Users> resultUserList = usersRepository.findByUserNameContaining(keyword, pageable);
+
+        List<Long> resultUserIdList = resultUserList.stream()
+                .map(Users::getUserId)
+                .collect(Collectors.toList());
+
+        Map<Long, Boolean> resultUserFollow = followsRepository.isFollowedByMyIdANDUserIds(userDetails.getUserId(), resultUserIdList).stream()
+                .collect(Collectors.toMap(row->(Long) row[0], row ->(Boolean) row[1]));
+
+        Page<SearchUserResponseDto> resultUser = resultUserList.map(
+                user-> new SearchUserResponseDto(
+                        user.getUserName(),
+                        user.getProfileImageUrl(),
+                        resultUserFollow.getOrDefault(user.getUserId(), false)
+                ));
+        return resultUser;
+    }
 }
