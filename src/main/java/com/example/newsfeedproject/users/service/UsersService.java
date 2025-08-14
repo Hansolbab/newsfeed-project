@@ -54,6 +54,7 @@ public class UsersService {
     public boolean isSameUser(Long userId, Long targetId){return userId.equals(targetId);}
     // userId 값의 User를 읽을 수 있는 권한 있을 때 Users 형태로 반환
     public Users userById(Long userId){
+        if (usersRepository.existsByDeletedTrueAndUserId(userId)){throw new UsersErrorException(NO_SUCH_USER);}
         return usersRepository.findById(userId)
                 .orElseThrow(() -> new UsersErrorException(NO_SUCH_USER));
     }
@@ -153,7 +154,7 @@ public class UsersService {
 
     @Transactional
     public Page<ReadUserSimpleResponseDto> searchUser(String keyword, UserDetailsImpl userDetails, Pageable pageable){
-        Page<Users> resultUserList = usersRepository.findByUserNameContainingAndDeletedFalseAndNOTNoneAccess(keyword, pageable);
+        Page<Users> resultUserList = usersRepository.findByUserNameContainingAndDeletedAndNOTNoneAccess(keyword, pageable);
 
         List<Long> resultUserIdList = resultUserList.stream()
                 .map(Users::getUserId)
