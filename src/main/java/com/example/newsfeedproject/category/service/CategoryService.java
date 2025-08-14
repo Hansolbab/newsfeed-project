@@ -44,6 +44,6 @@ public class CategoryService {
                 .collect(Collectors.toMap(row ->(Long) row[0], row ->((Long) row[1]).intValue()));
 
 
-        return feedsPage.map(feeds -> FeedsResponseDto.toDto(feeds, true, likeTotalMap.getOrDefault(feeds.getFeedId(),0)));
+        return feedsPage.map(feeds -> FeedsResponseDto.toDto(feeds, true, likeTotalMap.getOrDefault(feeds.getFeedId(),0),0));
     }
 }

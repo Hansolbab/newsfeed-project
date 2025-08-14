@@ -8,6 +8,7 @@ import com.example.newsfeedproject.feeds.dto.ReadFeedsResponseDto;
 import com.example.newsfeedproject.feeds.entity.Feeds;
 import com.example.newsfeedproject.feeds.repository.FeedsRepository;
 import com.example.newsfeedproject.likes.repository.LikesRepository;
+import com.example.newsfeedproject.myinfo.dto.AccessAbleDto;
 import com.example.newsfeedproject.users.entity.AccessAble;
 import com.example.newsfeedproject.users.entity.Users;
 import com.example.newsfeedproject.users.repository.UsersRepository;
@@ -81,10 +82,10 @@ public class MyInfoService {
                         ReadFeedsResponseDto.toDto(feeds, true, likeTotalMap.getOrDefault(feeds.getFeedId(),0),commentsTotal.getOrDefault(feeds.getFeedId(),0)));
     }
 
-    public String accessAlbeMyPage(UserDetailsImpl userDetails, AccessAble accessAble) {
+    public AccessAble accessAlbeMyPage(UserDetailsImpl userDetails, AccessAbleDto accessAble) {
         Users user = usersRepository.findById(userDetails.getUserId())
                 .orElseThrow(() -> new AuthErrorException(USER_NOT_FOUND));
-        user.setVisibility(accessAble);
-        return accessAble.getAccessAble();
+        user.setVisibility(accessAble.getAccessAble());
+        return user.getVisibility();
     }
 }

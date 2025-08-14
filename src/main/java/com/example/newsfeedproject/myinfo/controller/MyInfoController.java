@@ -4,6 +4,7 @@ import com.example.newsfeedproject.auth.impl.UserDetailsImpl;
 import com.example.newsfeedproject.common.dto.ReadUserSimpleResponseDto;
 import com.example.newsfeedproject.common.exception.users.UsersErrorException;
 import com.example.newsfeedproject.feeds.dto.ReadFeedsResponseDto;
+import com.example.newsfeedproject.myinfo.dto.AccessAbleDto;
 import com.example.newsfeedproject.myinfo.service.MyInfoService;
 import com.example.newsfeedproject.common.dto.ReadUsersFeedsResponseDto;
 import com.example.newsfeedproject.users.entity.AccessAble;
@@ -78,7 +79,8 @@ public class MyInfoController {
 
     @PostMapping("/accessAble")
     @Transactional
-    public ResponseEntity<String> accessAbleMyInfo(@AuthenticationPrincipal UserDetailsImpl userDetails, AccessAble accessAble){
+    public ResponseEntity<AccessAble> accessAbleMyInfo(@AuthenticationPrincipal UserDetailsImpl userDetails,
+                                                       @RequestBody AccessAbleDto accessAble){
         return new ResponseEntity<>(myInfoService.accessAlbeMyPage(userDetails, accessAble),HttpStatus.OK);
     }
 }
