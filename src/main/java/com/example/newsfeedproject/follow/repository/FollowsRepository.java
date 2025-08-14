@@ -38,4 +38,15 @@ public interface FollowsRepository extends JpaRepository<Follows , Long> {
             "WHERE f.follower.userId = :meId AND f.followee.userId IN :userId ")
     List<Object[]> isFollowedByMyIdANDUserIds(@Param("meId") Long meId, @Param("userId") List<Long> userId);
 
+    // (A) boolean 필드로 관리하는 경우
+    @Query("""
+        select f.followee.userId
+        from Follows f
+        where f.follower.userId = :meId
+          and f.followed = true
+    """)
+    Set<Long> findFolloweeIdsByMe(@Param("meId") Long meId);
+
+
+
 }
