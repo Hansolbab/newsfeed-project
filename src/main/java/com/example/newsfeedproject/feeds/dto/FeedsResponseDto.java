@@ -67,7 +67,6 @@ public class FeedsResponseDto {
                 .map(FeedImage::getFeedImageUrl)
                 .collect(Collectors.toList());
         this.category = feeds.getCategory(); // Feeds 엔티티에서 가져옴
-        // likeTotal, commentTotal은 Feeds 엔티티에 없으므로 DTO에서 0으로 초기화
         this.likeTotal = likeTotal; //
         this.commentTotal = commentTotal;
         this.liked = liked;

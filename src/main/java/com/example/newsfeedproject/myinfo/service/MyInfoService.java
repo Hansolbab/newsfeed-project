@@ -63,6 +63,7 @@ public class MyInfoService {
     }
 
     public Page<ReadFeedsResponseDto> readFeedsByMyLikes(UserDetailsImpl userDetails, Pageable pageable) {
+
         if (userDetails == null) {
             throw new UsersErrorException(NOT_A_USER);
         }
