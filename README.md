@@ -30,20 +30,19 @@
 
 ## 목차
 
-1. [🔧 환경 설정 방법](#환경-설정-방법)
-2. [1️⃣ 필수 설치](#필수-설치)
-3. [2️⃣ MySQL Database 생성](#mysql-database-생성)
-4. [3️⃣ application.properties 생성](#applicationproperties-생성)
-5. [📮 API 명세](#api-명세)
-6. [📝 브랜치 컨벤션](#브랜치-컨벤션)
-7. [📋 커밋 컨벤션](#커밋-컨벤션)
-8[🙌 협업 규칙](#협업-규칙)
-9[🎈 API명세서 및 와이어프레임, ERD, 트리구조](#api명세서-및-와이어프레임,-ERD,-트리구조)
+1. [🔧 환경 설정 방법](#-환경-설정-방법)
+2. [필수 설치](#필수-설치)
+3. [MySQL Database 생성](#mysql-database-생성)
+4. [application.properties 생성](#applicationproperties-생성)
+5. [📝 브랜치 컨벤션](#-브랜치-컨벤션)
+6. [📋 커밋 컨벤션](#-커밋-컨벤션)
+7. [🙌 협업 규칙](#-협업-규칙)
+8. [🎈 API명세서 및 와이어프레임, ERD, 트리구조](#-api명세서-및-와이어프레임-ERD-트리구조)
 
 
 ## 🔧 환경 설정 방법
 
-### 1️⃣ 필수 설치
+### 필수 설치
 
 - **Postman**
 - **Java** 17
@@ -61,12 +60,12 @@
   | 🔍 검증     | `Validation`           | @Valid, @NotNull 등 유효성 검사 |
   | 🛠️ 개발도구      | `lombok`                | 코드 간소화                    |
 
-### 2️⃣ MySQL Database 생성
+### MySQL Database 생성
 
 ```sql
 CREATE DATABASE hansolbab;
 ```
-### 3️⃣ application.properties 생성
+### application.properties 생성
 📁 경로: src/main/resources/application.properties
 
 ⚠️ .gitignore에 등록되어 있어 직접 생성해야 합니다.
@@ -132,7 +131,7 @@ application.properties
 <details>
   <summary>ERD</summary>
 
-![title](https://private-user-images.githubusercontent.com/151719708/478484954-5a7f23dc-cd90-44de-889f-480e791da5f5.png?jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NTUyNzMwMjMsIm5iZiI6MTc1NTI3MjcyMywicGF0aCI6Ii8xNTE3MTk3MDgvNDc4NDg0OTU0LTVhN2YyM2RjLWNkOTAtNDRkZS04ODlmLTQ4MGU3OTFkYTVmNS5wbmc_WC1BbXotQWxnb3JpdGhtPUFXUzQtSE1BQy1TSEEyNTYmWC1BbXotQ3JlZGVudGlhbD1BS0lBVkNPRFlMU0E1M1BRSzRaQSUyRjIwMjUwODE1JTJGdXMtZWFzdC0xJTJGczMlMkZhd3M0X3JlcXVlc3QmWC1BbXotRGF0ZT0yMDI1MDgxNVQxNTQ1MjNaJlgtQW16LUV4cGlyZXM9MzAwJlgtQW16LVNpZ25hdHVyZT02MzdhNzc4NTY3NTEwYWQzZTk3NzdkMGEzZmVhMjhkNjZhMmNmMjY5MDhlMjA2YWRhOTRlZjk4NWVjYzZkZTlhJlgtQW16LVNpZ25lZEhlYWRlcnM9aG9zdCJ9.Y_l_Lj-SjCZl2fEF9rSo5k-Gif2Bey1-O7FJgeKbTho)
+![title](https://github.com/Hansolbab/newsfeed-project/issues/86#issue-3325623507)
 </details> 
 
 <details>
