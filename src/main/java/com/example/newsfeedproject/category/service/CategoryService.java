@@ -38,7 +38,7 @@ public class CategoryService {
 
         Page<Feeds> feedsPage = feedsRepository.findAccessibleFeedsBasedOnProfile(meId,pageable);
 
-        Set<Long> feedIdContainCategorySet = feedsRepository.findFeedIdByCategory(Category.sortedType(text), pageable);
+        Set<Long> feedIdContainCategorySet = feedsRepository.findFeedIdsByCategory(Category.sortedType(text));
 
 
         List<Feeds> pageFeedList = feedsPage.getContent().stream().filter(feeds -> feedIdContainCategorySet.contains(feeds.getFeedId()))
@@ -66,7 +66,7 @@ public class CategoryService {
                 pageFeedList.size()
                 );
 
-        return  feedsPage.map(feeds -> ReadFeedsResponseDto.toDto(feeds,
+        return  resultFeedPage.map(feeds -> ReadFeedsResponseDto.toDto(feeds,
                 likedIdSet.contains(feeds.getFeedId()),
                 likesTotalMap.getOrDefault(feeds.getFeedId(), 0),
                 commentsTotalMap.getOrDefault(feeds.getFeedId(),0),
