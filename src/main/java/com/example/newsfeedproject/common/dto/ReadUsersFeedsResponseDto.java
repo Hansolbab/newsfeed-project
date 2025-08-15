@@ -22,8 +22,9 @@ public class ReadUsersFeedsResponseDto {
     private String userName;
     private String userProfileImageUrl;
     private boolean followed;
+    private Long userId;
 
-    public ReadUsersFeedsResponseDto(Long feedId, List<String> feedImgs, String contents, Integer likeTotal, Integer commentTotal, Boolean liked, Category category, String userName, String userProfileImageUrl, boolean followed, LocalDateTime createdAt) {
+    public ReadUsersFeedsResponseDto(Long feedId, List<String> feedImgs, String contents, Integer likeTotal, Integer commentTotal, Boolean liked, Category category, String userName, String userProfileImageUrl, boolean followed, LocalDateTime createdAt, Long userId) {
         this.feedId = feedId;
         this.feedImageURL = feedImgs;
         this.contents = contents;
@@ -35,6 +36,7 @@ public class ReadUsersFeedsResponseDto {
         this.userProfileImageUrl = userProfileImageUrl;
         this.followed = followed;
         this.createdAt = createdAt;
+        this.userId = userId;
     }
 
     public ReadUsersFeedsResponseDto(Long feedId, List<String> feeImgs, String contents, Integer likeTotal, Integer commentTotal, boolean liked){
