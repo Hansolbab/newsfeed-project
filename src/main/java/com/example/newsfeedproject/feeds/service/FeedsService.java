@@ -1,6 +1,7 @@
 package com.example.newsfeedproject.feeds.service;
 
 import com.example.newsfeedproject.auth.impl.UserDetailsImpl;
+import com.example.newsfeedproject.category.entity.Category;
 import com.example.newsfeedproject.comment.repository.CommentsRepository;
 import com.example.newsfeedproject.common.dto.ReadUsersFeedsResponseDto;
 import com.example.newsfeedproject.common.exception.auth.AuthErrorException;
@@ -127,7 +128,8 @@ public class FeedsService {
         Long meId = user.getUserId();
 
         // 권한별로 나눠서 Feed 조회 후 페이징
-        Page<Feeds> feedsPage = feedsRepository.findAccessibleFeedsBasedOnProfile(meId, pageable);
+//        Page<Feeds> feedsPage = feedsRepository.findAccessibleFeedsBasedOnProfile(meId, pageable);
+        Page<Feeds> feedsPage = feedsRepository.findAllFeedConditional(meId, Category.KOREAN,pageable);
 
         List<Long> feedIdList = feedsPage.getContent().stream()
                 .map(Feeds::getFeedId)

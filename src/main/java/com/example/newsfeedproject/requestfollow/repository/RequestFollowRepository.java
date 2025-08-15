@@ -18,10 +18,16 @@ public interface RequestFollowRepository extends JpaRepository<RequestFollows, L
     Optional<RequestFollows> findByRequesterAndTarget(Users requester, Users target);
 
 
+
     Page<RequestFollows> findByTargetAndFollowStatus(
             Users target,
             FollowStatus followStatus,
             Pageable pageable);
 
     Page<RequestFollows> findByRequesterAndFollowStatus(Users requester, FollowStatus followStatus, Pageable pageable);
+
+//    boolean existByRequester_RequesterIdAndTarget_TargetId(Long requesterId,Long targeterId );
+
+//    Optional<Boolean> existByRequesterAndTargetAndFollowStatus(Users requester, Users target, FollowStatus followStatus);
+
 }

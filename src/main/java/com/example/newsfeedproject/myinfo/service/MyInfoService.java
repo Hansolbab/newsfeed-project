@@ -16,6 +16,7 @@ import com.example.newsfeedproject.users.entity.Users;
 import com.example.newsfeedproject.users.repository.UsersRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import java.util.List;
@@ -32,38 +33,47 @@ public class MyInfoService {
     private final FollowsRepository followsRepository;
     private final UsersRepository usersRepository;
 
-    public Page<ReadFeedsResponseDto> readFeedsByMyComment(UserDetailsImpl userDetails, Pageable pageable) {
+    public Page<ReadFeedsResponseDto> readFeedsByMyLikes(UserDetailsImpl userDetails, Pageable pageable) {
 
         Long meId = userDetails.getUserId();
 
-        Page<Feeds> feedsPage = feedsRepository.findFeedsByCommentsBy(meId,pageable);
+
+        Page<Feeds> feedsPage =  feedsRepository.findAccessibleFeedsBasedOnProfile(meId,pageable);
 
         List<Long> feedIdsList = feedsPage.getContent().stream().map(Feeds::getFeedId).toList();
+
 
         Set<Long> likedIdSet = feedIdsList.isEmpty() // feedIdSet 이 0일 경우
                 ? Set.of() // 빈 셋을 반환 : DB 에러 방지
                 : likesRepository.findLikedFeedIds(meId, feedIdsList);
 
-        Map<Long, Integer> likesTotal = likesRepository.countLikedByFeedIds(feedIdsList).stream()
+
+        Map<Long, Integer> likesTotalMap = likesRepository.countLikedByFeedIds(feedIdsList).stream()
                 .collect(Collectors.toMap(row ->(Long) row[0],
                 row ->((Long) row[1]).intValue()));
 
-        Map<Long, Integer> commentsTotal = commentsRepository.countCommentsByFeedIds(feedIdsList).stream()
+        Map<Long, Integer> commentsTotalMap = commentsRepository.countCommentsByFeedIds(feedIdsList).stream()
                 .collect(Collectors.toMap(row ->(Long) row[0],
                         row ->((Long) row[1]).intValue()));
 
 
+        List<Feeds> filteredLikes = feedsPage.stream().filter(feeds -> likedIdSet.contains(feeds.getFeedId())).toList();
+
         Set<Long> followedUserIdSet = followsRepository.findFolloweeIdsByMe(meId);
 
-
-        return  feedsPage.map(feeds -> ReadFeedsResponseDto.toDto(feeds,
+        Page<Feeds> filteredPage = new PageImpl<>(
+                filteredLikes,
+                pageable,
+                filteredLikes.size()
+        );
+        return  filteredPage.map(feeds -> ReadFeedsResponseDto.toDto(feeds,
                 likedIdSet.contains(feeds.getFeedId()),
-                likesTotal.getOrDefault(feeds.getFeedId(), 0),
-                commentsTotal.getOrDefault(feeds.getFeedId(),0),
+                likesTotalMap.getOrDefault(feeds.getFeedId(), 0),
+                commentsTotalMap.getOrDefault(feeds.getFeedId(),0),
                 followedUserIdSet.contains(feeds.getUser().getUserId())));
     }
 
-    public Page<ReadFeedsResponseDto> readFeedsByMyLikes(UserDetailsImpl userDetails, Pageable pageable) {
+    public Page<ReadFeedsResponseDto> readFeedsByMyComment(UserDetailsImpl userDetails, Pageable pageable) {
 
         if (userDetails == null) {
             throw new UsersErrorException(NOT_A_USER);
@@ -71,28 +81,41 @@ public class MyInfoService {
 
         Long meId = userDetails.getUserId();
 
+        Page<Feeds> feedsPage =  feedsRepository.findAccessibleFeedsBasedOnProfile(meId,pageable);
+
+        List<Long> feedIdsList = feedsPage.stream().map(Feeds::getFeedId).toList();
+
+        Set<Long> commentsIdSet = feedIdsList.isEmpty() // feedIdSet 이 0일 경우
+                ? Set.of() // 빈 셋을 반환 : DB 에러 방지
+                : commentsRepository.findCommentsFeedIds(meId, feedIdsList);
+
         Set<Long> likesIdSet = likesRepository.findLikesByFeedId(meId);
 
-        List<Long> feedIdsList = likesRepository.findLikesByFeedId(meId).stream().toList();
-
-        Map<Long, Integer> likeTotalMap = likesRepository.countLikedByFeedIds(feedIdsList.stream().toList()).stream()
+        Map<Long, Integer> likesTotalMap = likesRepository.countLikedByFeedIds(feedIdsList.stream().toList()).stream()
                 .collect(Collectors.toMap(row -> (Long) row[0], row -> ((Long) row[1]).intValue()));
 
-        Map<Long, Integer> commentsTotal = commentsRepository.countCommentsByFeedIds(feedIdsList).stream()
+        Map<Long, Integer> commentsTotalMap = commentsRepository.countCommentsByFeedIds(feedIdsList).stream()
                 .collect(Collectors.toMap(row -> (Long) row[0],
                         row -> ((Long) row[1]).intValue()));
 
         Set<Long> followedUserIdSet = followsRepository.findFolloweeIdsByMe(meId);
 
+        List<Feeds> filteredContent = feedsPage.stream().filter(feeds -> commentsIdSet.contains(feeds.getFeedId())).toList();
 
-        return (likesIdSet.isEmpty()) ? Page.empty(pageable)
-                : feedsRepository.findByIdIn(likesIdSet, pageable)
-                .map(feeds ->
+        Page<Feeds> filteredPage = new PageImpl<>(
+                filteredContent,
+                pageable,
+                filteredContent.size()
+        );
 
-                        ReadFeedsResponseDto.toDto(feeds,
-                                true, likeTotalMap.getOrDefault(feeds.getFeedId(), 0),
-                                commentsTotal.getOrDefault(feeds.getFeedId(), 0),
-                                followedUserIdSet.contains(feeds.getUser().getUserId())));
+        return filteredPage
+                .map(feeds -> ReadFeedsResponseDto.toDto(feeds,
+                    likesIdSet.contains(feeds.getFeedId()),
+                    likesTotalMap.getOrDefault(feeds.getFeedId(), 0),
+                    commentsTotalMap.getOrDefault(feeds.getFeedId(),0),
+                    followedUserIdSet.contains(feeds.getUser().getUserId())));
+
+
     }
 
     public AccessAble accessAbleMyPage(UserDetailsImpl userDetails, AccessAbleDto accessAble) {
@@ -101,4 +124,6 @@ public class MyInfoService {
         user.setVisibility(accessAble.getAccessAble());
         return user.getVisibility();
     }
+
+
 }
