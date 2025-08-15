@@ -48,8 +48,8 @@
     <div class="section">
         <h2>로그인</h2>
         <div>
-            <input type="text" id="username" placeholder="이메일 (username)" value="testuser@example.com">
-            <input type="password" id="password" placeholder="비밀번호" value="password123!">
+            <input type="text" id="username" placeholder="이메일 (username)" value="aaaaaa1@example.com">
+            <input type="password" id="password" placeholder="비밀번호" value="hansol1@">
             <button onclick="login()">로그인</button>
             <div id="tokenDisplay" class="token-info"></div>
             <div id="loginError" class="error"></div>
@@ -148,6 +148,7 @@
 
             if (response.ok) {
                 const data = await response.json();
+                console.log(data);
                 displayFeeds(data); // 게시글 표시 함수 호출
                 displayPagination(data.number, data.totalPages, data.first, data.last); // 페이지네이션 표시 함수 호출
             } else {
@@ -162,6 +163,8 @@
     }
 
     // --- 게시글 표시 함수 ---
+
+
     function displayFeeds(data) {
         const feedsContainer = document.getElementById('feedsContainer');
         feedsContainer.innerHTML = ''; // 기존 내용 지우기
@@ -174,19 +177,57 @@
         data.content.forEach(feed => {
             const feedItem = document.createElement('div');
             feedItem.className = 'feed-item';
+
+            // 프로필 이미지
+            const profileImg = feed.userProfileImageUrl
+                ? `<img src="${feed.userProfileImageUrl}" alt="프로필 이미지" style="width:50px; height:50px; border-radius:50%;">`
+                : '없음';
+
+            // 피드 이미지
+            const feedImgs = (feed.feedImageUrlList && feed.feedImageUrlList.length > 0)
+                ? feed.feedImageUrlList.map(url => `<img src="${url}" alt="Feed Image" style="max-width:300px; height:auto; margin-top:10px;">`).join('')
+                : '';
+
             feedItem.innerHTML = `
-                    <h3>[ID: ${feed.feedId}] ${feed.contents}</h3>
-                    <p><strong>작성자:</strong> ${feed.user ? feed.user.userName : '알 수 없음'} (ID: ${feed.user ? feed.user.userId : '?'})</p>
+                    <h3>[FeedID: ${feed.feedId}] <button class="followBtn" data-user-id="${feed.userId}">
+                ${feed.followed ? "✅ 팔로잉" : "❌ 팔로우"} </button> </h3>
+
+                    <p><strong>작성자:</strong> ${feed.userName || '알 수 없음'}</p>
+                    <p><strong>프로필 이미지:</strong> ${profileImg}</p>
                     <p><strong>카테고리:</strong> ${feed.category}</p>
-                    <p><strong>게시글 공개:</strong> ${feed.accessAble}</p>
-                    <p><strong>작성자 프로필 공개:</strong> ${feed.user ? feed.user.visibility : '알 수 없음'}</p>
-                    <p><strong>좋아요:</strong> ${feed.likeTotal} / <strong>댓글:</strong> ${feed.commentTotal}</p>
-                    <p><strong>나의 좋아요 여부:</strong> ${feed.liked ? '✅' : '❌'}</p>
-                    <p><strong>내가 이 작성자를 팔로우?:</strong> ${feed.user && feed.user.followed ? '✅' : '❌'}</p>
+                    <p><strong>내용 :</strong> ${feed.contents || ''}</p>
+                    <p><strong>좋아요 수:</strong> ${feed.likeTotal} / <strong>댓글 수:</strong> ${feed.commentTotal}</p>
+                    <p><strong>나의 좋아요 여부:</strong>  ${feed.liked ? '💖' : '🤍'} </p>
                     <p><strong>작성일:</strong> ${new Date(feed.createdAt).toLocaleString()}</p>
-                    ${feed.feedImageUrlList && feed.feedImageUrlList.length > 0 ?
-                feed.feedImageUrlList.map(url => `<img src="${url}" alt="Feed Image">`).join('') : ''}
-                `;
+                    ${feedImgs}
+    `;
+            // 팔로우 버튼 이벤트
+            const followBtn = feedItem.querySelector('.followBtn');
+            followBtn.addEventListener('click', async () => {
+                try {
+                    const response = await fetch(`${API_BASE_URL}/api/follows/${feed.userId}/follow`, {
+                        method: 'POST', // 팔로우 API에 맞게 POST/PUT 등 설정
+                        headers: {
+                            'Authorization': authToken,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json(); // 예: { followed: true/false }
+                        // followStatus에 따라 버튼 텍스트 변경
+                        followBtn.textContent = data.followStatus === "REQUESTED"
+                            ? "💬 요청중"
+                            : (data.followed ? "✅ 팔로잉" : "❌ 팔로우");
+                    } else {
+                        const errorData = await response.json();
+                        alert(`팔로우 실패: ${errorData.message || response.statusText}`);
+                    }
+                } catch (error) {
+                    alert(`네트워크 오류: ${error.message}`);
+                }
+            });
+            // 좋아요 버튼
             feedsContainer.appendChild(feedItem);
         });
     }
