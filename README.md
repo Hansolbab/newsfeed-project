@@ -131,7 +131,7 @@ application.properties
 <details>
   <summary>ERD</summary>
 
-![title](https://github.com/Hansolbab/newsfeed-project/issues/86#issue-3325623507)
+<img width="757" height="735" alt="Image" src="https://github.com/Hansolbab/newsfeed-project/issues/86#issue-3325623507" />
 </details> 
 
 <details>
