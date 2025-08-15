@@ -21,8 +21,11 @@ public interface FeedsRepository extends JpaRepository<Feeds, Long> {
     Optional<Feeds> findByFeedIdAndDeletedFalse(Long feedId);
 
 
-//    @Query("SELECT f.feedId FROM Feeds f WHERE f.category =:category ")
-    Set<Long> findFeedIdByCategory( Category category, Pageable pageable);
+    @Query("SELECT DISTINCT f.feedId " +
+            "FROM Feeds f " +
+            "WHERE f.deleted = false AND f.category = :category ")
+    Set<Long> findFeedIdsByCategory(@Param("category") Category category);
+
 
     // 필요한 사용자 정의 쿼리 메소드 추가 가능
     Page<Feeds> findByUser_UserId(Long userId, Pageable pageable);
