@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>뉴스피드 (우선순위 &amp; 공개 범위 + 페이지네이션)</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f4f4; }
+        .container { background-color: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); max-width: 800px; margin: 0 auto; }
+        h1, h2 { color: #333; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 20px; }
+        input[type="text"], input[type="password"] {
+            width: calc(100% - 22px); padding: 10px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 4px;
+        }
+        button {
+            background-color: #007bff; color: white; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer;
+            font-size: 16px; margin-right: 10px; margin-bottom: 10px;
+        }
+        button:hover { background-color: #0056b3; }
+        .feed-list { margin-top: 20px; border-top: 1px dashed #ccc; padding-top: 20px;}
+        .feed-item {
+            border: 1px solid #e0e0e0; padding: 15px; margin-bottom: 15px; border-radius: 6px; background-color: #f9f9f9;
+        }
+        .feed-item h3 { margin-top: 0; color: #007bff; font-size: 1.2em; }
+        .feed-item p { margin-bottom: 5px; color: #555; }
+        .feed-item img { max-width: 100%; height: auto; border-radius: 4px; margin-top: 10px; }
+        .error { color: red; font-weight: bold; margin-top: 10px; }
+        .token-info { background-color: #e9ecef; padding: 10px; border-radius: 4px; margin-top: 10px; font-size: 0.9em; word-wrap: break-word;}
+        .section { margin-bottom: 30px; padding: 15px; border: 1px dashed #b1b1b1; border-radius: 8px; background-color: #fafafa;}
+
+        /* 페이지네이션 스타일 */
+        .pagination { display: flex; justify-content: center; margin-top: 20px; }
+        .pagination button {
+            background-color: #f0f0f0; color: #333; border: 1px solid #ddd; border-radius: 4px;
+            padding: 8px 12px; margin: 0 4px; cursor: pointer; font-size: 0.9em;
+        }
+        .pagination button.active {
+            background-color: #007bff; color: white; border-color: #007bff;
+        }
+        .pagination button:disabled {
+            opacity: 0.5; cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>뉴스피드 우선순위 &amp; 공개 범위 테스트</h1>
+
+    <div class="section">
+        <h2>로그인</h2>
+        <div>
+            <input type="text" id="username" placeholder="이메일 (username)" value="aaaaaa1@example.com">
+            <input type="password" id="password" placeholder="비밀번호" value="hansol1@">
+            <button onclick="login()">로그인</button>
+            <div id="tokenDisplay" class="token-info"></div>
+            <div id="loginError" class="error"></div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>게시글 조회</h2>
+        <p>
+            <b>테스트 방법:</b> 계정 별 로그인 후 '게시글 불러오기' 클릭.
+            <br> 페이지네이션 버튼으로 페이지를 이동하며 필터링/정렬/표시를 확인합니다.
+        </p>
+        <button onclick="loadFeeds(0)">게시글 불러오기 (첫 페이지)</button>
+        <div id="feedsContainer" class="feed-list"></div>
+        <div id="feedsError" class="error"></div>
+        <div id="paginationContainer" class="pagination"></div> <!-- 페이지네이션 버튼이 들어갈 곳 -->
+    </div>
+</div>
+
+<script>
+    const API_BASE_URL = 'http://localhost:8080'; // ⭐ 백엔드 API 주소 ⭐
+    const PAGE_SIZE = 10; // 한 페이지에 가져올 게시글 수
+
+    let authToken = ''; // 로그인 후 JWT 토큰이 여기에 저장됩니다.
+    let currentPage = 0; // 현재 페이지 번호 (0부터 시작)
+
+    // --- 로그인 함수 (이전과 동일) ---
+    async function login() {
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+        const tokenDisplay = document.getElementById('tokenDisplay');
+        const loginError = document.getElementById('loginError');
+
+        loginError.textContent = '';
+        tokenDisplay.textContent = '';
+        tokenDisplay.style.color = 'black';
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/auth/signIn`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ email: username, password: password })
+            });
+
+            if (response.ok) {
+                const responseData = await response.json(); // 응답 body를 JSON으로 파싱
+                const accessToken = responseData.accessToken; // SignInResponseDto의 accessToken 필드에 접근
+
+                if (accessToken) {
+                    authToken = `Bearer ${accessToken}`;
+                    tokenDisplay.textContent = `로그인 성공! 액세스 토큰: ${accessToken.substring(0, 30)}...`;
+                    tokenDisplay.style.color = 'green';
+                    loadFeeds(0); // 로그인 성공 후 자동으로 첫 페이지 로드
+                } else {
+                    tokenDisplay.textContent = `로그인 성공! 하지만 응답 바디에서 액세스 토큰을 찾을 수 없습니다.`;
+                    console.warn('Access token missing in response body:', responseData);
+                    tokenDisplay.style.color = 'orange';
+                }
+            } else {
+                const errorData = await response.json();
+                loginError.textContent = `로그인 실패: ${errorData.message || response.statusText}`;
+                loginError.style.color = 'red';
+            }
+        } catch (error) {
+            loginError.textContent = `네트워크 오류: ${error.message}`;
+            loginError.style.color = 'red';
+        }
+    }
+
+    // --- 게시글 불러오기 함수 (페이지네이션 적용) ---
+    async function loadFeeds(pageNumber) {
+        currentPage = pageNumber; // 현재 페이지 번호 업데이트
+
+        const feedsContainer = document.getElementById('feedsContainer');
+        const feedsError = document.getElementById('feedsError');
+        const paginationContainer = document.getElementById('paginationContainer');
+
+        feedsContainer.innerHTML = ''; // 이전 게시글 초기화
+        feedsError.textContent = ''; // 에러 메시지 초기화
+        paginationContainer.innerHTML = ''; // 페이지네이션 초기화
+
+        if (!authToken) {
+            feedsError.textContent = '로그인이 필요합니다. 먼저 로그인 버튼을 눌러주세요.';
+            return;
+        }
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/feeds?page=${currentPage}&size=${PAGE_SIZE}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': authToken
+                }
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                console.log(data);
+                displayFeeds(data); // 게시글 표시 함수 호출
+                displayPagination(data.number, data.totalPages, data.first, data.last); // 페이지네이션 표시 함수 호출
+            } else {
+                const errorData = await response.json();
+                feedsError.textContent = `게시글 로드 실패: ${errorData.message || response.statusText}`;
+                feedsError.style.color = 'red';
+            }
+        } catch (error) {
+            feedsError.textContent = `네트워크 오류: ${error.message}`;
+            feedsError.style.color = 'red';
+        }
+    }
+
+    // --- 게시글 표시 함수 ---
+
+
+    function displayFeeds(data) {
+        const feedsContainer = document.getElementById('feedsContainer');
+        feedsContainer.innerHTML = ''; // 기존 내용 지우기
+
+        if (!data || !data.content || !Array.isArray(data.content) || data.content.length === 0) {
+            feedsContainer.textContent = '표시할 게시글이 없습니다.';
+            return;
+        }
+
+        data.content.forEach(feed => {
+            const feedItem = document.createElement('div');
+            feedItem.className = 'feed-item';
+
+            // 프로필 이미지
+            const profileImg = feed.userProfileImageUrl
+                ? `<img src="${feed.userProfileImageUrl}" alt="프로필 이미지" style="width:50px; height:50px; border-radius:50%;">`
+                : '없음';
+
+            // 피드 이미지
+            const feedImgs = (feed.feedImageUrlList && feed.feedImageUrlList.length > 0)
+                ? feed.feedImageUrlList.map(url => `<img src="${url}" alt="Feed Image" style="max-width:300px; height:auto; margin-top:10px;">`).join('')
+                : '';
+
+            feedItem.innerHTML = `
+                    <h3>[FeedID: ${feed.feedId}] <button class="followBtn" data-user-id="${feed.userId}">
+                ${feed.followed ? "✅ 팔로잉" : "❌ 팔로우"} </button> </h3>
+
+                    <p><strong>작성자:</strong> ${feed.userName || '알 수 없음'}</p>
+                    <p><strong>프로필 이미지:</strong> ${profileImg}</p>
+                    <p><strong>카테고리:</strong> ${feed.category}</p>
+                    <p><strong>내용 :</strong> ${feed.contents || ''}</p>
+                    <p><strong>좋아요 수:</strong> ${feed.likeTotal} / <strong>댓글 수:</strong> ${feed.commentTotal}</p>
+                    <p><strong>나의 좋아요 여부:</strong>  ${feed.liked ? '💖' : '🤍'} </p>
+                    <p><strong>작성일:</strong> ${new Date(feed.createdAt).toLocaleString()}</p>
+                    ${feedImgs}
+    `;
+            // 팔로우 버튼 이벤트
+            const followBtn = feedItem.querySelector('.followBtn');
+            followBtn.addEventListener('click', async () => {
+                try {
+                    const response = await fetch(`${API_BASE_URL}/api/follows/${feed.userId}/follow`, {
+                        method: 'POST', // 팔로우 API에 맞게 POST/PUT 등 설정
+                        headers: {
+                            'Authorization': authToken,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json(); // 예: { followed: true/false }
+                        // followStatus에 따라 버튼 텍스트 변경
+                        followBtn.textContent = data.followStatus === "REQUESTED"
+                            ? "💬 요청중"
+                            : (data.followed ? "✅ 팔로잉" : "❌ 팔로우");
+                    } else {
+                        const errorData = await response.json();
+                        alert(`팔로우 실패: ${errorData.message || response.statusText}`);
+                    }
+                } catch (error) {
+                    alert(`네트워크 오류: ${error.message}`);
+                }
+            });
+            // 좋아요 버튼
+            feedsContainer.appendChild(feedItem);
+        });
+    }
+
+    // --- 페이지네이션 표시 함수 ---
+    function displayPagination(number, totalPages, isFirst, isLast) {
+        const paginationContainer = document.getElementById('paginationContainer');
+        paginationContainer.innerHTML = ''; // 기존 페이지네이션 버튼 지우기
+
+        // 이전 페이지 버튼
+        const prevButton = document.createElement('button');
+        prevButton.textContent = '이전';
+        prevButton.onclick = () => loadFeeds(number - 1);
+        prevButton.disabled = isFirst;
+        paginationContainer.appendChild(prevButton);
+
+        // 페이지 번호 버튼들
+        for (let i = 0; i < totalPages; i++) {
+            const pageButton = document.createElement('button');
+            pageButton.textContent = i + 1; // 페이지 번호는 1부터 시작
+            pageButton.onclick = () => loadFeeds(i);
+            if (i === number) { // 현재 페이지
+                pageButton.classList.add('active');
+                pageButton.disabled = true; // 현재 페이지는 비활성화
+            }
+            paginationContainer.appendChild(pageButton);
+        }
+
+        // 다음 페이지 버튼
+        const nextButton = document.createElement('button');
+        nextButton.textContent = '다음';
+        nextButton.onclick = () => loadFeeds(number + 1);
+        nextButton.disabled = isLast;
+        paginationContainer.appendChild(nextButton);
+    }
+</script>
+</body>
+</html>
