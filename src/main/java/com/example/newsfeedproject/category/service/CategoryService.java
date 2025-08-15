@@ -38,7 +38,7 @@ public class CategoryService {
 
         Page<Feeds> feedsPage = feedsRepository.findAccessibleFeedsBasedOnProfile(meId,pageable);
 
-        Set<Long> feedIdContainCategorySet = feedsRepository.findFeedIdByCategory(Category.sortedType(text), pageable);
+        Set<Long> feedIdContainCategorySet = feedsRepository.findFeedIdsByCategory(Category.sortedType(text));
 
 
         List<Feeds> pageFeedList = feedsPage.getContent().stream().filter(feeds -> feedIdContainCategorySet.contains(feeds.getFeedId()))
