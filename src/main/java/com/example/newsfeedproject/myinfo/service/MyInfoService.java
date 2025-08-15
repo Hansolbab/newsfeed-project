@@ -33,7 +33,7 @@ public class MyInfoService {
     private final UsersRepository usersRepository;
 
     public Page<ReadFeedsResponseDto> readFeedsByMyComment(UserDetailsImpl userDetails, Pageable pageable) {
-//화장실로 떠난 그녀
+
         Long meId = userDetails.getUserId();
 
         Page<Feeds> feedsPage = feedsRepository.findFeedsByCommentsBy(meId,pageable);
@@ -44,7 +44,8 @@ public class MyInfoService {
                 ? Set.of() // 빈 셋을 반환 : DB 에러 방지
                 : likesRepository.findLikedFeedIds(meId, feedIdsList);
 
-        Map<Long, Integer> likesTotal = likesRepository.countLikedByFeedIds(feedIdsList).stream().collect(Collectors.toMap(row ->(Long) row[0],
+        Map<Long, Integer> likesTotal = likesRepository.countLikedByFeedIds(feedIdsList).stream()
+                .collect(Collectors.toMap(row ->(Long) row[0],
                 row ->((Long) row[1]).intValue()));
 
         Map<Long, Integer> commentsTotal = commentsRepository.countCommentsByFeedIds(feedIdsList).stream()

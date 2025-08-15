@@ -11,8 +11,6 @@ import com.example.newsfeedproject.feeds.repository.FeedsRepository;
 import com.example.newsfeedproject.follow.repository.FollowsRepository;
 import com.example.newsfeedproject.likes.repository.LikesRepository;
 import com.example.newsfeedproject.common.dto.ReadUsersFeedsResponseDto;
-import com.example.newsfeedproject.users.dto.LikesInfoDto;
-import com.example.newsfeedproject.common.dto.ReadUserSimpleResponseDto;
 import com.example.newsfeedproject.users.entity.AccessAble;
 import com.example.newsfeedproject.users.entity.Users;
 import com.example.newsfeedproject.users.repository.UsersRepository;
@@ -56,6 +54,7 @@ public class UsersService {
     public boolean isSameUser(Long userId, Long targetId){return userId.equals(targetId);}
     // userId 값의 User를 읽을 수 있는 권한 있을 때 Users 형태로 반환
     public Users userById(Long userId){
+        if (usersRepository.existsByDeletedTrueAndUserId(userId)){throw new UsersErrorException(NO_SUCH_USER);}
         return usersRepository.findById(userId)
                 .orElseThrow(() -> new UsersErrorException(NO_SUCH_USER));
     }
@@ -101,7 +100,7 @@ public class UsersService {
         Users user = userById(userId);
         Page<Feeds> feedsPage;
         // 본인 페이지 볼 때
-        if (isSameUser(userDetails.getUserId(), userId)){
+        if (isSameUser(user.getUserId(), userId)){
             feedsPage = feedsRepository.findAcceessibleFeedsMyPage(userId, pageable);
         } else { // 다른사람 페이지 볼 때
             if (isUserAccessible(userId, AccessAble.ALL_ACCESS)){ // 전체공개 유저 // 전체 공개 게시글
@@ -112,30 +111,40 @@ public class UsersService {
         }
 
         List<Long> feedIdsList = feedsPage.stream().map(Feeds::getFeedId).toList(); // FeedId만 리스트로 정리
-        //object로 받고 Map key: feedId, value LikeInfoDto
-        Map<Long, LikesInfoDto> likesInfoMap = likeRepository.countLikesAndIsLikedByFeedIds(feedIdsList, userId).stream()
-                .collect(Collectors.toMap(row -> (Long) row[0],
-                        row-> new LikesInfoDto(
-                                ((Long) row[1]).intValue(),
-                           ((Long) row[2]) > 0)));
+
+        // 피드 이미지 리스트 맵으로 받기
+        Map<Long, List<String>> feedImages = feedImgRepository.findFeedImgByFeedId(feedIdsList).stream()
+                .collect(Collectors.groupingBy(row -> (Long) row[0], // feedId를 기준으로 그룹화
+                        Collectors.mapping(row -> (String) row[1], // feedImageUrl만 뽑아서
+                                Collectors.toList() // 리스트로 묶음
+                        )));
+        //object로 받고 Map key: feedId, value LikeInfoDto 개선중에 오류 발견하고 나중으로 미룸
+//        Map<Long, LikesInfoDto> likesInfoMap = likeRepository.countLikesAndIsLikedByFeedIds(feedIdsList, userId).stream()
+//                .collect(Collectors.toMap(row -> (Long) row[0],
+//                        row-> new LikesInfoDto(
+//                                ((Long) row[1]).intValue(),
+//                           ((Long) row[2]) > 0)));
+        // null 값 때문에 object로 받고 Map key feedId, value count한 likkes값
+
+        Map<Long, Integer> likesTotalMap = likeRepository.countLikedByFeedIds(feedIdsList).stream()
+                .collect(Collectors.toMap(row ->(Long) row[0], row ->((Long) row[1]).intValue()));
+
+
         //null 값 때문에 Object로 받고 Map Key: feedId, value: count한 comments값
-        Map<Long, Integer> commentsTotal = commentsRepository.countCommentsByFeedIds(feedIdsList).stream()
+        Map<Long, Integer> commentsTotalMap = commentsRepository.countCommentsByFeedIds(feedIdsList).stream()
                                             .collect(Collectors.toMap(row ->(Long) row[0], row ->((Long) row[1]).intValue()));
 
-        Map<Long, List<String>> feedImages = feedImgRepository.findFeedImgByFeedId(feedIdsList).stream()
-                        .collect(Collectors.groupingBy(row -> (Long) row[0], // feedId를 기준으로 그룹화
-                                 Collectors.mapping(row -> (String) row[1], // feedImageUrl만 뽑아서
-                                 Collectors.toList() // 리스트로 묶음
-                        )));
+        Map<Long, Boolean> likedMap = likeRepository.isLikedByFeedIdsANDUserId(feedIdsList, user.getUserId()).stream()
+                .collect(Collectors.toMap(row -> (Long) row[0], row ->((Boolean) row[1])));
 
         List<ReadUsersFeedsResponseDto> feedResponseDtoList = feedsPage.stream()
                 .map(feed -> new ReadUsersFeedsResponseDto(
                         feed.getFeedId(),                                               // FeedId 값
                         feedImages.get(feed.getFeedId()),                                 // FeedImageUrl List값
                         feed.getContents(),                                             // Contents 값
-                        likesInfoMap.getOrDefault(feed.getFeedId(),new LikesInfoDto(0, false)).getLikeTotal(),           // likeTotal 값, 기본 0
-                        commentsTotal.getOrDefault(feed.getFeedId(), 0),      // commentsTotal 값, 기본 0
-                        likesInfoMap.getOrDefault(feed.getFeedId(),new LikesInfoDto(0, false)).isLiked()         // liked 값, 기본 false
+                        likesTotalMap.getOrDefault(feed.getFeedId(),0),           // likeTotal 값, 기본 0
+                        commentsTotalMap.getOrDefault(feed.getFeedId(), 0),      // commentsTotal 값, 기본 0
+                        likedMap.getOrDefault(feed.getFeedId(),false)         // liked 값, 기본 false
                         ))
                 .toList();
 
@@ -145,7 +154,7 @@ public class UsersService {
 
     @Transactional
     public Page<ReadUserSimpleResponseDto> searchUser(String keyword, UserDetailsImpl userDetails, Pageable pageable){
-        Page<Users> resultUserList = usersRepository.findByUserNameContainingAndDeletedFalseAndNOTNoneAccess(keyword, pageable);
+        Page<Users> resultUserList = usersRepository.findByUserNameContainingAndDeletedAndNOTNoneAccess(keyword, pageable);
 
         List<Long> resultUserIdList = resultUserList.stream()
                 .map(Users::getUserId)

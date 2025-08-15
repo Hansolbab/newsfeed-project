@@ -4,12 +4,16 @@ package com.example.newsfeedproject.follow.service;
 import com.example.newsfeedproject.auth.impl.UserDetailsImpl;
 
 import com.example.newsfeedproject.common.exception.follow.FollowErrorException;
+import com.example.newsfeedproject.common.exception.users.UsersErrorCode;
+import com.example.newsfeedproject.common.exception.users.UsersErrorException;
 import com.example.newsfeedproject.follow.dto.FollowResponseDto;
 import com.example.newsfeedproject.follow.dto.ReadFollowUsersDto;
 import com.example.newsfeedproject.follow.entity.Follows;
 import com.example.newsfeedproject.follow.repository.FollowsRepository;
+import com.example.newsfeedproject.requestfollow.dto.RequestFollowResponseDto;
 import com.example.newsfeedproject.requestfollow.entity.RequestFollows;
 import com.example.newsfeedproject.requestfollow.repository.RequestFollowRepository;
+import com.example.newsfeedproject.users.entity.AccessAble;
 import com.example.newsfeedproject.users.entity.Users;
 import com.example.newsfeedproject.users.repository.UsersRepository;
 import jakarta.transaction.Transactional;;
@@ -31,6 +35,35 @@ public class FollowsService {
     private final FollowsRepository followsRepository;
     private final UsersRepository usersRepository;
     private final RequestFollowRepository requestFollowRepository;
+
+    // 팔로우 언팔 토글 되는거 같기도?
+
+//    public FollowResponseDto follow(UserDetailsImpl userDetails, Long userId) {
+//
+//        Long meId = userDetails.getUserId();
+//        validId(meId, userId);
+//
+//        Follows relation = getRelation(meId, userId); // getRelation => 없으면 관계 생성
+//        if (usersRepository.existsByUserIdAndVisibility(meId, AccessAble.NONE_ACCESS)){throw new UsersErrorException(UsersErrorCode.NO_SUCH_USER);}
+//        visibility = All_ACCESS
+//        if(usersRepository.existsByUserIdAndVisibility(meId, visibility)){
+//            if(relation.isFollowed()){
+//                relation.unfollow();
+//            } else {
+//                relation.follow();
+//            }
+//        } else{
+//            if(relation.isFollowed()) {
+//
+//            }
+//            else{
+//                RequestFollowResponseDto followStatus = new RequestFollowResponseDto(requestFollowService.requestFollow(userDetails, userId));
+//            }
+//        }
+//
+//        followsRepository.save(relation);
+//        return new FollowResponseDto(relation.isFollowed());
+//    }
 
     public FollowResponseDto follow(UserDetailsImpl userDetails, Long userId) {
 

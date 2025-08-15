@@ -42,8 +42,12 @@ public interface LikesRepository extends JpaRepository<Likes, Long> {
 
     Long countByFeedIdAndLikedTrue(Long feedId);
 
-
-    @Query("SELECT l.feedId FROM  Likes l WHERE  l.userId = :meId AND l.liked = true")
+    // feed soft delete 여부 추가
+    @Query("SELECT l.feedId " +
+            "FROM  Likes l " +
+            "WHERE l.userId = :meId AND l.liked = true " +
+            "AND EXISTS (SELECT 1 FROM Feeds f " +
+            "WHERE f.deleted = false)" )
     Set<Long> findLikesByFeedId(@Param(("meId")) Long meId);
 
     // feedId, likeTotal, user liked 확인

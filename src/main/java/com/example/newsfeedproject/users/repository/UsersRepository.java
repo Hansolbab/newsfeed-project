@@ -16,15 +16,15 @@ import java.util.Optional;
 public interface UsersRepository extends JpaRepository<Users, Long> {
     Optional<Users> findByEmail(String email);
     boolean existsByUserName(String userName);
-    Page<Users> findByUserNameContainingAndVisibilityNotAndDeletedFalse(String userName, AccessAble visibilities,
-                                                                        Pageable pageable);
-//whdfyㄴㅇ
+
+    boolean existsByDeletedTrueAndUserId(Long userId);
+
     boolean existsByUserIdAndVisibility(Long userId, AccessAble visibility);
 
     @Query("SELECT u FROM Users u " +
             "WHERE u.userName LIKE %:username% " +
             "AND (u.deleted = false or u.deleted IS NULL) AND u.visibility <> 'NONE_ACCESS' ")
-    Page<Users> findByUserNameContainingAndDeletedFalseAndNOTNoneAccess(@Param("username") String username,
+    Page<Users> findByUserNameContainingAndDeletedAndNOTNoneAccess(@Param("username") String username,
                                                                         Pageable pageable);
 
 
