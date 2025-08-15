@@ -131,7 +131,8 @@ application.properties
 <details>
   <summary>ERD</summary>
 
-<img width="757" height="735" alt="Image" src="https://github.com/Hansolbab/newsfeed-project/issues/86#issue-3325623507" />
+![엥](https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdna%2Fcq1xuY%2FbtsPWmLjC1z%2FAAAAAAAAAAAAAAAAAAAAAC-TPdlgwN1maMgRa5YM2Db7FoxQnOVi_rAi7kIrR-jF%2Fimg.png%3Fcredential%3DyqXZFxpELC7KVnFOS48ylbz2pIh7yKj8%26expires%3D1756652399%26allow_ip%3D%26allow_referer%3D%26signature%3DCDlzQgsJjHV2Y1vabOSPOL0vqQg%253D)
+
 </details> 
 
 <details>
