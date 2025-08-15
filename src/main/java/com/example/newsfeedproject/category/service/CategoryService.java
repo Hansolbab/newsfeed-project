@@ -66,7 +66,7 @@ public class CategoryService {
                 pageFeedList.size()
                 );
 
-        return  feedsPage.map(feeds -> ReadFeedsResponseDto.toDto(feeds,
+        return  resultFeedPage.map(feeds -> ReadFeedsResponseDto.toDto(feeds,
                 likedIdSet.contains(feeds.getFeedId()),
                 likesTotalMap.getOrDefault(feeds.getFeedId(), 0),
                 commentsTotalMap.getOrDefault(feeds.getFeedId(),0),
