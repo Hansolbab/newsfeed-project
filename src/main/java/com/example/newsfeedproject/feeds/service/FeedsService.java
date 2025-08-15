@@ -3,6 +3,7 @@ package com.example.newsfeedproject.feeds.service;
 import com.example.newsfeedproject.auth.impl.UserDetailsImpl;
 import com.example.newsfeedproject.category.entity.Category;
 import com.example.newsfeedproject.comment.repository.CommentsRepository;
+import com.example.newsfeedproject.common.dto.ReadUserSimpleResponseDto;
 import com.example.newsfeedproject.common.dto.ReadUsersFeedsResponseDto;
 import com.example.newsfeedproject.common.exception.auth.AuthErrorException;
 import com.example.newsfeedproject.common.exception.feeds.FeedsErrorException;
@@ -30,6 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.example.newsfeedproject.common.exception.feeds.FeedsErrorCode.*;
@@ -154,6 +156,8 @@ public class FeedsService {
 //                            ((Long) row[1]) > 0
 //                        )));
 
+
+
         //댓글 토탈
         Map<Long, Integer> commentsTotalMap = commentsRepository.countCommentsByFeedIds(feedIdList).stream()
                 .collect(Collectors.toMap(row -> (Long) row[0],
@@ -163,6 +167,8 @@ public class FeedsService {
                 .collect(Collectors.toMap(row -> (Long) row[0],
                         row ->(boolean) row[1]));
 
+        Set<Long> followedUserIdSet = followsRepository.findFolloweeIdsByMe(meId);
+
         List<ReadUsersFeedsResponseDto> feedsResponseDtoList = feedsPage.stream()
                 .map(feed -> new ReadUsersFeedsResponseDto(
                         feed.getFeedId(),
@@ -170,8 +176,12 @@ public class FeedsService {
                         feed.getContents(),
                         likeTaotalMap.getOrDefault(feed.getFeedId(),  0),
                         commentsTotalMap.getOrDefault(feed.getFeedId(), 0),
-                        likedMap.getOrDefault(feed.getFeedId(),false))
-                ).toList();
+                        likedMap.getOrDefault(feed.getFeedId(),false),
+                        feed.getCategory(),
+                        feed.getUser().getUserName(),
+                        feed.getUser().getProfileImageUrl(),
+                        followedUserIdSet.contains(feed.getUser().getUserId()),
+                        feed.getCreatedAt())).toList();
 
         return new PageImpl<>(feedsResponseDtoList, pageable, feedsPage.getTotalElements());
         }

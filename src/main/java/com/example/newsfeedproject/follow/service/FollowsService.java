@@ -46,6 +46,8 @@ public class FollowsService {
         Users me = usersRepository.getReferenceById(meId);
         Users users = usersRepository.getReferenceById(userId);
 
+        FollowStatus currentStatus = FollowStatus.NONE;
+
         if (usersRepository.existsByUserIdAndVisibility(userId, AccessAble.NONE_ACCESS)){throw new UsersErrorException(UsersErrorCode.NO_SUCH_USER);}
 
         if(usersRepository.existsByUserIdAndVisibility(userId, AccessAble.ALL_ACCESS)){ // 전체접근
@@ -60,12 +62,12 @@ public class FollowsService {
                         .orElseGet(() -> new RequestFollows(me, users));
                 if (requestRelation.getFollowStatus().equals(FollowStatus.REQUESTED)){
                     RequestFollows requestFollows = requestFollowRepository.findByRequesterAndTarget(me, users).orElseThrow(() -> new FollowErrorException(NOT_REQUEST));
-
                     requestFollows.cancel();
-
+                    return new FollowResponseDto(requestFollows.getFollowStatus(), relation.isFollowed());
                 } else {
                     requestRelation.request();
                     requestFollowRepository.save(requestRelation);
+                    return new FollowResponseDto(requestRelation.getFollowStatus(), relation.isFollowed());
                 }
 
             }
@@ -73,7 +75,7 @@ public class FollowsService {
         }
 
         followsRepository.save(relation);
-        return new FollowResponseDto(relation.isFollowed());
+        return new FollowResponseDto(currentStatus, relation.isFollowed());
     }
 
 
@@ -95,7 +97,7 @@ public class FollowsService {
 
         relation.unfollow();
 
-        return new FollowResponseDto(relation.isFollowed());
+        return new FollowResponseDto(requestRelation.getFollowStatus(), relation.isFollowed());
     }
 
 
