@@ -122,6 +122,7 @@ public class FeedsService {
     @Transactional(readOnly = true)
     public Page<ReadUsersFeedsResponseDto> readAllFeeds(int page, int size, UserDetailsImpl userDetails) {
         Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
+        size = 3;
         Pageable pageable = PageRequest.of(page, size, sort);
 
         Users user = usersRepository.findById(userDetails.getUserId())
@@ -181,7 +182,8 @@ public class FeedsService {
                         feed.getUser().getUserName(),
                         feed.getUser().getProfileImageUrl(),
                         followedUserIdSet.contains(feed.getUser().getUserId()),
-                        feed.getCreatedAt())).toList();
+                        feed.getCreatedAt(),
+                        feed.getUser().getUserId())).toList();
 
         return new PageImpl<>(feedsResponseDtoList, pageable, feedsPage.getTotalElements());
         }
