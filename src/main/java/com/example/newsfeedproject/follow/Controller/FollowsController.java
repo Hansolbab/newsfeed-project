@@ -37,13 +37,6 @@ public class FollowsController {
     }
 
 
-    @PostMapping("/{userId}/unFollow")
-    public  ResponseEntity<FollowResponseDto> unfollow(
-            @PathVariable @NotNull Long userId,
-            @AuthenticationPrincipal UserDetailsImpl userDetails
-    ) {
-        return new ResponseEntity<>(followsService.unfollow(userDetails, userId), HttpStatus.OK);
-    }
 
     @PostMapping("/{userId}/delete")
     public  ResponseEntity<FollowResponseDto> deleteFollow(

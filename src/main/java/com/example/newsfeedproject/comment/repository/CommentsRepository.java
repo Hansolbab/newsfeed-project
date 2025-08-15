@@ -8,8 +8,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Repository
 public interface CommentsRepository extends JpaRepository<Comments, Long> {
@@ -41,4 +44,8 @@ public interface CommentsRepository extends JpaRepository<Comments, Long> {
             "GROUP BY f.feedId")
     List<Object[]> countCommentsByFeedIds(@Param("feedIds") List<Long> feedIds);
 
+
+
+    @Query("SELECT DISTINCT c.feedComments.feedId FROM Comments c WHERE c.deleted = false AND c.userComments.userId = :meId AND c.feedComments.feedId IN (:feedIds)")
+    Set<Long> findCommentsFeedIds(@Param("meId") Long meId, @Param("feedIds") Collection<Long> feedIdsList);
 }

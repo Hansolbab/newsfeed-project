@@ -2,27 +2,25 @@ package com.example.newsfeedproject.follow.service;
 
 
 import com.example.newsfeedproject.auth.impl.UserDetailsImpl;
-
 import com.example.newsfeedproject.common.exception.follow.FollowErrorException;
 import com.example.newsfeedproject.common.exception.users.UsersErrorCode;
 import com.example.newsfeedproject.common.exception.users.UsersErrorException;
 import com.example.newsfeedproject.follow.dto.FollowResponseDto;
 import com.example.newsfeedproject.follow.dto.ReadFollowUsersDto;
+import com.example.newsfeedproject.follow.entity.FollowStatus;
 import com.example.newsfeedproject.follow.entity.Follows;
 import com.example.newsfeedproject.follow.repository.FollowsRepository;
-import com.example.newsfeedproject.requestfollow.dto.RequestFollowResponseDto;
 import com.example.newsfeedproject.requestfollow.entity.RequestFollows;
 import com.example.newsfeedproject.requestfollow.repository.RequestFollowRepository;
 import com.example.newsfeedproject.users.entity.AccessAble;
 import com.example.newsfeedproject.users.entity.Users;
 import com.example.newsfeedproject.users.repository.UsersRepository;
-import jakarta.transaction.Transactional;;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.Set;
 import static com.example.newsfeedproject.common.exception.follow.FollowErrorCode.*;
@@ -38,70 +36,47 @@ public class FollowsService {
 
     // 팔로우 언팔 토글 되는거 같기도?
 
-//    public FollowResponseDto follow(UserDetailsImpl userDetails, Long userId) {
-//
-//        Long meId = userDetails.getUserId();
-//        validId(meId, userId);
-//
-//        Follows relation = getRelation(meId, userId); // getRelation => 없으면 관계 생성
-//        if (usersRepository.existsByUserIdAndVisibility(meId, AccessAble.NONE_ACCESS)){throw new UsersErrorException(UsersErrorCode.NO_SUCH_USER);}
-//        visibility = All_ACCESS
-//        if(usersRepository.existsByUserIdAndVisibility(meId, visibility)){
-//            if(relation.isFollowed()){
-//                relation.unfollow();
-//            } else {
-//                relation.follow();
-//            }
-//        } else{
-//            if(relation.isFollowed()) {
-//
-//            }
-//            else{
-//                RequestFollowResponseDto followStatus = new RequestFollowResponseDto(requestFollowService.requestFollow(userDetails, userId));
-//            }
-//        }
-//
-//        followsRepository.save(relation);
-//        return new FollowResponseDto(relation.isFollowed());
-//    }
-
     public FollowResponseDto follow(UserDetailsImpl userDetails, Long userId) {
 
         Long meId = userDetails.getUserId();
-
         validId(meId, userId);
 
         Follows relation = getRelation(meId, userId); // getRelation => 없으면 관계 생성
 
-        if(relation.isFollowed()){
-            throw new FollowErrorException(ALREADY_FOLLOW);
+        Users me = usersRepository.getReferenceById(meId);
+        Users users = usersRepository.getReferenceById(userId);
+
+        if (usersRepository.existsByUserIdAndVisibility(userId, AccessAble.NONE_ACCESS)){throw new UsersErrorException(UsersErrorCode.NO_SUCH_USER);}
+
+        if(usersRepository.existsByUserIdAndVisibility(userId, AccessAble.ALL_ACCESS)){ // 전체접근
+            if(relation.isFollowed()){ //이미 팔로우
+                relation.unfollow();
+            } else { //언팔로우
+                relation.follow();
+            }
+        } else { //팔로우공개
+            if (!relation.isFollowed()) { // 팔로우 상태니까 언팔로우 넘어가고
+                RequestFollows requestRelation = requestFollowRepository.findByRequesterAndTarget(me, users)
+                        .orElseGet(() -> new RequestFollows(me, users));
+                if (requestRelation.getFollowStatus().equals(FollowStatus.REQUESTED)){
+                    RequestFollows requestFollows = requestFollowRepository.findByRequesterAndTarget(me, users).orElseThrow(() -> new FollowErrorException(NOT_REQUEST));
+
+                    requestFollows.cancel();
+
+                } else {
+                    requestRelation.request();
+                    requestFollowRepository.save(requestRelation);
+                }
+
+            }
+            relation.unfollow();
         }
 
-        relation.follow();
         followsRepository.save(relation);
-
-
         return new FollowResponseDto(relation.isFollowed());
     }
 
 
-
-    //언팔로우 서비스 //내 팔로잉 목록에서 삭제 // 내가 팔로워를 안하겠다.
-    public FollowResponseDto unfollow(UserDetailsImpl userDetails, Long userId) {
-
-        Long meId = userDetails.getUserId();
-
-        validId(meId, userId);
-
-        Follows relation = readRelation(meId, userId); // 없으면 return 팔로우 관계 없음
-
-        RequestFollows requestRelation =getRelationOrThrow(meId,userId);
-
-        requestRelation.cancel();
-        relation.unfollow();
-
-        return new FollowResponseDto(relation.isFollowed());
-    }
 
     //팔로우 삭제 // 내 팔로워 목록에서 삭제 // 너는 내 팔로워가 아니다.
     public FollowResponseDto deleteFollow(UserDetailsImpl userDetails, Long userId) {
