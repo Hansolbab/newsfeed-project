@@ -5,12 +5,12 @@
 
 ## 👥 팀원 소개
 
-| 이름  | 역할                    | GitHub                                    |
-|-----|-----------------------|-------------------------------------------|
-| 곽지훈 | 핵심 콘텐츠(피드/댓글) 데이터 흐름 관리 시스템 및 접근 제어 로직 설계/구현     | [github.com/Gwakjihun](https://github.com/Gwakjihun) |
-| 전재민 | Toggle 기능 이용 사용자 관계 관리 시스템 구축 (팔로우 서비스) 및 콘텐츠 분류 및 관리 시스템 구축 | [github.com/Beforejamni](https://github.com/Beforejamni) |
-| 최재혁 | 사용자 활동 지표(좋아요,댓글) 관리 및 통합 검색, 개인화된 정보 조회 시스템 개발  | [github.com/Gemini-kei](https://github.com/Gemini-kei) |
-| 최한솔 | Security & JWT Token Auth System 구축, 테스트 진행 후 기록 및 관련 영상 제작 | [github.com/hansolChoi29](https://github.com/hansolChoi29) |
+| 이름  | 역할                    | GitHub                                    | 트러블슈팅  |
+|-----|-----------------------|-------------------------------------------|---|
+| 곽지훈 | 핵심 콘텐츠(피드/댓글) 데이터 흐름 관리 시스템 및 접근 제어 로직 설계/구현     | [Gwakjihun](https://github.com/Gwakjihun) | [click](https://rhkrwlgns.tistory.com/17)  |
+| 전재민 | Toggle 기능 이용 사용자 관계 관리 시스템 구축 (팔로우 서비스) 및 콘텐츠 분류 및 관리 시스템 구축 | [Beforejamni](https://github.com/Beforejamni) | [click]()  |
+| 최재혁 | 사용자 활동 지표(좋아요,댓글) 관리 및 통합 검색, 개인화된 정보 조회 시스템 개발  | [Gemini-kei](https://github.com/Gemini-kei) | [click]()  |
+| 최한솔 | Security & JWT Token Auth System 구축, 테스트 진행 후 기록 및 관련 영상 제작 | [hansolChoi29](https://github.com/hansolChoi29) | [click](https://winwin0219.tistory.com/entry/Spring-newfeedprojectTrouble-Shootingauth)  |
 
 
 ## 🚀 프로젝트 개요
@@ -27,6 +27,10 @@
   - 내 댓글 활동 / 내 좋아요 게시글 조회
   - 다른 유저 프로필 조회
   - 게시글, 프로필 공개범위 설정 (전체 공개 / 팔로워에게만 공개 / 나만 보기)
+
+## ⏳ 개발 기간
+
+`2025.08.04 ~ 2025.08.16`
 
 ## 목차
 
@@ -51,7 +55,7 @@
 - **의존성 (dependency):**
 
   | 분류        | 의존성 이름                 | 설명                        |
-    |-----------|------------------------|---------------------------|
+      |-----------|------------------------|---------------------------|
   | 🌐 웹      | `Spring Web`           | REST API 개발용              |
   | 🛢 데이터    | `Spring Data JPA`      | JPA ORM 사용                |
   | 🐬 데이터베이스 | `MySQL Driver`         | MySQL 연동용 JDBC 드라이버       |
@@ -117,7 +121,7 @@ application.properties
 일일 커밋 후 PR 리뷰 요청
 
 
-## 📮 API명세서 및 와이어프레임, ERD, 트리구조
+## 🎈 API명세서 및 와이어프레임, ERD, 트리구조
 
 <details>
 
@@ -307,3 +311,4 @@ com.example.newsfeedproject/
 
 ```
 </details>
+
