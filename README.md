@@ -55,7 +55,7 @@
 - **의존성 (dependency):**
 
   | 분류        | 의존성 이름                 | 설명                        |
-      |-----------|------------------------|---------------------------|
+    |-----------|------------------------|---------------------------|
   | 🌐 웹      | `Spring Web`           | REST API 개발용              |
   | 🛢 데이터    | `Spring Data JPA`      | JPA ORM 사용                |
   | 🐬 데이터베이스 | `MySQL Driver`         | MySQL 연동용 JDBC 드라이버       |
@@ -63,7 +63,6 @@
   | 💾 파일업로드  | `Spring Boot DevTools` | 개발 시 핫 리로딩 등              |
   | 🔍 검증     | `Validation`           | @Valid, @NotNull 등 유효성 검사 |
   | 🛠️ 개발도구      | `lombok`                | 코드 간소화                    |
-
 ### MySQL Database 생성
 
 ```sql
